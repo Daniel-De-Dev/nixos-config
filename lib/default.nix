@@ -17,7 +17,6 @@ let
         hostMainModule = import (hostDir + "/${hostName}" + "/configuration.nix");
       in
       inputs.nixpkgs.lib.nixosSystem {
-        system = (hostMetaModule { }).my.host.system;
         specialArgs = { inherit inputs hostName; };
         modules = modules ++ [
           hostMetaModule
