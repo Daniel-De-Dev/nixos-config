@@ -25,5 +25,7 @@
     # Specify the platform the NixOS configuration will run (Host Spesific)
     # Main reason for it being here is to have the type for `system` enforced
     nixpkgs.hostPlatform = config.my.host.system;
+
+    networking.hostName = config.my.host.hostName;
   };
 }
