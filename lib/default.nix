@@ -23,8 +23,6 @@ let
     scanning a directory (`hostDir`). Each subdirectory is treated as a
     host, and its name is used as the default `hostName`.
 
-    It also enforces a strict directory structure to ensure consistency.
-
     @inputs: An attribute set with the following keys:
       - hostDir: The path to the directory containing host subdirectories.
       - modules: A list of modules to be included in every host.
@@ -48,17 +46,6 @@ let
       let
         hostPath = hostDir + "/${hostName}";
 
-        allowedFiles = [
-          "meta.nix"
-          "configuration.nix"
-          "hardware-configuration.nix"
-        ];
-        actualEntries = builtins.readDir hostPath;
-
-        rogueEntries = lib.filterAttrs (
-          name: type: !(lib.elem name allowedFiles) || type != "regular"
-        ) actualEntries;
-
         requireFile =
           hPath: fileName:
           let
@@ -71,8 +58,6 @@ let
         hostMetaModule = import (requireFile hostPath "meta.nix");
         hostMainModule = import (requireFile hostPath "configuration.nix");
       in
-      assert lib.assertMsg (rogueEntries == { })
-        "mkHostConfigurations: host '${hostName}' contains non-whitelisted files or subdirectories: ${builtins.toString (builtins.attrNames rogueEntries)}";
       inputs.nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs hostName; };
         modules = moduleList ++ [
