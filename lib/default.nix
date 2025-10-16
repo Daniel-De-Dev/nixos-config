@@ -55,13 +55,11 @@ let
             filePath
           else
             throw "mkHostConfigurations: expected ${fileName} for host '${hostName}' at ${toString filePath}";
-        hostMetaModule = import (requireFile hostPath "meta.nix");
         hostMainModule = import (requireFile hostPath "configuration.nix");
       in
       inputs.nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs hostName; };
         modules = moduleList ++ [
-          hostMetaModule
           hostMainModule
         ];
       }
