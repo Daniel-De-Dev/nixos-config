@@ -12,13 +12,13 @@
     in
     {
       nixosModules = {
-        core = import ./modules/core;
+        my = import ./modules/my;
       };
 
       lib = {
         inherit (lib) mkHostConfigurations;
       };
 
-      nixosConfigurations = lib.mkHostConfigurations { modules = [ self.nixosModules.core ]; };
+      nixosConfigurations = lib.mkHostConfigurations { modules = [ self.nixosModules.my ]; };
     };
 }
