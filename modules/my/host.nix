@@ -6,7 +6,7 @@
 }:
 {
   options.my.host = {
-    hostName = lib.mkOption {
+    name = lib.mkOption {
       # Enforce RFC 1123 rules for hostnames (1-63 chars, no leading/trailing hyphen).
       type = lib.types.strMatching "[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?";
       default = hostName;
@@ -15,6 +15,6 @@
   };
 
   config = {
-    networking.hostName = config.my.host.hostName;
+    networking.hostName = config.my.host.name;
   };
 }
