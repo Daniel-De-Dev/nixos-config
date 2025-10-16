@@ -8,14 +8,18 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.alice = {
-  #   isNormalUser = true;
-  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-  #   packages = with pkgs; [
-  #     tree
-  #   ];
-  # };
+
+  # allow for having internet upon first startup
+  networking.networkmanager.enable = true;
+
+  # git needed intially
+  programs.git.enable = true;
+
+  # initial editor setup
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -24,11 +28,6 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  # system.copySystemConfiguration = true;
 
   system.stateVersion = "25.05";
 }
