@@ -28,9 +28,32 @@ Config will be very fine tuned for my spesfic setup and needs.
 
 1. Make a new directory `./hosts/<hostname>`
 1. Generate the default configurations files `nixos-generate-config --dir ./hosts/<hostname>`
-1. Create `./hosts/<hostname>/meta.nix` (might be removed)
 1. Still work in progress, i'll see how i proceed
 
+## Handling Private Data
+
+To keep personal information (like locale settings, usernames, or email
+addresses) out of this public repository, this configuration uses a `privacy`
+module. This separates the public configuration logic from your private,
+host-specific data.
+
+### How It Works
+1. **Flake Input**: The system relies on a flake input named `privacy`.
+You must point this input to a private Git repository containing your personal
+data. This can be done by overriding the input in your `flake.lock` file.
+
+1. **Data Structure**: The private repository must contain a `hosts/`
+directory, with a separate `.nix` file for each host (like `hosts/titan.nix`).
+Each file must return a Nix attribute set.
+
+1. **Enabling Per-Host**: To use this feature, you must explicitly enable it
+for each host by setting `my.privacy.enable = true;` in its configuration.
+
+If enabled, the module will load the corresponding file from your private
+repository and make the data available at `config.my.privacy.data`. The build
+will fail with a descriptive error if the `privacy` input is missing or the
+host-specific file cannot be found, making sure the configuration is always
+correct.
 
 ## Think Out Loud Section
 

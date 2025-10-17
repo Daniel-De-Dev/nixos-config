@@ -16,9 +16,26 @@
         "type": "github"
       }
     },
+    "privacy": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1760723522,
+        "narHash": "sha256-631otEi2GNOOhdTyuFWYgOzUCi/GoXhselMwBeRvo6k=",
+        "ref": "refs/heads/main",
+        "rev": "a68a41ce1a90752eb6909750a70bf64469d86eba",
+        "revCount": 1,
+        "type": "git",
+        "url": "ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "privacy": "privacy"
       }
     }
   },

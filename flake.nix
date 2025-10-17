@@ -3,6 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    # Private repository for personal configuration data that are not wanted to
+    # be public.
+    privacy = {
+      url = "git+ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git";
+      flake = false;
+    };
   };
 
   outputs =
