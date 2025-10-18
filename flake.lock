@@ -25,11 +25,11 @@
         "rev": "a68a41ce1a90752eb6909750a70bf64469d86eba",
         "revCount": 1,
         "type": "git",
-        "url": "ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git"
+        "url": "ssh://nixos-privacy/Daniel-De-Dev/nixos-privacy.git"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git"
+        "url": "ssh://nixos-privacy/Daniel-De-Dev/nixos-privacy.git"
       }
     },
     "root": {

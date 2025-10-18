@@ -6,8 +6,9 @@
 
     # Private repository for personal configuration data that are not wanted to
     # be public.
+    # WARNING: For first ever build, comment out this import
     privacy = {
-      url = "git+ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git";
+      url = "git+ssh://nixos-privacy/Daniel-De-Dev/nixos-privacy.git";
       flake = false;
     };
   };

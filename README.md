@@ -30,12 +30,124 @@ Config will be very fine tuned for my spesfic setup and needs.
 1. Generate the default configurations files `nixos-generate-config --dir ./hosts/<hostname>`
 1. Still work in progress, i'll see how i proceed
 
-## Handling Private Data
+## Using a Private Repository (Bootstrap Guide)
 
 To keep personal information (like locale settings, usernames, or email
 addresses) out of this public repository, this configuration uses a `privacy`
 module. This separates the public configuration logic from your private,
 host-specific data.
+
+But, because Nix needs to fetch this repository *before* it can build your
+system, there is a one-time "chicken-and-egg" problem to solve.
+
+The solution is a two-stage build process.
+
+1.  **First Build:** You'll build the system *without* the private repository.
+This build's only job would be to **add an SSH rule** to your system so it
+learns how to access the private repo.
+2.  **Second Build:** Now that your system has the SSH rule, you'll build it
+again *with* the private repository enabled. This build will succeed.
+
+> [!NOTE]
+> There might be possible simplifications when installing trough nix installer
+> image by manually adding the ssh rule, but has not been tested
+
+### Stage 1: Apply the SSH Configuration
+
+On a new machine, you must first tell your system how to resolve the private
+repository's address.
+
+1.  **Edit `flake.nix`:**
+    Open `flake.nix` and comment out the `privacy` input:
+
+    ```nix
+    # in flake.nix
+    {
+      inputs = {
+        # ...
+
+        # 1. COMMENT OUT THIS INPUT FOR THE FIRST BUILD
+        # privacy = {
+        #   url = "git+ssh://nixos-privacy/<user>/<repo>.git";
+        #   flake = false;
+        # };
+      };
+      # ... rest of your flake ...
+    }
+    ```
+
+2.  **Edit Host Configuration:**
+    Open your host's configuration file (e.g., `hosts/<yourHost>/configuration.nix`)
+    and enable the `my.privacy.gitRepo` module. You **must** set the `sshKey`
+    path to your secret key (as a string).
+
+    **Note:** You must manually copy your private SSH key to this path *before*
+    running the build.
+
+    ```nix
+    # in hosts/<yourHost>/configuration.nix
+    { pkgs, ... }: {
+
+      my.privacy = {
+        # 2. You can leave this enabled; it will just load an empty set for now.
+        enable = false;
+
+        # 3. Enable the gitRepo module and set the key path
+        gitRepo = {
+          enable = true;
+          sshKey = "/etc/nixos/secrets/id_ed25519_privacy";
+        };
+      };
+
+      # ... rest of your configuration ...
+    }
+    ```
+
+3.  **Run the First Build:**
+    Now, apply this configuration.
+
+    ```bash
+    sudo nixos-rebuild switch --flake .#your-host
+    ```
+
+    This build will succeed and install a new rule in `/etc/ssh/ssh_config`
+    that defines the `nixos-privacy` host alias.
+
+### Stage 2: Enable the Private Repository
+
+Now that your system has the SSH rule, you can safely fetch the private repository.
+
+1.  **Edit `flake.nix`:**
+    Go back to your `flake.nix` and uncomment the `privacy` input. Make sure
+    its URL uses the `git+ssh://nixos-privacy/` alias.
+
+    ```nix
+    # in flake.nix
+    {
+      inputs = {
+        # ...
+
+        # 1. UNCOMMENT THIS INPUT
+        privacy = {
+          url = "git+ssh://nixos-privacy/<user>/<repo>.git";
+          flake = false;
+        };
+      };
+      # ... rest of your flake ...
+    }
+    ```
+
+2.  **Run the Second Build:**
+    Run the build command one more time.
+
+    ```bash
+    sudo nixos-rebuild switch --flake .#your-host
+    ```
+
+Nix will now successfully use your SSH key and the `nixos-privacy` alias to
+fetch your private repository, and your system will build with all your private
+data. Your setup is complete
+
 
 ### How It Works
 1. **Flake Input**: The system relies on a flake input named `privacy`.
