@@ -113,7 +113,7 @@
         }
       ];
 
-      # Add the alias to SSH config.
+      # Add the host's configuration to the target system's SSH config.
       programs.ssh.extraConfig = ''
         Host nixos-privacy
           HostName ${config.my.privacy.gitRepo.hostname}

@@ -4,8 +4,11 @@
   users.users.zeus = {
     isNormalUser = true;
     group = "zeus";
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
   };
 
-  users.groups.zeus = {};
+  users.groups.zeus = { };
 }

@@ -1,5 +1,7 @@
 # nixos-config
 
+**Still Work in progress!**
+
 A Nixos config meant for mutliple hosts and high level of modularity. Idea
 being that modules can be toggled on/off and everything will configure itself
 where only thing that would need configuration is the hosts themselves, the
@@ -14,7 +16,6 @@ Config will be very fine tuned for my spesfic setup and needs.
 ├── flake.nix                           # Flake entrypoint
 ├── hosts/                              # One directory per host
 │   ├── <hostname>/
-│   │   ├── meta.nix                    # Host metadata
 │   │   ├── config.nix                  # Host-specific logic, imports, options
 │   │   └── hardware-configuration.nix  # Machine-generated hardware profile
 ├── lib/                                # Shared library helpers
@@ -66,7 +67,7 @@ repository's address.
       inputs = {
         # ...
 
-        # 1. COMMENT OUT THIS INPUT FOR THE FIRST BUILD
+        # COMMENT OUT THIS INPUT FOR THE FIRST BUILD
         # privacy = {
         #   url = "git+ssh://nixos-privacy/<user>/<repo>.git";
         #   flake = false;
@@ -76,7 +77,7 @@ repository's address.
     }
     ```
 
-2.  **Edit Host Configuration:**
+1.  **Edit Host Configuration:**
     Open your host's configuration file (e.g., `hosts/<yourHost>/configuration.nix`)
     and enable the `my.privacy.gitRepo` module. You **must** set the `sshKey`
     path to your secret key (as a string).
@@ -89,10 +90,10 @@ repository's address.
     { pkgs, ... }: {
 
       my.privacy = {
-        # 2. You can leave this enabled; it will just load an empty set for now.
-        enable = false;
+        # You can leave this enabled; it will just load an empty set for now.
+        enable = true;
 
-        # 3. Enable the gitRepo module and set the key path
+        # Enable the gitRepo module and set the key path
         gitRepo = {
           enable = true;
           sshKey = "/etc/nixos/secrets/id_ed25519_privacy";
@@ -103,7 +104,7 @@ repository's address.
     }
     ```
 
-3.  **Run the First Build:**
+1.  **Run the First Build:**
     Now, apply this configuration.
 
     ```bash
@@ -127,7 +128,7 @@ Now that your system has the SSH rule, you can safely fetch the private reposito
       inputs = {
         # ...
 
-        # 1. UNCOMMENT THIS INPUT
+        # UNCOMMENT THIS INPUT
         privacy = {
           url = "git+ssh://nixos-privacy/<user>/<repo>.git";
           flake = false;
@@ -137,7 +138,7 @@ Now that your system has the SSH rule, you can safely fetch the private reposito
     }
     ```
 
-2.  **Run the Second Build:**
+1.  **Run the Second Build:**
     Run the build command one more time.
 
     ```bash
@@ -194,3 +195,12 @@ yet implementing and structure it in a way that makese sense.
 
 Atleast `config.my.host` feels like it belongs there as it gives NixOS information
 it didnt have.
+
+### insight
+With time ive gained better undertstanding and a clearer view on what i want.
+The goals i want is also for other people than be to also be able to use the config
+and only need to essentially define their own host, set host spesific configurations
+then apply some predefined profiles (comming soon) that pre-configures modules
+
+Meaning hosts/<hostName>/... would strictly be used for specifying host spesific
+details (like i can think of graphics card for now)
