@@ -21,7 +21,7 @@
     in
     {
       nixosModules = {
-        my = import ./modules/my;
+        core = import ./modules/core;
       };
 
       lib = {
