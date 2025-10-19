@@ -5,6 +5,10 @@
   hostName,
   ...
 }:
+let
+  privacyInputAvailable = inputs ? privacy;
+  hostPrivacyFile = if privacyInputAvailable then inputs.privacy + "/hosts/${hostName}.nix" else null;
+in
 {
   options.my.privacy = {
     enable = lib.mkOption {
@@ -14,7 +18,7 @@
     };
 
     data = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
       readOnly = true;
       description = "The private data loaded from the privacy flake input for this host.";
     };
@@ -26,9 +30,9 @@
         description = ''
           Whether to configure an SSH rule for accessing the private repository.
 
-          This creates an SSH host alias named "nixos-privacy". You must use this alias
-          in your flake.nix URL, for example:
-          `url = "git+ssh://nixos-privacy/<user>/<repo>.git";`
+          This creates an SSH host alias.
+          Use this alias in your flake.nix URL, for example:
+          `url = "git+ssh://<alias>/<user>/<repo>.git";`
 
           **First-Time Setup (if repo is private):**
           For the initial build on a new machine, you must:
@@ -41,7 +45,7 @@
       };
 
       sshKey = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = null;
         description = "Absolute path to the SSH private key with read access to the repository `privacy.url` points to.";
         example = "/etc/nixos/secrets/id_ed25519_privacy";
@@ -59,6 +63,12 @@
         default = "git";
         description = "The SSH user for the connection.";
       };
+
+      alias = lib.mkOption {
+        type = lib.types.str;
+        default = "nixos-privacy";
+        description = "SSH host alias used in the generated configuration.";
+      };
     };
   };
 
@@ -66,13 +76,9 @@
     {
       my.privacy.data =
         # It's filled with data when enabled, otherwise it's an empty set.
-        if config.my.privacy.enable && (inputs ? privacy) then
+        if config.my.privacy.enable && privacyInputAvailable then
           (
             let
-              privacyRoot = inputs.privacy;
-
-              hostPrivacyFile = privacyRoot + "/hosts/${hostName}.nix";
-
               rawPrivacy =
                 if builtins.pathExists hostPrivacyFile then
                   let
@@ -92,7 +98,7 @@
                 The privacy file for host "${hostName}" did not return an attribute set.
               ''
           )
-        else if config.my.privacy.enable && !(inputs ? privacy) then
+        else if config.my.privacy.enable && !privacyInputAvailable then
           lib.warn ''
             my.privacy.enable is true, but the 'privacy' flake input was not found.
             Returning empty set for my.privacy.data.
@@ -101,6 +107,18 @@
         else
           { };
     }
+
+    (lib.mkIf
+      (!config.my.privacy.enable && privacyInputAvailable && builtins.pathExists hostPrivacyFile)
+      {
+        warnings = [
+          ''
+            A privacy file for host "${hostName}" exists at ${hostPrivacyFile}, but `my.privacy.enable` is false.
+            If this is intentional you can ignore this warning; otherwise consider enabling `my.privacy.enable`.
+          ''
+        ];
+      }
+    )
 
     (lib.mkIf config.my.privacy.gitRepo.enable {
       assertions = [
@@ -111,11 +129,19 @@
             Please provide the absolute path to your SSH private key.
           '';
         }
+        {
+          assertion = lib.stringLength config.my.privacy.gitRepo.hostname > 0;
+          message = "my.privacy.gitRepo.hostname must not be an empty string when gitRepo.enable is true.";
+        }
+        {
+          assertion = lib.stringLength config.my.privacy.gitRepo.alias > 0;
+          message = "my.privacy.gitRepo.alias must not be an empty string when gitRepo.enable is true.";
+        }
       ];
 
       # Add the host's configuration to the target system's SSH config.
       programs.ssh.extraConfig = ''
-        Host nixos-privacy
+        Host ${config.my.privacy.gitRepo.alias}
           HostName ${config.my.privacy.gitRepo.hostname}
           User ${config.my.privacy.gitRepo.user}
           IdentityFile ${config.my.privacy.gitRepo.sshKey}

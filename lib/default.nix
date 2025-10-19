@@ -11,10 +11,14 @@ let
         else
           throw "mkHostConfigurations: host directory ${toString dir} does not exist";
       rogueEntries = lib.filterAttrs (_: type: type != "directory") entries;
+      hostNames = builtins.attrNames (lib.filterAttrs (_: type: type == "directory") entries);
     in
     assert lib.assertMsg (rogueEntries == { })
       "mkHostConfigurations: non-directory entries found in ${toString dir}: ${builtins.toString (builtins.attrNames rogueEntries)}";
-    builtins.attrNames (lib.filterAttrs (_: type: type == "directory") entries);
+    assert lib.assertMsg (
+      hostNames != [ ]
+    ) "mkHostConfigurations: no host directories found in ${toString dir}.";
+    hostNames;
 
   /*
     Generate NixOS system configurations for a set of hosts.
@@ -55,7 +59,14 @@ let
             filePath
           else
             throw "mkHostConfigurations: expected ${fileName} for host '${hostName}' at ${toString filePath}";
-        hostMainModule = import (requireFile hostPath "configuration.nix");
+        hostMainModule =
+          let
+            imported = import (requireFile hostPath "configuration.nix");
+            moduleValid = lib.isAttrs imported || lib.isFunction imported;
+          in
+          assert lib.assertMsg moduleValid
+            "mkHostConfigurations: configuration.nix for host '${hostName}' must return an attribute set or module function.";
+          imported;
       in
       inputs.nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs hostName; };
