@@ -41,8 +41,14 @@ let
     }:
     let
       moduleList =
-        assert lib.assertMsg (lib.isList modules)
-          "mkHostConfigurations: `modules` must be a list of NixOS modules.";
+        let
+          modulesAreList = lib.assertMsg (lib.isList modules) "mkHostConfigurations: `modules` must be a list of NixOS modules.";
+          modulesAreValid =
+            lib.assertMsg (lib.all (module: lib.isAttrs module || lib.isFunction module) modules)
+              "mkHostConfigurations: each entry in `modules` must be either an attribute set or a module function.";
+        in
+        assert modulesAreList;
+        assert modulesAreValid;
         modules;
     in
     lib.genAttrs (listHostNames hostDir) (
