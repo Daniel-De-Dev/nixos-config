@@ -53,6 +53,12 @@ again *with* the private repository enabled. This build will succeed.
 > There might be possible simplifications when installing trough nix installer
 > image by manually adding the ssh rule, but has not been tested
 
+
+> [!NOTE]
+> If youre able to have your private repo locally you can swap to using
+> `url = "git+file:///absolute/path/to/repo";`
+> Avoiding the whole ssh setup problem
+
 ### Stage 1: Apply the SSH Configuration
 
 On a new machine, you must first tell your system how to resolve the private
@@ -69,7 +75,7 @@ repository's address.
 
         # COMMENT OUT THIS INPUT FOR THE FIRST BUILD
         # privacy = {
-        #   url = "git+ssh://nixos-privacy/<user>/<repo>.git";
+        #   url = "git+ssh://<alias>/<user>/<repo>.git";
         #   flake = false;
         # };
       };
@@ -79,11 +85,13 @@ repository's address.
 
 1.  **Edit Host Configuration:**
     Open your host's configuration file (e.g., `hosts/<yourHost>/configuration.nix`)
-    and enable the `my.privacy.gitRepo` module. You **must** set the `sshKey`
-    path to your secret key (as a string).
+    and enable the `my.privacy.sshAliasConfig` module. You **must** set the `sshKey`
+    path to your secret key (as a string). Also update anything else spesfic to
+    your case
 
-    **Note:** You must manually copy your private SSH key to this path *before*
-    running the build.
+    > [!NOTE]
+    > You must manually copy your private SSH key to this path *before*
+    > running the build.
 
     ```nix
     # in hosts/<yourHost>/configuration.nix
@@ -93,8 +101,8 @@ repository's address.
         # You can leave this enabled; it will just load an empty set for now.
         enable = true;
 
-        # Enable the gitRepo module and set the key path
-        gitRepo = {
+        # Enable the sshAliasConfig and set the key path
+        sshAliasConfig = {
           enable = true;
           sshKey = "/etc/nixos/secrets/id_ed25519_privacy";
         };
@@ -120,7 +128,7 @@ Now that your system has the SSH rule, you can safely fetch the private reposito
 
 1.  **Edit `flake.nix`:**
     Go back to your `flake.nix` and uncomment the `privacy` input. Make sure
-    its URL uses the `git+ssh://nixos-privacy/` alias.
+    its URL uses the same alias as sshAliasConfig.
 
     ```nix
     # in flake.nix
@@ -130,7 +138,7 @@ Now that your system has the SSH rule, you can safely fetch the private reposito
 
         # UNCOMMENT THIS INPUT
         privacy = {
-          url = "git+ssh://nixos-privacy/<user>/<repo>.git";
+          url = "git+ssh://<alias>/<user>/<repo>.git";
           flake = false;
         };
       };

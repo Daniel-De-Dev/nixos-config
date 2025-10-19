@@ -8,6 +8,8 @@
 let
   privacyInputAvailable = inputs ? privacy;
   hostPrivacyFile = if privacyInputAvailable then inputs.privacy + "/hosts/${hostName}.nix" else null;
+  hostPrivacyFileExists =
+    if privacyInputAvailable then builtins.pathExists hostPrivacyFile else false;
 in
 {
   options.my.privacy = {
@@ -23,12 +25,15 @@ in
       description = "The private data loaded from the privacy flake input for this host.";
     };
 
-    gitRepo = {
+    sshAliasConfig = {
       enable = lib.mkOption {
         type = lib.types.bool;
         default = false;
         description = ''
-          Whether to configure an SSH rule for accessing the private repository.
+          Whether to configure an SSH rule for accessing a private repository.
+
+          NOTE: If you have the option to point to a local repo, use:
+          `url = "git+file:///absolute/path/to/repository";`
 
           This creates an SSH host alias.
           Use this alias in your flake.nix URL, for example:
@@ -37,7 +42,7 @@ in
           **First-Time Setup (if repo is private):**
           For the initial build on a new machine, you must:
           1. Comment out the `privacy` input in your `flake.nix`.
-          2. Set `my.privacy.gitRepo.enable = true;` in your configuration.
+          2. Set `my.privacy.sshAliasConfig.enable = true;` in your configuration.
           3. Run `nixos-rebuild switch`. This applies the SSH rule.
           4. Uncomment the `privacy` input in your `flake.nix`.
           5. Run `nixos-rebuild switch` again. The build will now succeed.
@@ -72,81 +77,99 @@ in
     };
   };
 
-  config = lib.mkMerge [
-    {
-      my.privacy.data =
-        # It's filled with data when enabled, otherwise it's an empty set.
-        if config.my.privacy.enable && privacyInputAvailable then
-          (
+  config =
+    let
+      shouldLoadPrivacy = config.my.privacy.enable && privacyInputAvailable;
+      rawPrivacy =
+        if shouldLoadPrivacy then
+          if hostPrivacyFileExists then
             let
-              rawPrivacy =
-                if builtins.pathExists hostPrivacyFile then
-                  let
-                    imported = import hostPrivacyFile;
-                  in
-                  if builtins.isFunction imported then imported { inherit hostName; } else imported
-                else
-                  builtins.throw ''
-                    my.privacy.enable is true, but the privacy file was not found for host "${hostName}".
-                    Nix looked for the file at: ${hostPrivacyFile}
-                  '';
+              imported = import hostPrivacyFile;
             in
-            if builtins.isAttrs rawPrivacy then
-              rawPrivacy
-            else
-              builtins.throw ''
-                The privacy file for host "${hostName}" did not return an attribute set.
-              ''
-          )
-        else if config.my.privacy.enable && !privacyInputAvailable then
-          lib.warn ''
+            if builtins.isFunction imported then imported { inherit hostName; } else imported
+          else
+            null
+        else
+          { };
+      privacyIsAttrset =
+        if shouldLoadPrivacy then rawPrivacy != null && builtins.isAttrs rawPrivacy else true;
+      privacyData = if shouldLoadPrivacy then if privacyIsAttrset then rawPrivacy else { } else { };
+    in
+    lib.mkMerge [
+      {
+        my.privacy.data = privacyData;
+      }
+
+      (lib.mkIf shouldLoadPrivacy {
+        assertions = [
+          {
+            assertion = hostPrivacyFileExists;
+            message = ''
+              my.privacy.enable is true, but the privacy file was not found for host "${hostName}".
+              Nix looked for the file at: ${hostPrivacyFile}
+            '';
+          }
+          {
+            assertion = privacyIsAttrset;
+            message = ''
+              The privacy file for host "${hostName}" must return an attribute set.
+            '';
+          }
+        ];
+      })
+
+      (lib.mkIf (config.my.privacy.enable && !privacyInputAvailable) {
+        warnings = [
+          ''
             my.privacy.enable is true, but the 'privacy' flake input was not found.
             Returning empty set for my.privacy.data.
             (This is normal and can be ignored if you are bootstrapping a new system).
-          '' { }
-        else
-          { };
-    }
+          ''
+        ];
+      })
 
-    (lib.mkIf
-      (!config.my.privacy.enable && privacyInputAvailable && builtins.pathExists hostPrivacyFile)
-      {
+      (lib.mkIf (!config.my.privacy.enable && hostPrivacyFileExists) {
         warnings = [
           ''
             A privacy file for host "${hostName}" exists at ${hostPrivacyFile}, but `my.privacy.enable` is false.
             If this is intentional you can ignore this warning; otherwise consider enabling `my.privacy.enable`.
           ''
         ];
-      }
-    )
+      })
 
-    (lib.mkIf config.my.privacy.gitRepo.enable {
-      assertions = [
+      (lib.mkIf config.my.privacy.sshAliasConfig.enable (
+        let
+          keyPath = config.my.privacy.sshAliasConfig.sshKey;
+          keyProvided = keyPath != null;
+        in
         {
-          assertion = config.my.privacy.gitRepo.sshKey != null;
-          message = ''
-            my.privacy.gitRepo.enable is true, but 'my.privacy.gitRepo.sshKey' is not set.
-            Please provide the absolute path to your SSH private key.
+          assertions = [
+            {
+              assertion = keyProvided;
+              message = ''
+                my.privacy.sshAliasConfig.enable is true, but 'my.privacy.sshAliasConfig.sshKey' is not set.
+                Please provide the absolute path to your SSH private key.
+              '';
+            }
+            {
+              assertion = lib.stringLength config.my.privacy.sshAliasConfig.hostname > 0;
+              message = "my.privacy.sshAliasConfig.hostname must not be an empty string when sshAliasConfig.enable is true.";
+            }
+            {
+              assertion = lib.stringLength config.my.privacy.sshAliasConfig.alias > 0;
+              message = "my.privacy.sshAliasConfig.alias must not be an empty string when sshAliasConfig.enable is true.";
+            }
+          ];
+
+          # Add the host's configuration to the target system's SSH config.
+          programs.ssh.extraConfig = lib.mkAfter ''
+            Host ${config.my.privacy.sshAliasConfig.alias}
+              HostName ${config.my.privacy.sshAliasConfig.hostname}
+              User ${config.my.privacy.sshAliasConfig.user}
+              IdentityFile ${config.my.privacy.sshAliasConfig.sshKey}
+              IdentitiesOnly yes
           '';
         }
-        {
-          assertion = lib.stringLength config.my.privacy.gitRepo.hostname > 0;
-          message = "my.privacy.gitRepo.hostname must not be an empty string when gitRepo.enable is true.";
-        }
-        {
-          assertion = lib.stringLength config.my.privacy.gitRepo.alias > 0;
-          message = "my.privacy.gitRepo.alias must not be an empty string when gitRepo.enable is true.";
-        }
-      ];
-
-      # Add the host's configuration to the target system's SSH config.
-      programs.ssh.extraConfig = ''
-        Host ${config.my.privacy.gitRepo.alias}
-          HostName ${config.my.privacy.gitRepo.hostname}
-          User ${config.my.privacy.gitRepo.user}
-          IdentityFile ${config.my.privacy.gitRepo.sshKey}
-          IdentitiesOnly yes
-      '';
-    })
-  ];
+      ))
+    ];
 }

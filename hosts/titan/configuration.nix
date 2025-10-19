@@ -9,7 +9,7 @@
   my.privacy = {
     enable = true;
 
-    gitRepo = {
+    sshAliasConfig = {
       enable = true;
       sshKey = "/etc/nixos/secrets/nixos-privacy-key";
     };
