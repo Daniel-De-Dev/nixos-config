@@ -16,7 +16,8 @@
   outputs =
     inputs@{ self, ... }:
     let
-      lib = import ./lib { inherit inputs; };
+      lib = inputs.nixpkgs.lib;
+      myLib = import ./lib { inherit inputs; };
     in
     {
       nixosModules = {
@@ -24,9 +25,9 @@
       };
 
       lib = {
-        inherit (lib) mkHostConfigurations;
+        inherit (myLib) mkHostConfigurations;
       };
 
-      nixosConfigurations = lib.mkHostConfigurations { modules = [ self.nixosModules.my ]; };
+      nixosConfigurations = myLib.mkHostConfigurations { modules = lib.attrValues self.nixosModules; };
     };
 }
