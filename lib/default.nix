@@ -2,6 +2,8 @@
 let
   inherit (inputs.nixpkgs) lib;
 
+  supportedSystems = [ "x86_64-linux" ];
+
   listHostNames =
     dir:
     let
@@ -73,15 +75,33 @@ let
           assert lib.assertMsg moduleValid
             "mkHostConfigurations: configuration.nix for host '${hostName}' must return an attribute set or module function.";
           imported;
+
+        systemCheckModule =
+          { config, ... }:
+          {
+            assertions = [
+              {
+                assertion = lib.elem config.nixpkgs.hostPlatform.system supportedSystems;
+                message = ''
+                  Host "${hostName}" has a hostPlatform (${config.nixpkgs.hostPlatform.system})
+                  that is not in the global supportedSystems list.
+                  Please either add this platform to lib/default.nix
+                  or correct the host's hardware configuration.
+                '';
+              }
+            ];
+          };
       in
       inputs.nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs hostName; };
         modules = moduleList ++ [
           hostMainModule
+          systemCheckModule
         ];
       }
     );
 in
 {
   inherit mkHostConfigurations;
+  inherit supportedSystems;
 }

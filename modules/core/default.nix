@@ -1,13 +1,7 @@
-{ pkgs, ... }:
+{ ... }:
 {
   imports = [
     ../my
+    ./nix.nix
   ];
-
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-
-  environment.systemPackages = [ pkgs.nixfmt-rfc-style ];
 }
