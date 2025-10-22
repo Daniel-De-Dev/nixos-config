@@ -50,7 +50,7 @@ in
       };
 
       sshKey = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
+        type = lib.types.nullOr (lib.types.strMatching "^/.*");
         default = null;
         description = "Absolute path to the SSH private key with read access to the repository `privacy.url` points to.";
         example = "/etc/nixos/secrets/id_ed25519_privacy";
@@ -80,17 +80,60 @@ in
   config =
     let
       shouldLoadPrivacy = config.my.privacy.enable && privacyInputAvailable;
-      rawPrivacy =
+      loadPrivacy =
         if shouldLoadPrivacy then
           if hostPrivacyFileExists then
             let
-              imported = import hostPrivacyFile;
+              importResult = builtins.tryEval (import hostPrivacyFile);
             in
-            if builtins.isFunction imported then imported { inherit hostName; } else imported
+            if importResult.success then
+              let
+                resolvedResult =
+                  if builtins.isFunction importResult.value then
+                    builtins.tryEval (importResult.value { inherit hostName; })
+                  else
+                    {
+                      success = true;
+                      value = importResult.value;
+                    };
+              in
+              if resolvedResult.success then
+                {
+                  success = true;
+                  value = resolvedResult.value;
+                  errorMessage = "";
+                }
+              else
+                {
+                  success = false;
+                  value = { };
+                  errorMessage = ''
+                    Evaluating the privacy file for host "${hostName}" failed.
+                    Check ${hostPrivacyFile} for errors.
+                  '';
+                }
+            else
+              {
+                success = false;
+                value = { };
+                errorMessage = ''
+                  Importing the privacy file for host "${hostName}" failed.
+                  Check ${hostPrivacyFile} for syntax or evaluation errors.
+                '';
+              }
           else
-            null
+            {
+              success = true;
+              value = null;
+              errorMessage = "";
+            }
         else
-          { };
+          {
+            success = true;
+            value = { };
+            errorMessage = "";
+          };
+      rawPrivacy = loadPrivacy.value;
       privacyIsAttrset =
         if shouldLoadPrivacy then rawPrivacy != null && builtins.isAttrs rawPrivacy else true;
       privacyData = if shouldLoadPrivacy then if privacyIsAttrset then rawPrivacy else { } else { };
@@ -115,7 +158,11 @@ in
               The privacy file for host "${hostName}" must return an attribute set.
             '';
           }
-        ];
+        ]
+        ++ lib.optional (!loadPrivacy.success) {
+          assertion = loadPrivacy.success;
+          message = loadPrivacy.errorMessage;
+        };
       })
 
       (lib.mkIf (config.my.privacy.enable && !privacyInputAvailable) {
