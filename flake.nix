@@ -32,6 +32,7 @@
     // {
       nixosModules = {
         core = import ./modules/core;
+        my = import ./modules/my;
       };
 
       lib = {
