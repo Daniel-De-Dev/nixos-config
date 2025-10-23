@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1761235135,
+        "narHash": "sha256-cux9xeceLIER1lBxUa1gMafkz7gg5ntcUmJBynWdBWI=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "0adf9ba3f567da2d53af581a857aacf671aaa547",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1759381078,
@@ -16,14 +36,37 @@
         "type": "github"
       }
     },
+    "nvim-config": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1761241760,
+        "narHash": "sha256-JVGVSRmQeUr7BM3IHmO15GslsoXtmz20uMW1t4zfkAU=",
+        "owner": "Daniel-De-Dev",
+        "repo": "nvim-config",
+        "rev": "e1889b378b822f5c4eef242b79e6b62444c0e9f5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Daniel-De-Dev",
+        "repo": "nvim-config",
+        "type": "github"
+      }
+    },
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1760723522,
-        "narHash": "sha256-631otEi2GNOOhdTyuFWYgOzUCi/GoXhselMwBeRvo6k=",
+        "lastModified": 1761159220,
+        "narHash": "sha256-BgbKV6frgQNvxFCoBerAdhCrXFEXMIlqyHWEgKn6VCA=",
         "ref": "refs/heads/main",
-        "rev": "a68a41ce1a90752eb6909750a70bf64469d86eba",
-        "revCount": 1,
+        "rev": "eb559c93ad6fc77f21bb9627d3f558aa3cf54053",
+        "revCount": 2,
         "type": "git",
         "url": "ssh://nixos-privacy/Daniel-De-Dev/nixos-privacy.git"
       },
@@ -34,7 +77,9 @@
     },
     "root": {
       "inputs": {
+        "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
+        "nvim-config": "nvim-config",
         "privacy": "privacy",
         "treefmt-nix": "treefmt-nix"
       }

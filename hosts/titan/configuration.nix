@@ -1,4 +1,4 @@
-{ config, ... }:
+{ inputs, config, ... }:
 let
   adminName = config.my.privacy.data.user.admin.name;
 in
@@ -22,6 +22,11 @@ in
     group = "${adminName}";
   };
   users.groups.${adminName} = { };
+
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  home-manager.users.${adminName} = ./home.nix;
+  home-manager.extraSpecialArgs = { inherit inputs; };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
