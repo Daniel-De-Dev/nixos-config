@@ -1,8 +1,8 @@
-{ inputs, myLib, ... }:
+{ inputs, supportedSystems }:
 let
   inherit (inputs) self nixpkgs treefmt-nix;
   lib = nixpkgs.lib;
-  forEachSystem = lib.genAttrs myLib.supportedSystems;
+  forEachSystem = lib.genAttrs supportedSystems;
   treefmtModule = ./config.nix;
   evalFor =
     system:

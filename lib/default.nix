@@ -2,8 +2,6 @@
 let
   inherit (inputs.nixpkgs) lib;
 
-  supportedSystems = [ "x86_64-linux" ];
-
   listHostNames =
     dir:
     let
@@ -40,6 +38,7 @@ let
     {
       hostDir ? ../hosts,
       modules ? [ ],
+      supportedSystems ? [ ],
     }:
     let
       moduleList =
@@ -103,5 +102,4 @@ let
 in
 {
   inherit mkHostConfigurations;
-  inherit supportedSystems;
 }

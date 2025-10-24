@@ -1,25 +1,5 @@
 {
   "nodes": {
-    "home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1761235135,
-        "narHash": "sha256-cux9xeceLIER1lBxUa1gMafkz7gg5ntcUmJBynWdBWI=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "0adf9ba3f567da2d53af581a857aacf671aaa547",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1759381078,
@@ -46,11 +26,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1761241760,
-        "narHash": "sha256-JVGVSRmQeUr7BM3IHmO15GslsoXtmz20uMW1t4zfkAU=",
+        "lastModified": 1761325283,
+        "narHash": "sha256-p4ZWOvK8xSepHUgu1yZxS60LkZFaJZt7Xnbe8gwuXZE=",
         "owner": "Daniel-De-Dev",
         "repo": "nvim-config",
-        "rev": "e1889b378b822f5c4eef242b79e6b62444c0e9f5",
+        "rev": "2800970ab3dc055899a651be86bd6dc62454d1c0",
         "type": "github"
       },
       "original": {
@@ -62,11 +42,11 @@
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1761159220,
-        "narHash": "sha256-BgbKV6frgQNvxFCoBerAdhCrXFEXMIlqyHWEgKn6VCA=",
+        "lastModified": 1761323730,
+        "narHash": "sha256-3Wu9t4PUKjGRL1KdoeexyxNmBqu3gCPq0FfbQlvXuYU=",
         "ref": "refs/heads/main",
-        "rev": "eb559c93ad6fc77f21bb9627d3f558aa3cf54053",
-        "revCount": 2,
+        "rev": "eb59f81f2e525473776de9e9b4ca6dc403b33524",
+        "revCount": 3,
         "type": "git",
         "url": "ssh://nixos-privacy/Daniel-De-Dev/nixos-privacy.git"
       },
@@ -77,7 +57,6 @@
     },
     "root": {
       "inputs": {
-        "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "nvim-config": "nvim-config",
         "privacy": "privacy",

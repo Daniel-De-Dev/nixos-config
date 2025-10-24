@@ -17,11 +17,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nvim-config = {
       url = "github:Daniel-De-Dev/nvim-config";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -32,11 +27,12 @@
   outputs =
     inputs@{ self, ... }:
     let
+      supportedSystems = [ "x86_64-linux" ];
       lib = inputs.nixpkgs.lib;
       myLib = import ./lib { inherit inputs; };
       treefmt = import ./nix/treefmt {
         inherit inputs;
-        inherit myLib;
+        inherit supportedSystems;
       };
     in
     treefmt
@@ -44,13 +40,15 @@
       nixosModules = {
         core = import ./modules/core;
         my = import ./modules/my;
-        home-manager = import inputs.home-manager.nixosModules.home-manager;
       };
 
       lib = {
         inherit (myLib) mkHostConfigurations;
       };
 
-      nixosConfigurations = myLib.mkHostConfigurations { modules = lib.attrValues self.nixosModules; };
+      nixosConfigurations = myLib.mkHostConfigurations {
+        modules = lib.attrValues self.nixosModules;
+        inherit supportedSystems;
+      };
     };
 }

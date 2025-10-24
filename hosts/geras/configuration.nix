@@ -1,6 +1,7 @@
-{ config, ... }:
+{ inputs, config, ... }:
 let
   adminName = config.my.privacy.data.user.admin.name;
+  hostSystem = config.nixpkgs.hostPlatform.system;
 in
 {
   imports = [
@@ -20,6 +21,10 @@ in
   # Define admin user
   users.users.${adminName} = config.my.users.predefined.admin // {
     group = "${adminName}";
+
+    packages = [
+      inputs.nvim-config.packages.${hostSystem}.default
+    ];
   };
   users.groups.${adminName} = { };
 
@@ -33,13 +38,22 @@ in
   # git needed intially
   programs.git.enable = true;
 
-  # Make neovim available system wide
+  # initial editor setup
   programs.neovim = {
     enable = true;
     defaultEditor = true;
   };
 
   console.keyMap = config.my.privacy.data.console.keyMap or "us";
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";
+    };
+  };
+
+  networking.firewall.allowedTCPPorts = [ 22 ];
 
   system.stateVersion = "25.05";
 }
