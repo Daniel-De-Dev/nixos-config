@@ -2,6 +2,10 @@
 let
   inherit (inputs.nixpkgs) lib;
 
+  errPrefix = "mkHostConfigurations: ";
+  hcAssert = cond: msg: lib.assertMsg cond "${errPrefix}${msg}";
+  hcThrow = msg: throw "${errPrefix}${msg}";
+
   listHostNames =
     dir:
     let
@@ -9,15 +13,10 @@ let
         if builtins.pathExists dir then
           builtins.readDir dir
         else
-          throw "mkHostConfigurations: host directory ${toString dir} does not exist";
-      rogueEntries = lib.filterAttrs (_: type: type != "directory") entries;
+          hcThrow "host directory ${toString dir} does not exist";
       hostNames = builtins.attrNames (lib.filterAttrs (_: type: type == "directory") entries);
     in
-    assert lib.assertMsg (rogueEntries == { })
-      "mkHostConfigurations: non-directory entries found in ${toString dir}: ${builtins.toString (builtins.attrNames rogueEntries)}";
-    assert lib.assertMsg (
-      hostNames != [ ]
-    ) "mkHostConfigurations: no host directories found in ${toString dir}.";
+    assert hcAssert (hostNames != [ ]) "no host directories found in ${toString dir}.";
     hostNames;
 
   /*
@@ -28,6 +27,7 @@ let
     host, and its name is used as the default `hostName`.
 
     @inputs: An attribute set with the following keys:
+      - supportedSystems: list of explicetly supported systems which can be built
       - hostDir: The path to the directory containing host subdirectories.
       - modules: A list of modules to be included in every host.
 
@@ -36,18 +36,28 @@ let
   */
   mkHostConfigurations =
     {
+      supportedSystems,
       hostDir ? ../hosts,
       modules ? [ ],
-      supportedSystems ? [ ],
     }:
     let
+
+      # Ensure only real systems are explicitly specified
+      knownSystems = lib.systems.flakeExposed;
+      invalidSystems = lib.filter (system: !(lib.elem system knownSystems)) supportedSystems;
+      systemsAreValid =
+        hcAssert (invalidSystems == [ ])
+          "The following systems in `supportedSystems` are not valid: ${builtins.toString invalidSystems}. See `lib.systems.flakeExposed` for a list of valid systems.";
+
+      # Ensure `modules` is a list of valid modules
       moduleList =
         let
-          modulesAreList = lib.assertMsg (lib.isList modules) "mkHostConfigurations: `modules` must be a list of NixOS modules.";
-          modulesAreValid =
-            lib.assertMsg (lib.all (module: lib.isAttrs module || lib.isFunction module) modules)
-              "mkHostConfigurations: each entry in `modules` must be either an attribute set or a module function.";
+          modulesAreList = hcAssert (lib.isList modules) "`modules` must be a list of NixOS modules.";
+          modulesAreValid = hcAssert (lib.all (
+            module: lib.isAttrs module || lib.isFunction module
+          ) modules) "each entry in `modules` must be either an attribute set or a module function.";
         in
+        assert systemsAreValid;
         assert modulesAreList;
         assert modulesAreValid;
         modules;
@@ -65,14 +75,14 @@ let
           if lib.pathIsRegularFile filePath then
             filePath
           else
-            throw "mkHostConfigurations: expected ${fileName} for host '${hostName}' at ${toString filePath}";
+            hcThrow "expected ${fileName} for host '${hostName}' at ${toString filePath}";
         hostMainModule =
           let
             imported = import (requireFile hostPath "configuration.nix");
             moduleValid = lib.isAttrs imported || lib.isFunction imported;
           in
-          assert lib.assertMsg moduleValid
-            "mkHostConfigurations: configuration.nix for host '${hostName}' must return an attribute set or module function.";
+          assert hcAssert moduleValid
+            "configuration.nix for host '${hostName}' must return an attribute set or module function.";
           imported;
 
         systemCheckModule =
