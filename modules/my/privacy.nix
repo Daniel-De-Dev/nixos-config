@@ -6,17 +6,104 @@
   ...
 }:
 let
+  cfg = config.my.privacy;
+
   privacyInputAvailable = inputs ? privacy;
   hostPrivacyFile = if privacyInputAvailable then inputs.privacy + "/hosts/${hostName}.nix" else null;
   hostPrivacyFileExists =
     if privacyInputAvailable then builtins.pathExists hostPrivacyFile else false;
+
+  /*
+    Helper to import and evaluate the host's private data file.
+    Returns an attribute set: { success = bool; value = ...; errorMessage = string; }
+  */
+  tryLoadHostPrivacy =
+    if !hostPrivacyFileExists then
+      {
+        success = false;
+        value = { };
+        errorMessage = ''
+          my.privacy.enable is true, but the privacy file was not found for host "${hostName}".
+          Nix looked for the file at: ${hostPrivacyFile}
+        '';
+      }
+    else
+      let
+        importResult = builtins.tryEval (import hostPrivacyFile);
+      in
+      if !importResult.success then
+        {
+          success = false;
+          value = { };
+          errorMessage = ''
+            Importing the privacy file for host "${hostName}" failed.
+            Check ${hostPrivacyFile} for syntax or evaluation errors.
+          '';
+        }
+      else
+        let
+          resolvedResult =
+            if builtins.isFunction importResult.value then
+              {
+                success = false;
+                value = { };
+                errorMessage = ''
+                  Importing functions is not explicitly not supported as of yet.
+                  This is due to wanting to allow host to dynamically specify
+                  expected paramters it wants to provide.
+                  File: ${hostPrivacyFile}
+                '';
+              }
+            else if !(builtins.isAttrs importResult.value) then
+              {
+                success = false;
+                value = { };
+                errorMessage = ''
+                  The privacy file for host "${hostName}" did not return an attribute set.
+                  File: ${hostPrivacyFile}
+                '';
+              }
+            else
+              {
+                success = true;
+                value = importResult.value;
+              };
+        in
+        if !resolvedResult.success then
+          {
+            success = false;
+            value = { };
+            errorMessage = ''
+              Evaluating the privacy file for host "${hostName}" failed.
+              Check ${hostPrivacyFile} for errors.
+
+              Error it has: ${resolvedResult.errorMessage}
+            '';
+          }
+        else
+          {
+            success = true;
+            value = resolvedResult.value;
+            errorMessage = "";
+          };
 in
 {
   options.my.privacy = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Whether to load private data for this host from the privacy input.";
+      description = "Enable the privacy module.";
+    };
+
+    bootstrap = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable this only for the initial "Stage 1" build.
+        When true, this module will only set up the SSH alias
+        and will skip attempting to load the private data.
+        Set to `false` for normal operation.
+      '';
     };
 
     data = lib.mkOption {
@@ -32,20 +119,15 @@ in
         description = ''
           Whether to configure an SSH rule for accessing a private repository.
 
-          NOTE: If you have the option to point to a local repo, use:
-          `url = "git+file:///absolute/path/to/repository";`
-
-          This creates an SSH host alias.
-          Use this alias in your flake.nix URL, for example:
-          `url = "git+ssh://<alias>/<user>/<repo>.git";`
-
-          **First-Time Setup (if repo is private):**
-          For the initial build on a new machine, you must:
+          First-Time Setup (if repo is remote & private):
           1. Comment out the `privacy` input in your `flake.nix`.
-          2. Set `my.privacy.sshAliasConfig.enable = true;` in your configuration.
-          3. Run `nixos-rebuild switch`. This applies the SSH rule.
-          4. Uncomment the `privacy` input in your `flake.nix`.
-          5. Run `nixos-rebuild switch` again. The build will now succeed.
+          2. Set `my.privacy.enable = true;`
+          3. Set `my.privacy.bootstrap = true;`
+          4. Set `my.privacy.sshAliasConfig.enable = true;` (and set `sshKey` and the other attributes).
+          5. Run `nixos-rebuild switch`. This applies the SSH rule.
+          6. Uncomment the `privacy` input in your `flake.nix`.
+          7. Set `my.privacy.bootstrap = false;`
+          8. Run `nixos-rebuild switch` again. The build will now succeed (might need sudo based on key permissions).
         '';
       };
 
@@ -56,7 +138,7 @@ in
         example = "/etc/nixos/secrets/id_ed25519_privacy";
       };
 
-      hostname = lib.mkOption {
+      host = lib.mkOption {
         type = lib.types.str;
         default = "github.com";
         description = "The actual hostname of the Git provider.";
@@ -77,146 +159,90 @@ in
     };
   };
 
-  config =
+  config = lib.mkIf cfg.enable (
     let
-      shouldLoadPrivacy = config.my.privacy.enable && privacyInputAvailable;
       loadPrivacy =
-        if shouldLoadPrivacy then
-          if hostPrivacyFileExists then
-            let
-              importResult = builtins.tryEval (import hostPrivacyFile);
-            in
-            if importResult.success then
-              let
-                resolvedResult =
-                  if builtins.isFunction importResult.value then
-                    builtins.tryEval (importResult.value { inherit hostName; })
-                  else
-                    {
-                      success = true;
-                      value = importResult.value;
-                    };
-              in
-              if resolvedResult.success then
-                {
-                  success = true;
-                  value = resolvedResult.value;
-                  errorMessage = "";
-                }
-              else
-                {
-                  success = false;
-                  value = { };
-                  errorMessage = ''
-                    Evaluating the privacy file for host "${hostName}" failed.
-                    Check ${hostPrivacyFile} for errors.
-                  '';
-                }
-            else
-              {
-                success = false;
-                value = { };
-                errorMessage = ''
-                  Importing the privacy file for host "${hostName}" failed.
-                  Check ${hostPrivacyFile} for syntax or evaluation errors.
-                '';
-              }
-          else
-            {
-              success = true;
-              value = null;
-              errorMessage = "";
-            }
+        if !cfg.bootstrap && privacyInputAvailable then
+          tryLoadHostPrivacy
+        else if !cfg.bootstrap && !privacyInputAvailable then
+          {
+            success = false;
+            value = { };
+            errorMessage = ''
+              my.privacy.enable is true and my.privacy.bootstrap is false,
+              but the 'privacy' flake input is not found. Add it as input or
+              disable the privacy module
+            '';
+          }
         else
+          # bootstrap is enabled, skipping reading the data
           {
             success = true;
             value = { };
             errorMessage = "";
           };
-      rawPrivacy = loadPrivacy.value;
-      privacyIsAttrset =
-        if shouldLoadPrivacy then rawPrivacy != null && builtins.isAttrs rawPrivacy else true;
-      privacyData = if shouldLoadPrivacy then if privacyIsAttrset then rawPrivacy else { } else { };
     in
     lib.mkMerge [
       {
-        my.privacy.data = privacyData;
+        my.privacy.data =
+          assert lib.assertMsg loadPrivacy.success loadPrivacy.errorMessage;
+          loadPrivacy.value;
       }
 
-      (lib.mkIf shouldLoadPrivacy {
+      (lib.mkIf cfg.bootstrap {
+        warnings = [
+          "my.privacy is in bootstrap mode. Skipping private data load. Set `bootstrap = false;` for normal operation."
+        ];
+      })
+
+      (lib.mkIf (!cfg.bootstrap && hostPrivacyFileExists && !privacyInputAvailable) {
+        warnings = [
+          "A privacy file exists but the 'privacy' flake input is missing."
+        ];
+      })
+
+      (lib.mkIf cfg.sshAliasConfig.enable {
         assertions = [
           {
-            assertion = hostPrivacyFileExists;
-            message = ''
-              my.privacy.enable is true, but the privacy file was not found for host "${hostName}".
-              Nix looked for the file at: ${hostPrivacyFile}
-            '';
+            assertion = cfg.sshAliasConfig.sshKey != null;
+            message = "my.privacy.sshAliasConfig.enable is true, but 'sshKey' is not set.";
           }
           {
-            assertion = privacyIsAttrset;
-            message = ''
-              The privacy file for host "${hostName}" must return an attribute set.
-            '';
+            assertion = lib.stringLength cfg.sshAliasConfig.host > 0;
+            message = "my.privacy.sshAliasConfig.host must not be an empty string.";
           }
-        ]
-        ++ lib.optional (!loadPrivacy.success) {
-          assertion = loadPrivacy.success;
-          message = loadPrivacy.errorMessage;
-        };
+          {
+            assertion = lib.stringLength cfg.sshAliasConfig.alias > 0;
+            message = "my.privacy.sshAliasConfig.alias must not be an empty string.";
+          }
+          {
+            assertion = lib.stringLength cfg.sshAliasConfig.user > 0;
+            message = "my.privacy.sshAliasConfig.user must not be an empty string.";
+          }
+        ];
+
+        programs.ssh.extraConfig = lib.mkAfter ''
+          Host ${cfg.sshAliasConfig.alias}
+            HostName ${cfg.sshAliasConfig.host}
+            User ${cfg.sshAliasConfig.user}
+            IdentityFile ${cfg.sshAliasConfig.sshKey}
+            IdentitiesOnly yes
+        '';
       })
 
-      (lib.mkIf (config.my.privacy.enable && !privacyInputAvailable) {
+      # Print a warning to confirm what was added to ssh
+      (lib.mkIf (cfg.sshAliasConfig.enable && cfg.bootstrap) {
         warnings = [
           ''
-            my.privacy.enable is true, but the 'privacy' flake input was not found.
-            Returning empty set for my.privacy.data.
-            (This is normal and can be ignored if you are bootstrapping a new system).
-          ''
-        ];
-      })
-
-      (lib.mkIf (!config.my.privacy.enable && hostPrivacyFileExists) {
-        warnings = [
-          ''
-            A privacy file for host "${hostName}" exists at ${hostPrivacyFile}, but `my.privacy.enable` is false.
-            If this is intentional you can ignore this warning; otherwise consider enabling `my.privacy.enable`.
-          ''
-        ];
-      })
-
-      (lib.mkIf config.my.privacy.sshAliasConfig.enable (
-        let
-          keyPath = config.my.privacy.sshAliasConfig.sshKey;
-          keyProvided = keyPath != null;
-        in
-        {
-          assertions = [
-            {
-              assertion = keyProvided;
-              message = ''
-                my.privacy.sshAliasConfig.enable is true, but 'my.privacy.sshAliasConfig.sshKey' is not set.
-                Please provide the absolute path to your SSH private key.
-              '';
-            }
-            {
-              assertion = lib.stringLength config.my.privacy.sshAliasConfig.hostname > 0;
-              message = "my.privacy.sshAliasConfig.hostname must not be an empty string when sshAliasConfig.enable is true.";
-            }
-            {
-              assertion = lib.stringLength config.my.privacy.sshAliasConfig.alias > 0;
-              message = "my.privacy.sshAliasConfig.alias must not be an empty string when sshAliasConfig.enable is true.";
-            }
-          ];
-
-          # Add the host's configuration to the target system's SSH config.
-          programs.ssh.extraConfig = lib.mkAfter ''
-            Host ${config.my.privacy.sshAliasConfig.alias}
-              HostName ${config.my.privacy.sshAliasConfig.hostname}
-              User ${config.my.privacy.sshAliasConfig.user}
-              IdentityFile ${config.my.privacy.sshAliasConfig.sshKey}
+            The following was added to ssh config:
+            Host ${cfg.sshAliasConfig.alias}
+              HostName ${cfg.sshAliasConfig.host}
+              User ${cfg.sshAliasConfig.user}
+              IdentityFile ${cfg.sshAliasConfig.sshKey}
               IdentitiesOnly yes
-          '';
-        }
-      ))
-    ];
+          ''
+        ];
+      })
+    ]
+  );
 }
