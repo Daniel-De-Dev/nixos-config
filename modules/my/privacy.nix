@@ -14,8 +14,8 @@ let
     if privacyInputAvailable then builtins.pathExists hostPrivacyFile else false;
 
   /*
-    Helper to import and evaluate the host's private data file.
-    Returns an attribute set: { success = bool; value = ...; errorMessage = string; }
+    Helper to import the host's private data file.
+    Returns { success = bool; value = attrs; errorMessage = string; }
   */
   tryLoadHostPrivacy =
     if !hostPrivacyFileExists then
@@ -37,7 +37,8 @@ let
           value = { };
           errorMessage = ''
             Importing the privacy file for host "${hostName}" failed.
-            Check ${hostPrivacyFile} for syntax or evaluation errors.
+            File: ${hostPrivacyFile}
+            Error: ${importResult.error.message or "unknown"}
           '';
         }
       else
@@ -48,9 +49,9 @@ let
                 success = false;
                 value = { };
                 errorMessage = ''
-                  Importing functions is not explicitly not supported as of yet.
+                  Importing functions is explicitly not supported as of yet.
                   This is due to wanting to allow host to dynamically specify
-                  expected paramters it wants to provide.
+                  expected paramters it wants to provide. and no need for it now
                   File: ${hostPrivacyFile}
                 '';
               }
@@ -67,6 +68,7 @@ let
               {
                 success = true;
                 value = importResult.value;
+                errorMessage = "";
               };
         in
         if !resolvedResult.success then
@@ -86,6 +88,28 @@ let
             value = resolvedResult.value;
             errorMessage = "";
           };
+
+  loadedPrivacyData =
+    if !cfg.bootstrap && privacyInputAvailable then
+      tryLoadHostPrivacy
+    else if !cfg.bootstrap && !privacyInputAvailable then
+      {
+        success = false;
+        value = { };
+        errorMessage = ''
+          my.privacy.enable is true and my.privacy.bootstrap is false,
+          but the 'privacy' flake input is not found. Add it as input or
+          disable the privacy module
+        '';
+      }
+    else
+      # bootstrap is enabled, skipping reading the data.
+      # The schema will just use its default values.
+      {
+        success = true;
+        value = { };
+        errorMessage = "";
+      };
 in
 {
   options.my.privacy = {
@@ -102,14 +126,19 @@ in
         Enable this only for the initial "Stage 1" build.
         When true, this module will only set up the SSH alias
         and will skip attempting to load the private data.
+        The privacy schema will be populated with default values.
         Set to `false` for normal operation.
       '';
     };
 
-    data = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
-      readOnly = true;
-      description = "The private data loaded from the privacy flake input for this host.";
+    schema = lib.mkOption {
+      type = lib.types.submoduleWith {
+        modules = [ ./privacy-schema.nix ];
+        specialArgs = {
+          check = true;
+        };
+      };
+      description = "The schema and data for private, host-specific values.";
     };
 
     sshAliasConfig = {
@@ -160,33 +189,11 @@ in
   };
 
   config = lib.mkIf cfg.enable (
-    let
-      loadPrivacy =
-        if !cfg.bootstrap && privacyInputAvailable then
-          tryLoadHostPrivacy
-        else if !cfg.bootstrap && !privacyInputAvailable then
-          {
-            success = false;
-            value = { };
-            errorMessage = ''
-              my.privacy.enable is true and my.privacy.bootstrap is false,
-              but the 'privacy' flake input is not found. Add it as input or
-              disable the privacy module
-            '';
-          }
-        else
-          # bootstrap is enabled, skipping reading the data
-          {
-            success = true;
-            value = { };
-            errorMessage = "";
-          };
-    in
     lib.mkMerge [
       {
-        my.privacy.data =
-          assert lib.assertMsg loadPrivacy.success loadPrivacy.errorMessage;
-          loadPrivacy.value;
+        my.privacy.schema =
+          assert lib.assertMsg loadedPrivacyData.success loadedPrivacyData.errorMessage;
+          loadedPrivacyData.value;
       }
 
       (lib.mkIf cfg.bootstrap {

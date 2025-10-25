@@ -1,6 +1,6 @@
 { inputs, config, ... }:
 let
-  adminName = config.my.privacy.data.user.admin.name;
+  adminName = config.my.privacy.schema.users.main.name;
   hostSystem = config.nixpkgs.hostPlatform.system;
 in
 {
@@ -44,7 +44,7 @@ in
     defaultEditor = true;
   };
 
-  console.keyMap = config.my.privacy.data.console.keyMap or "us";
+  console.keyMap = config.my.privacy.schema.console.keyMap;
 
   services.openssh = {
     enable = true;

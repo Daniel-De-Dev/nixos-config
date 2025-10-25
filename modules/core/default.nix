@@ -1,7 +1,6 @@
 { ... }:
 {
   imports = [
-    ../my
     ./nix.nix
   ];
 }
