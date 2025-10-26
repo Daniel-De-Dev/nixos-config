@@ -24,23 +24,19 @@ in
     };
 
     sshAliasConfig = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = ''
-          Whether to configure an SSH rule for accessing a private repository.
+      enable = lib.mkEnableOption ''
+        Whether to configure an SSH rule for accessing a private repository.
 
-          First-Time Setup (if repo is remote & private):
-          1. Comment out the `privacy` input in your `flake.nix`.
-          2. Set `my.privacy.enable = true;`
-          3. Set `my.privacy.bootstrap = true;`
-          4. Set `my.privacy.sshAliasConfig.enable = true;` (and set `sshKey` and the other attributes).
-          5. Run `nixos-rebuild switch`. This applies the SSH rule.
-          6. Uncomment the `privacy` input in your `flake.nix`.
-          7. Set `my.privacy.bootstrap = false;`
-          8. Run `nixos-rebuild switch` again. The build will now succeed (might need sudo based on key permissions).
-        '';
-      };
+        First-Time Setup (if repo is remote & private):
+        1. Comment out the `privacy` input in your `flake.nix`.
+        2. Set `my.privacy.enable = true;`
+        3. Set `my.privacy.bootstrap = true;`
+        4. Set `my.privacy.sshAliasConfig.enable = true;` (and set `sshKey` and the other attributes).
+        5. Run `nixos-rebuild switch`. This applies the SSH rule.
+        6. Uncomment the `privacy` input in your `flake.nix`.
+        7. Set `my.privacy.bootstrap = false;`
+        8. Run `nixos-rebuild switch` again. The build will now succeed (might need sudo based on key permissions).
+      '';
 
       sshKey = lib.mkOption {
         type = lib.types.nullOr (lib.types.strMatching "^/.*");
