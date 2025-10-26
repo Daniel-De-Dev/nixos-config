@@ -83,7 +83,7 @@ in
           Returns { success = bool; value = attrs; errorMessage = string; }
         */
         tryLoadHostPrivacy =
-          if !hostPrivacyFileExists then
+          if cfg.enable && !hostPrivacyFileExists then
             {
               success = false;
               value = { };
@@ -96,7 +96,7 @@ in
             let
               importResult = builtins.tryEval (import hostPrivacyFile);
             in
-            if !importResult.success then
+            if cfg.enable && !importResult.success then
               {
                 success = false;
                 value = { };
@@ -109,7 +109,7 @@ in
             else
               let
                 resolvedResult =
-                  if builtins.isFunction importResult.value then
+                  if cfg.enable && builtins.isFunction importResult.value then
                     {
                       success = false;
                       value = { };
@@ -120,7 +120,7 @@ in
                         File: ${hostPrivacyFile}
                       '';
                     }
-                  else if !(builtins.isAttrs importResult.value) then
+                  else if cfg.enable && !(builtins.isAttrs importResult.value) then
                     {
                       success = false;
                       value = { };
@@ -136,7 +136,7 @@ in
                       errorMessage = "";
                     };
               in
-              if !resolvedResult.success then
+              if cfg.enable && !resolvedResult.success then
                 {
                   success = false;
                   value = { };
@@ -155,9 +155,9 @@ in
                 };
 
         loadedPrivacyData =
-          if !cfg.bootstrap && privacyInputAvailable then
+          if cfg.enable && !cfg.bootstrap && privacyInputAvailable then
             tryLoadHostPrivacy
-          else if !cfg.bootstrap && !privacyInputAvailable then
+          else if cfg.enable && cfg.enable && !cfg.bootstrap && !privacyInputAvailable then
             {
               success = false;
               value = { };
