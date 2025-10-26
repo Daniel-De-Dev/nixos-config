@@ -69,152 +69,153 @@ in
     };
   };
 
-  config = lib.mkMerge [
+  config = lib.mkIf cfg.enable (
+    lib.mkMerge [
+      (
+        # Helper logic is only defined if privacy module is enabled
+        let
+          privacyInputAvailable = inputs ? privacy;
+          hostPrivacyFile = if privacyInputAvailable then inputs.privacy + "/hosts/${hostName}.nix" else null;
+          hostPrivacyFileExists = if privacyInputAvailable then builtins.pathExists hostPrivacyFile else null;
 
-    (lib.mkIf cfg.enable (
-      # Helper logic is only defined if privacy module is enabled
-      let
-        privacyInputAvailable = inputs ? privacy;
-        hostPrivacyFile = if privacyInputAvailable then inputs.privacy + "/hosts/${hostName}.nix" else null;
-        hostPrivacyFileExists = if privacyInputAvailable then builtins.pathExists hostPrivacyFile else null;
-
-        /*
-          Helper to import the host's private data file.
-          Returns { success = bool; value = attrs; errorMessage = string; }
-        */
-        tryLoadHostPrivacy =
-          if cfg.enable && !hostPrivacyFileExists then
-            {
-              success = false;
-              value = { };
-              errorMessage = ''
-                my.privacy.enable is true, but the privacy file was not found for host "${hostName}".
-                Nix looked for the file at: ${hostPrivacyFile}
-              '';
-            }
-          else
-            let
-              importResult = builtins.tryEval (import hostPrivacyFile);
-            in
-            if cfg.enable && !importResult.success then
+          /*
+            Helper to import the host's private data file.
+            Returns { success = bool; value = attrs; errorMessage = string; }
+          */
+          tryLoadHostPrivacy =
+            if !hostPrivacyFileExists then
               {
                 success = false;
                 value = { };
                 errorMessage = ''
-                  Importing the privacy file for host "${hostName}" failed.
-                  File: ${hostPrivacyFile}
-                  Error: ${importResult.error.message or "unknown"}
+                  my.privacy.enable is true, but the privacy file was not found for host "${hostName}".
+                  Nix looked for the file at: ${hostPrivacyFile}
                 '';
               }
             else
               let
-                resolvedResult =
-                  if cfg.enable && builtins.isFunction importResult.value then
-                    {
-                      success = false;
-                      value = { };
-                      errorMessage = ''
-                        Importing functions is explicitly not supported as of yet.
-                        This is due to wanting to allow host to dynamically specify
-                        expected paramters it wants to provide. and no need for it now
-                        File: ${hostPrivacyFile}
-                      '';
-                    }
-                  else if cfg.enable && !(builtins.isAttrs importResult.value) then
-                    {
-                      success = false;
-                      value = { };
-                      errorMessage = ''
-                        The privacy file for host "${hostName}" did not return an attribute set.
-                        File: ${hostPrivacyFile}
-                      '';
-                    }
-                  else
-                    {
-                      success = true;
-                      value = importResult.value;
-                      errorMessage = "";
-                    };
+                importResult = builtins.tryEval (import hostPrivacyFile);
               in
-              if cfg.enable && !resolvedResult.success then
+              if !importResult.success then
                 {
                   success = false;
                   value = { };
                   errorMessage = ''
-                    Evaluating the privacy file for host "${hostName}" failed.
-                    Check ${hostPrivacyFile} for errors.
-
-                    Error it has: ${resolvedResult.errorMessage}
+                    Importing the privacy file for host "${hostName}" failed.
+                    File: ${hostPrivacyFile}
+                    Error: ${importResult.error.message or "unknown"}
                   '';
                 }
               else
-                {
-                  success = true;
-                  value = resolvedResult.value;
-                  errorMessage = "";
-                };
+                let
+                  resolvedResult =
+                    if builtins.isFunction importResult.value then
+                      {
+                        success = false;
+                        value = { };
+                        errorMessage = ''
+                          Importing functions is explicitly not supported as of yet.
+                          This is due to wanting to allow host to dynamically specify
+                          expected paramters it wants to provide. and no need for it now
+                          File: ${hostPrivacyFile}
+                        '';
+                      }
+                    else if !(builtins.isAttrs importResult.value) then
+                      {
+                        success = false;
+                        value = { };
+                        errorMessage = ''
+                          The privacy file for host "${hostName}" did not return an attribute set.
+                          File: ${hostPrivacyFile}
+                        '';
+                      }
+                    else
+                      {
+                        success = true;
+                        value = importResult.value;
+                        errorMessage = "";
+                      };
+                in
+                if !resolvedResult.success then
+                  {
+                    success = false;
+                    value = { };
+                    errorMessage = ''
+                      Evaluating the privacy file for host "${hostName}" failed.
+                      Check ${hostPrivacyFile} for errors.
 
-        loadedPrivacyData =
-          if cfg.enable && !cfg.bootstrap && privacyInputAvailable then
-            tryLoadHostPrivacy
-          else if cfg.enable && cfg.enable && !cfg.bootstrap && !privacyInputAvailable then
-            {
-              success = false;
-              value = { };
-              errorMessage = ''
-                my.privacy.enable is true and my.privacy.bootstrap is false,
-                but the 'privacy' flake input is not found. Add it as input or
-                disable the privacy module
-              '';
-            }
-          else
-            # bootstrap is enabled, skipping reading the data.
-            {
-              success = true;
-              value = { };
-              errorMessage = "";
-            };
-      in
-      {
-        my.hostData =
-          assert lib.assertMsg loadedPrivacyData.success loadedPrivacyData.errorMessage;
-          loadedPrivacyData.value;
-      }
-    ))
+                      Error it has: ${resolvedResult.errorMessage}
+                    '';
+                  }
+                else
+                  {
+                    success = true;
+                    value = resolvedResult.value;
+                    errorMessage = "";
+                  };
 
-    (lib.mkIf (cfg.enable && cfg.bootstrap) {
-      warnings = [
-        "my.privacy is in bootstrap mode. Skipping private data load. `my.hostData` will use defaults."
-      ];
-    })
+          loadedPrivacyData =
+            if !cfg.bootstrap && privacyInputAvailable then
+              tryLoadHostPrivacy
+            else if !cfg.bootstrap && !privacyInputAvailable then
+              {
+                success = false;
+                value = { };
+                errorMessage = ''
+                  my.privacy.enable is true and my.privacy.bootstrap is false,
+                  but the 'privacy' flake input is not found. Add it as input or
+                  disable the privacy module
+                '';
+              }
+            else
+              # bootstrap is enabled, skipping reading the data.
+              {
+                success = true;
+                value = { };
+                errorMessage = "";
+              };
+        in
+        {
+          my.hostData =
+            assert lib.assertMsg loadedPrivacyData.success loadedPrivacyData.errorMessage;
+            loadedPrivacyData.value;
+        }
+      )
 
-    (lib.mkIf (cfg.enable && cfg.sshAliasConfig.enable) {
-      assertions = [
-        {
-          assertion = cfg.sshAliasConfig.sshKey != null;
-          message = "my.privacy.sshAliasConfig.enable is true, but 'sshKey' is not set.";
-        }
-        {
-          assertion = lib.stringLength cfg.sshAliasConfig.host > 0;
-          message = "my.privacy.sshAliasConfig.host must not be an empty string.";
-        }
-        {
-          assertion = lib.stringLength cfg.sshAliasConfig.alias > 0;
-          message = "my.privacy.sshAliasConfig.alias must not be an empty string.";
-        }
-        {
-          assertion = lib.stringLength cfg.sshAliasConfig.user > 0;
-          message = "my.privacy.sshAliasConfig.user must not be an empty string.";
-        }
-      ];
+      (lib.mkIf cfg.bootstrap {
+        warnings = [
+          "my.privacy is in bootstrap mode. Skipping private data load. `my.hostData` will use defaults."
+        ];
+      })
 
-      programs.ssh.extraConfig = lib.mkAfter ''
-        Host ${cfg.sshAliasConfig.alias}
-          HostName ${cfg.sshAliasConfig.host}
-          User ${cfg.sshAliasConfig.user}
-          IdentityFile ${cfg.sshAliasConfig.sshKey}
-          IdentitiesOnly yes
-      '';
-    })
-  ];
+      (lib.mkIf cfg.sshAliasConfig.enable {
+        assertions = [
+          {
+            assertion = cfg.sshAliasConfig.sshKey != null;
+            message = "my.privacy.sshAliasConfig.enable is true, but 'sshKey' is not set.";
+          }
+          {
+            assertion = lib.stringLength cfg.sshAliasConfig.host > 0;
+            message = "my.privacy.sshAliasConfig.host must not be an empty string.";
+          }
+          {
+            assertion = lib.stringLength cfg.sshAliasConfig.alias > 0;
+            message = "my.privacy.sshAliasConfig.alias must not be an empty string.";
+          }
+          {
+            assertion = lib.stringLength cfg.sshAliasConfig.user > 0;
+            message = "my.privacy.sshAliasConfig.user must not be an empty string.";
+          }
+        ];
+
+        programs.ssh.extraConfig = lib.mkAfter ''
+          Host ${cfg.sshAliasConfig.alias}
+            HostName ${cfg.sshAliasConfig.host}
+            User ${cfg.sshAliasConfig.user}
+            IdentityFile ${cfg.sshAliasConfig.sshKey}
+            IdentitiesOnly yes
+        '';
+      })
+    ]
+  );
 }
