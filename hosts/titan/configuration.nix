@@ -1,7 +1,4 @@
 { config, ... }:
-let
-  adminName = config.my.hostData.users.main.name;
-in
 {
   imports = [
     ./hardware-configuration.nix
@@ -17,11 +14,9 @@ in
     };
   };
 
-  # Define admin user
-  users.users.${adminName} = config.my.users.predefined.admin // {
-    group = "${adminName}";
+  users.users.main = {
+    isNormalUser = true;
   };
-  users.groups.${adminName} = { };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -39,7 +34,7 @@ in
     defaultEditor = true;
   };
 
-  console.keyMap = config.my.hostData.console.keyMap;
+  console.keyMap = config.my.host.console.keyMap;
 
   system.stateVersion = "25.05";
 }

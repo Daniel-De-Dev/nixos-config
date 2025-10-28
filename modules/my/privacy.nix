@@ -172,7 +172,7 @@ in
               };
         in
         {
-          my.hostData =
+          my.host =
             assert lib.assertMsg loadedPrivacyData.success loadedPrivacyData.errorMessage;
             loadedPrivacyData.value;
         }
@@ -180,7 +180,7 @@ in
 
       (lib.mkIf cfg.bootstrap {
         warnings = [
-          "my.privacy is in bootstrap mode. Skipping private data load. `my.hostData` will use defaults."
+          "my.privacy is in bootstrap mode. Skipping private data load. `my.host` will use defaults."
         ];
       })
 

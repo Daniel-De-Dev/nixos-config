@@ -1,8 +1,4 @@
-{ inputs, config, ... }:
-let
-  adminName = config.my.hostData.users.main.name;
-  hostSystem = config.nixpkgs.hostPlatform.system;
-in
+{ config, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -18,15 +14,9 @@ in
     };
   };
 
-  # Define admin user
-  users.users.${adminName} = config.my.users.predefined.admin // {
-    group = "${adminName}";
-
-    packages = [
-      inputs.nvim-config.packages.${hostSystem}.default
-    ];
+  users.users.main = {
+    isNormalUser = true;
   };
-  users.groups.${adminName} = { };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -44,7 +34,7 @@ in
     defaultEditor = true;
   };
 
-  console.keyMap = config.my.hostData.console.keyMap;
+  console.keyMap = config.my.host.console.keyMap;
 
   services.openssh = {
     enable = true;

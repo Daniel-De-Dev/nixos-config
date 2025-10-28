@@ -1,8 +1,6 @@
 {
   imports = [
-    ./host.nix
-    ./hostData.nix
+    ./host
     ./privacy.nix
-    ./users.nix
   ];
 }

@@ -5,6 +5,8 @@
   ...
 }:
 {
+  imports = [ ./users ];
+
   options.my.host = {
     name = lib.mkOption {
       # Enforce RFC 1123 rules for hostnames (1-63 chars, no leading/trailing hyphen).
@@ -12,9 +14,19 @@
       default = hostName;
       description = "The hostname for the machine. Defaults to the host's directory name.";
     };
+
+    console = {
+      keyMap = lib.mkOption {
+        type = lib.types.str;
+        default = "us";
+        description = "The keymap for the TTY console.";
+      };
+    };
+
   };
 
   config = {
     networking.hostName = config.my.host.name;
   };
+
 }
