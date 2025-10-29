@@ -9,7 +9,7 @@ let
 
   gitUsers = lib.filterAttrs (_: userConfig: userConfig.programs.git.enable or false) allUsers;
 
-  generateScriptForUser =
+  generateGitConfig =
     userName: userConfig:
     let
       gitCfg = userConfig.programs.git;
@@ -33,27 +33,44 @@ let
           the attribute type of "src" is not a path
         '';
         pkgs.replaceVars templateDef.src vars;
+
+      systemdName = "git-config-installer-${realUserConfig.name}";
+      installScript = pkgs.writeShellScript systemdName ''
+        set -euo pipefail
+        echo "Installing .gitconfig for user ${realUserConfig.name}"
+
+        configDir="${realUserConfig.home}/.config"
+        targetDir="$configDir/git"
+        targetFile="$targetDir/config"
+
+        mkdir -p "$targetDir"
+        ${pkgs.coreutils}/bin/install -m 0600 "${finalConfigPath}" "$targetFile"
+        chown -R "${realUserConfig.name}:${realUserConfig.group}" "$targetDir"
+      '';
     in
     {
-      name = "writeGitConfig-${realUserConfig.name}";
-      value = {
-        text = ''
-          echo "Installing .gitconfig for user ${realUserConfig.name}..."
-          configDir="${realUserConfig.home}/.config"
-          targetDir="$configDir/git"
-          targetFile="$targetDir/config"
+      service = {
+        ${systemdName} = {
+          description = "Install ${userName}'s .gitconfig";
+          unitConfig.RequiresMountsFor = [ realUserConfig.home ];
 
-          mkdir -p "$targetDir"
-          cp "${finalConfigPath}" "$targetFile"
-          chown -R "${realUserConfig.name}:${realUserConfig.group}" "$targetDir"
-          chmod 0600 "$targetFile"
-        '';
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = installScript;
+            User = "root";
+            Group = "root";
+          };
+
+          wantedBy = [ "sysinit-reactivation.target" ];
+          before = [ ];
+        };
       };
     };
+
+  perUser = lib.mapAttrs (u: uc: generateGitConfig u uc) gitUsers;
 in
 {
   config = {
-
     users.users = lib.mapAttrs (
       userName: userConfig:
       let
@@ -66,7 +83,7 @@ in
           '';
           assert lib.assertMsg (builtins.typeOf templateDef.packages == "list") ''
             User ${userName} has git.templates set to "${gitCfg.template}"
-            it coudlnt find attribute "packages"
+            The value attribute "packages" has is not a list
           '';
           templateDef.packages;
       in
@@ -75,7 +92,7 @@ in
       }
     ) gitUsers;
 
-    system.activationScripts = lib.mapAttrs' generateScriptForUser gitUsers;
+    systemd.services = lib.mkMerge (lib.attrValues (lib.mapAttrs (_: v: v.service) perUser));
 
     assertions = lib.flatten (
       lib.mapAttrsToList (
