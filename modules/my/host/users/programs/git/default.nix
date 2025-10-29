@@ -5,7 +5,7 @@
   ...
 }:
 let
-  allUsers = config.my.host.users or { };
+  allUsers = config.my.host.users;
 
   gitUsers = lib.filterAttrs (_: userConfig: userConfig.programs.git.enable or false) allUsers;
 
@@ -18,14 +18,21 @@ let
       realUserConfig = config.users.users.${userName};
 
       templateDef = import gitCfg.template { inherit pkgs; };
-      templateContent = builtins.readFile templateDef.src;
 
       vars = {
-        userName = settings.userName;
-        userEmail = settings.userEmail;
+        inherit (settings) userName userEmail;
       };
 
-      finalConfigPath = pkgs.replaceVars templateDef.src vars;
+      finalConfigPath =
+        assert lib.assertMsg (templateDef ? src) ''
+          User ${userName} has git.templates set to "${gitCfg.template}"
+          it coudlnt find attribute "src"
+        '';
+        assert lib.assertMsg (builtins.typeOf templateDef.src == "path") ''
+          User ${userName} has git.templates set to "${gitCfg.template}"
+          the attribute type of "src" is not a path
+        '';
+        pkgs.replaceVars templateDef.src vars;
     in
     {
       name = "writeGitConfig-${realUserConfig.name}";
@@ -52,9 +59,19 @@ in
       let
         gitCfg = userConfig.programs.git;
         templateDef = import gitCfg.template { inherit pkgs; };
+        templatePkgs =
+          assert lib.assertMsg (templateDef ? packages) ''
+            User ${userName} has git.templates set to "${gitCfg.template}"
+            it coudlnt find attribute "packages"
+          '';
+          assert lib.assertMsg (builtins.typeOf templateDef.packages == "list") ''
+            User ${userName} has git.templates set to "${gitCfg.template}"
+            it coudlnt find attribute "packages"
+          '';
+          templateDef.packages;
       in
       {
-        packages = [ pkgs.git ] ++ (templateDef.packages or [ ]);
+        packages = [ pkgs.git ] ++ templatePkgs;
       }
     ) gitUsers;
 
@@ -68,10 +85,6 @@ in
           settings = gitCfg.settings;
         in
         [
-          {
-            assertion = gitCfg.template != null;
-            message = "User '${userName}' has 'git' enabled but 'programs.git.template' is not set.";
-          }
           {
             assertion = settings.userName != null;
             message = "User '${userName}' has 'git' enabled but 'programs.git.settings.userName' is not set.";

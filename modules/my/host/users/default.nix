@@ -29,8 +29,7 @@
               '';
 
               template = lib.mkOption {
-                type = lib.types.nullOr lib.types.path;
-                default = null;
+                type = lib.types.path;
                 description = ''
                   Path to the .nix file that defines the git template.
                   (its dependecies & raw config file)
