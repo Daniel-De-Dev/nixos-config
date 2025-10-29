@@ -4,6 +4,10 @@
   ...
 }:
 {
+  imports = [
+    ./programs
+  ];
+
   options.my.host.users = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule (
@@ -17,6 +21,41 @@
                 The user's login name, defaults to the attribute name
               '';
             };
+
+            programs.git = {
+              enable = lib.mkEnableOption ''
+                Enable the setting up and managing of git configuration for
+                this user.
+              '';
+
+              template = lib.mkOption {
+                type = lib.types.nullOr lib.types.path;
+                default = null;
+                description = ''
+                  Path to the .nix file that defines the git template.
+                  (its dependecies & raw config file)
+                '';
+              };
+
+              settings = lib.mkOption {
+                type = lib.types.submodule {
+                  options = {
+                    userName = lib.mkOption {
+                      type = lib.types.nullOr lib.types.str;
+                      default = null;
+                      description = "Value for @userName@ placeholder.";
+                    };
+                    userEmail = lib.mkOption {
+                      type = lib.types.nullOr lib.types.str;
+                      default = null;
+                      description = "Value for @userEmail@ placeholder.";
+                    };
+                  };
+                };
+                default = { };
+                description = "Private settings to substitute into the template.";
+              };
+            };
           };
         }
       )
@@ -29,6 +68,7 @@
       and `users.groups` entries from this definition.
 
       This data is generally intended to be populated by the `my.privacy` module.
+      It's really up to you what you consider "private"
     '';
   };
 

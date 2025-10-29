@@ -1,0 +1,6 @@
+# This file is managed by NixOS.
+# Changes done here wont be saved between builds
+
+[user]
+  name = @userName@
+  email = @userEmail@
