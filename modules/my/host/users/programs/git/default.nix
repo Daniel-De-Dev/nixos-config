@@ -6,7 +6,6 @@
 }:
 let
   allUsers = config.my.host.users;
-
   gitUsers = lib.filterAttrs (_: userConfig: userConfig.programs.git.enable or false) allUsers;
 
   validateTemplate =
@@ -48,82 +47,36 @@ let
   validatedTemplates = lib.mapAttrs (
     userName: userConfig: validateTemplate userName userConfig.programs.git
   ) gitUsers;
-
-  generateGitConfig =
-    userName: userConfig:
-    let
-      gitCfg = userConfig.programs.git;
-      settings = gitCfg.settings;
-
-      realUserConfig =
-        let
-          hasSystemUser = lib.hasAttr userName config.users.users;
-        in
-        assert lib.assertMsg hasSystemUser ''
-          Git configuration was requested for "${userName}", but no matching
-          entry exists in users.users. Define the system user or disable
-          programs.git for this entry.
-          (shouldnt be possible since all host.users are generated)
-        '';
-        config.users.users.${userName};
-
-      templateDef = validatedTemplates.${userName};
-
-      vars = {
-        inherit (settings) userName userEmail;
-      };
-
-      finalConfigPath = pkgs.replaceVars templateDef.src vars;
-
-      systemdName = "git-config-installer-${realUserConfig.name}";
-      installScript = pkgs.writeShellScript systemdName ''
-        set -euo pipefail
-        echo "Installing .gitconfig for user ${realUserConfig.name}"
-
-        configDir="${realUserConfig.home}/.config"
-        targetDir="$configDir/git"
-        targetFile="$targetDir/config"
-
-        mkdir -p "$targetDir"
-        ${pkgs.coreutils}/bin/install -m 0600 "${finalConfigPath}" "$targetFile"
-        chown -R "${realUserConfig.name}:${realUserConfig.group}" "$targetDir"
-      '';
-    in
-    {
-      service = {
-        ${systemdName} = {
-          description = "Install ${userName}'s .gitconfig";
-          unitConfig.RequiresMountsFor = [ realUserConfig.home ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = installScript;
-            User = "root";
-            Group = "root";
-          };
-
-          wantedBy = [ "sysinit-reactivation.target" ];
-          before = [ ];
-        };
-      };
-    };
-
-  perUser = lib.mapAttrs (u: uc: generateGitConfig u uc) gitUsers;
 in
 {
   config = {
     users.users = lib.mapAttrs (
       userName: userConfig:
       let
+        gitCfg = userConfig.programs.git;
+        settings = gitCfg.settings;
         templateDef = validatedTemplates.${userName};
-        templatePkgs = templateDef.packages;
+        vars = { inherit (settings) userName userEmail; };
+
+        finalConfigPath = pkgs.replaceVars templateDef.src vars;
+
+        git-wrapper = pkgs.stdenv.mkDerivation {
+          name = "git-wrapper-${userName}";
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          dontUnpack = true;
+
+          installPhase = ''
+            mkdir -p $out/bin
+            # Wrap the real git binary
+            makeWrapper ${pkgs.git}/bin/git $out/bin/git \
+              --set GIT_CONFIG "${finalConfigPath}"
+          '';
+        };
       in
       {
-        packages = [ pkgs.git ] ++ templatePkgs;
+        packages = [ git-wrapper ] ++ templateDef.packages;
       }
     ) gitUsers;
-
-    systemd.services = lib.mkMerge (lib.attrValues (lib.mapAttrs (_: v: v.service) perUser));
 
     assertions = lib.flatten (
       lib.mapAttrsToList (
