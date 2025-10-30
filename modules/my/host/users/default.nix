@@ -5,6 +5,7 @@
 }:
 {
   imports = [
+    ./features
     ./programs
   ];
 
@@ -19,6 +20,13 @@
               default = name;
               description = ''
                 The user's login name, defaults to the attribute name
+              '';
+            };
+
+            features.sudo = {
+              enable = lib.mkEnableOption ''
+                Enable sudo access for this user.
+                This will add the user to the 'wheel' group
               '';
             };
 

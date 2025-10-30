@@ -14,7 +14,10 @@
     };
   };
 
-  my.host.users.main.programs.git.template = ../../templates/git/personal.nix;
+  my.host.users.main = {
+    features.sudo.enable = true;
+    programs.git.template = ../../templates/git/personal.nix;
+  };
 
   users.users.main = {
     isNormalUser = true;
