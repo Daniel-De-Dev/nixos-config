@@ -99,7 +99,7 @@ in
                   errorMessage = ''
                     Importing the privacy file for host "${hostName}" failed.
                     File: ${hostPrivacyFile}
-                    Error: ${importResult.error.message or "unknown"}
+                    Error: ${builtins.toString importResult.error}
                   '';
                 }
               else
