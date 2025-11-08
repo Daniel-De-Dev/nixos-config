@@ -17,9 +17,10 @@ in
       lib.mapAttrsToList (userName: userConfig: [
         {
           assertion = config.security.sudo.enable == true;
-          message = ''User '${userName}' has 'features.sudo' enabled, but
-          'security.sudo.enable' is not true. The module tried to enable it,
-          but it might be disabled by another module.'';
+          message = ''
+            User '${userName}' has 'features.sudo' enabled, but
+            'security.sudo.enable' is not true.
+          '';
         }
       ]) sudoUsers
     );
