@@ -15,7 +15,11 @@
   };
 
   my.host.users.main = {
-    features.sudo.enable = true;
+    features = {
+      sudo.enable = true;
+      ssh.enable = true;
+    };
+
     programs.git.template = ../../templates/git/personal.nix;
   };
 

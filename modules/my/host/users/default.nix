@@ -23,11 +23,25 @@
               '';
             };
 
-            features.sudo = {
-              enable = lib.mkEnableOption ''
-                Enable sudo access for this user.
-                This will add the user to the 'wheel' group
-              '';
+            features = {
+              sudo = {
+                enable = lib.mkEnableOption ''
+                  Enable sudo access for this user.
+                  This will add the user to the 'wheel' group
+                '';
+              };
+
+              ssh = {
+                enable = lib.mkEnableOption "automatic SSH key generation on first login";
+
+                email = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = ''
+                    Email address to use as a comment for the SSH key. Required if enabled.
+                  '';
+                };
+              };
             };
 
             programs.git = {
