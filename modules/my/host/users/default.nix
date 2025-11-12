@@ -42,6 +42,22 @@
                   '';
                 };
               };
+
+              gpg = {
+                enable = lib.mkEnableOption "automatic GPG key generation on first login";
+
+                realName = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = "Full name for the GPG key. Required if enabled.";
+                };
+
+                email = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = "Email address for the GPG key. Required if enabled.";
+                };
+              };
             };
 
             programs.git = {

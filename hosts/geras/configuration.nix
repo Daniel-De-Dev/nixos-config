@@ -18,6 +18,7 @@
     features = {
       sudo.enable = true;
       ssh.enable = true;
+      gpg.enable = true;
     };
 
     programs.git.template = ../../templates/git/personal.nix;
