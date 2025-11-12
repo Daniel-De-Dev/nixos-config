@@ -42,11 +42,11 @@
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1762652627,
-        "narHash": "sha256-KhsDHfFZ/vSIvwPdt7mE6meQ3uhepk+0coysmUXgOZQ=",
+        "lastModified": 1762907606,
+        "narHash": "sha256-ESKZjxJgA1TfcRXT9byI96/tt70L3Il07KCcIR5n9QA=",
         "ref": "refs/heads/main",
-        "rev": "82f108c14a437bb2abf211d0d9f523462b488d40",
-        "revCount": 7,
+        "rev": "642b4de793fabdb5e0dcea8269c60a8f54b667c2",
+        "revCount": 8,
         "type": "git",
         "url": "ssh://nixos-privacy/Daniel-De-Dev/nixos-privacy.git"
       },
