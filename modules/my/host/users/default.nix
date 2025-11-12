@@ -87,6 +87,11 @@
                       default = null;
                       description = "Value for @userEmail@ placeholder.";
                     };
+                    userSigningKey = lib.mkOption {
+                      type = lib.types.nullOr lib.types.str;
+                      default = null;
+                      description = "The GPG key ID or fingerprint for commit signing. Value for @userSigningKey@ placeholder.";
+                    };
                   };
                 };
                 default = { };

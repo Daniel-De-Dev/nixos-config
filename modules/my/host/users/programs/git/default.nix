@@ -15,7 +15,7 @@ let
     in
     if !importResult.success then
       throw ''
-        User ${userName} has git.templates set to "${gitCfg.template}"
+        User ${userName} has git.template set to "${gitCfg.template}"
         but evaluating the template failed with: ${builtins.toString importResult.error}
       ''
     else
@@ -23,23 +23,23 @@ let
         templateDef = importResult.value;
       in
       assert lib.assertMsg (builtins.isAttrs templateDef) ''
-        User ${userName} has git.templates set to "${gitCfg.template}"
+        User ${userName} has git.template set to "${gitCfg.template}"
         but the template did not return an attribute set
       '';
       assert lib.assertMsg (templateDef ? src) ''
-        User ${userName} has git.templates set to "${gitCfg.template}"
+        User ${userName} has git.template set to "${gitCfg.template}"
         it coudlnt find attribute "src"
       '';
       assert lib.assertMsg (builtins.typeOf templateDef.src == "path") ''
-        User ${userName} has git.templates set to "${gitCfg.template}"
+        User ${userName} has git.template set to "${gitCfg.template}"
         the attribute type of "src" is not a path
       '';
       assert lib.assertMsg (templateDef ? packages) ''
-        User ${userName} has git.templates set to "${gitCfg.template}"
+        User ${userName} has git.template set to "${gitCfg.template}"
         it coudlnt find attribute "packages"
       '';
       assert lib.assertMsg (builtins.typeOf templateDef.packages == "list") ''
-        User ${userName} has git.templates set to "${gitCfg.template}"
+        User ${userName} has git.template set to "${gitCfg.template}"
         The value attribute "packages" has is not a list
       '';
       templateDef;
@@ -56,7 +56,7 @@ in
         gitCfg = userConfig.programs.git;
         settings = gitCfg.settings;
         templateDef = validatedTemplates.${userName};
-        vars = { inherit (settings) userName userEmail; };
+        vars = { inherit (settings) userName userEmail userSigningKey; };
 
         finalConfigPath = pkgs.replaceVars templateDef.src vars;
 
@@ -69,7 +69,7 @@ in
             mkdir -p $out/bin
             # Wrap the real git binary
             makeWrapper ${pkgs.git}/bin/git $out/bin/git \
-              --set GIT_CONFIG "${finalConfigPath}"
+              --set GIT_CONFIG_SYSTEM "${finalConfigPath}"
           '';
         };
       in
@@ -93,6 +93,10 @@ in
           {
             assertion = settings.userEmail != null;
             message = "User '${userName}' has 'git' enabled but 'programs.git.settings.userEmail' is not set.";
+          }
+          {
+            assertion = settings.userSigningKey != null;
+            message = "User '${userName}' has 'git' enabled but 'programs.git.settings.userSigningKey' is not set.";
           }
         ]
       ) gitUsers

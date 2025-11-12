@@ -4,3 +4,7 @@
 [user]
   name = @userName@
   email = @userEmail@
+  signingkey = @userSigningKey@
+
+[commit]
+  gpgsign = true
