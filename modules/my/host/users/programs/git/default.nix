@@ -11,7 +11,13 @@ let
   validateTemplate =
     userName: gitCfg:
     let
-      importResult = builtins.tryEval (import gitCfg.template { inherit pkgs; });
+      importResult = builtins.tryEval (
+        import gitCfg.template {
+          inherit pkgs;
+          settings = gitCfg.settings;
+          inherit config;
+        }
+      );
     in
     if !importResult.success then
       throw ''
@@ -21,6 +27,8 @@ let
     else
       let
         templateDef = importResult.value;
+        requiredSettings = if templateDef ? requiredSettings then templateDef.requiredSettings else [ ];
+        templateAssertions = if templateDef ? assertions then templateDef.assertions else [ ];
       in
       assert lib.assertMsg (builtins.isAttrs templateDef) ''
         User ${userName} has git.template set to "${gitCfg.template}"
@@ -42,7 +50,38 @@ let
         User ${userName} has git.template set to "${gitCfg.template}"
         The value attribute "packages" has is not a list
       '';
-      templateDef;
+      assert lib.assertMsg (builtins.isList requiredSettings) ''
+        User ${userName} has git.template set to "${gitCfg.template}"
+        but the attribute "requiredSettings" is not a list
+      '';
+      assert lib.assertMsg (lib.all builtins.isString requiredSettings) ''
+        User ${userName} has git.template set to "${gitCfg.template}"
+        every entry in "requiredSettings" must be a string
+      '';
+      assert lib.assertMsg (builtins.isList templateAssertions) ''
+        User ${userName} has git.template set to "${gitCfg.template}"
+        but the attribute "assertions" is not a list
+      '';
+      assert lib.assertMsg
+        (lib.all (
+          assertion:
+          builtins.isAttrs assertion
+          && (assertion ? assertion)
+          && (assertion ? message)
+          && builtins.isBool assertion.assertion
+          && builtins.isString assertion.message
+        ) templateAssertions)
+        ''
+          User ${userName} has git.template set to "${gitCfg.template}"
+          every entry in "assertions" must be an attribute set with
+          boolean `assertion` and string `message`
+        '';
+      {
+        src = templateDef.src;
+        packages = templateDef.packages;
+        requiredSettings = requiredSettings;
+        assertions = templateAssertions;
+      };
 
   validatedTemplates = lib.mapAttrs (
     userName: userConfig: validateTemplate userName userConfig.programs.git
@@ -56,7 +95,7 @@ in
         gitCfg = userConfig.programs.git;
         settings = gitCfg.settings;
         templateDef = validatedTemplates.${userName};
-        vars = { inherit (settings) userName userEmail userSigningKey; };
+        vars = lib.filterAttrs (_: value: value != null) settings;
 
         finalConfigPath = pkgs.replaceVars templateDef.src vars;
 
@@ -69,7 +108,7 @@ in
             mkdir -p $out/bin
             # Wrap the real git binary
             makeWrapper ${pkgs.git}/bin/git $out/bin/git \
-              --set GIT_CONFIG_SYSTEM "${finalConfigPath}"
+              --set GIT_CONFIG_GLOBAL "${finalConfigPath}"
           '';
         };
       in
@@ -84,21 +123,22 @@ in
         let
           gitCfg = userConfig.programs.git;
           settings = gitCfg.settings;
+          templateDef = validatedTemplates.${userName};
+          requiredSettingAssertions = map (
+            settingName:
+            let
+              value = lib.attrByPath [ settingName ] null settings;
+            in
+            {
+              assertion = value != null;
+              message = "User '${userName}' uses a git template that requires 'programs.git.settings.${settingName}' to be set.";
+            }
+          ) templateDef.requiredSettings;
+          templateAssertions = map (
+            tplAssertion: tplAssertion // { message = "User '${userName}': ${tplAssertion.message}"; }
+          ) templateDef.assertions;
         in
-        [
-          {
-            assertion = settings.userName != null;
-            message = "User '${userName}' has 'git' enabled but 'programs.git.settings.userName' is not set.";
-          }
-          {
-            assertion = settings.userEmail != null;
-            message = "User '${userName}' has 'git' enabled but 'programs.git.settings.userEmail' is not set.";
-          }
-          {
-            assertion = settings.userSigningKey != null;
-            message = "User '${userName}' has 'git' enabled but 'programs.git.settings.userSigningKey' is not set.";
-          }
-        ]
+        requiredSettingAssertions ++ templateAssertions
       ) gitUsers
     );
   };
