@@ -67,116 +67,38 @@ in
 
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
-      (
-        # Helper logic is only defined if privacy module is enabled
+      # Load Private Data
+      (lib.mkIf (!cfg.bootstrap) (
         let
-          privacyInputAvailable = inputs ? privacy;
-          hostPrivacyFile = if privacyInputAvailable then inputs.privacy + "/hosts/${hostName}.nix" else null;
-          hostPrivacyFileExists = if privacyInputAvailable then builtins.pathExists hostPrivacyFile else null;
-
-          /*
-            Helper to import the host's private data file.
-            Returns { success = bool; value = attrs; errorMessage = string; }
-          */
-          tryLoadHostPrivacy =
-            if !hostPrivacyFileExists then
+          privacyInputExists = inputs ? privacy;
+        in
+        if !privacyInputExists then
+          {
+            assertions = [
               {
-                success = false;
-                value = { };
-                errorMessage = ''
-                  my.privacy.enable is true, but the privacy file was not found for host "${hostName}".
-                  Nix looked for the file at: ${hostPrivacyFile}
-                '';
+                assertion = false;
+                message = "my.privacy.enable is true and my.privacy.bootstrap is false, but the 'privacy' flake input is not found. Add it as input or disable the privacy module.";
               }
-            else
-              let
-                importResult = builtins.tryEval (import hostPrivacyFile);
-              in
-              if !importResult.success then
-                {
-                  success = false;
-                  value = { };
-                  errorMessage = ''
-                    Importing the privacy file for host "${hostName}" failed.
-                    File: ${hostPrivacyFile}
-                    Error: ${builtins.toString importResult.error}
-                  '';
+            ];
+          }
+        else
+          let
+            privacyFile = "${inputs.privacy}/hosts/${hostName}.nix";
+            imported = import privacyFile;
+            configValue =
+              if builtins.isFunction imported then
+                imported {
+                  inherit
+                    config
+                    lib
+                    inputs
+                    ;
                 }
               else
-                let
-                  resolvedResult =
-                    if builtins.isFunction importResult.value then
-                      {
-                        success = false;
-                        value = { };
-                        errorMessage = ''
-                          Importing functions is explicitly not supported as of yet.
-                          This is due to wanting to allow host to dynamically specify
-                          expected paramters it wants to provide. and no need for it now
-                          File: ${hostPrivacyFile}
-                        '';
-                      }
-                    else if !(builtins.isAttrs importResult.value) then
-                      {
-                        success = false;
-                        value = { };
-                        errorMessage = ''
-                          The privacy file for host "${hostName}" did not return an attribute set.
-                          File: ${hostPrivacyFile}
-                        '';
-                      }
-                    else
-                      {
-                        success = true;
-                        value = importResult.value;
-                        errorMessage = "";
-                      };
-                in
-                if !resolvedResult.success then
-                  {
-                    success = false;
-                    value = { };
-                    errorMessage = ''
-                      Evaluating the privacy file for host "${hostName}" failed.
-                      Check ${hostPrivacyFile} for errors.
-
-                      Error it has: ${resolvedResult.errorMessage}
-                    '';
-                  }
-                else
-                  {
-                    success = true;
-                    value = resolvedResult.value;
-                    errorMessage = "";
-                  };
-
-          loadedPrivacyData =
-            if !cfg.bootstrap && privacyInputAvailable then
-              tryLoadHostPrivacy
-            else if !cfg.bootstrap && !privacyInputAvailable then
-              {
-                success = false;
-                value = { };
-                errorMessage = ''
-                  my.privacy.enable is true and my.privacy.bootstrap is false,
-                  but the 'privacy' flake input is not found. Add it as input or
-                  disable the privacy module
-                '';
-              }
-            else
-              # bootstrap is enabled, skipping reading the data.
-              {
-                success = true;
-                value = { };
-                errorMessage = "";
-              };
-        in
-        {
-          my.host =
-            assert lib.assertMsg loadedPrivacyData.success loadedPrivacyData.errorMessage;
-            loadedPrivacyData.value;
-        }
-      )
+                imported;
+          in
+          configValue
+      ))
 
       (lib.mkIf cfg.bootstrap {
         warnings = [
