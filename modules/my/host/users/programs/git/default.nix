@@ -6,85 +6,67 @@
 }:
 let
   allUsers = config.my.host.users;
-  gitUsers = lib.filterAttrs (_: userConfig: userConfig.programs.git.enable or false) allUsers;
+  gitUsers = lib.filterAttrs (_: userConfig: userConfig.programs.git.enable) allUsers;
 
-  validateTemplate =
+  # Evaluate the template file as a module.
+  getValidatedTemplate =
     userName: gitCfg:
     let
-      importResult = builtins.tryEval (
-        import gitCfg.template {
-          inherit pkgs;
-          settings = gitCfg.settings;
-          inherit config;
-        }
-      );
-    in
-    if !importResult.success then
-      throw ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        but evaluating the template failed with: ${builtins.toString importResult.error}
-      ''
-    else
-      let
-        templateDef = importResult.value;
-        requiredSettings = if templateDef ? requiredSettings then templateDef.requiredSettings else [ ];
-        templateAssertions = if templateDef ? assertions then templateDef.assertions else [ ];
-      in
-      assert lib.assertMsg (builtins.isAttrs templateDef) ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        but the template did not return an attribute set
-      '';
-      assert lib.assertMsg (templateDef ? src) ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        it coudlnt find attribute "src"
-      '';
-      assert lib.assertMsg (builtins.typeOf templateDef.src == "path") ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        the attribute type of "src" is not a path
-      '';
-      assert lib.assertMsg (templateDef ? packages) ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        it coudlnt find attribute "packages"
-      '';
-      assert lib.assertMsg (builtins.typeOf templateDef.packages == "list") ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        The value attribute "packages" has is not a list
-      '';
-      assert lib.assertMsg (builtins.isList requiredSettings) ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        but the attribute "requiredSettings" is not a list
-      '';
-      assert lib.assertMsg (lib.all builtins.isString requiredSettings) ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        every entry in "requiredSettings" must be a string
-      '';
-      assert lib.assertMsg (builtins.isList templateAssertions) ''
-        User ${userName} has git.template set to "${gitCfg.template}"
-        but the attribute "assertions" is not a list
-      '';
-      assert lib.assertMsg
-        (lib.all (
-          assertion:
-          builtins.isAttrs assertion
-          && (assertion ? assertion)
-          && (assertion ? message)
-          && builtins.isBool assertion.assertion
-          && builtins.isString assertion.message
-        ) templateAssertions)
-        ''
-          User ${userName} has git.template set to "${gitCfg.template}"
-          every entry in "assertions" must be an attribute set with
-          boolean `assertion` and string `message`
-        '';
-      {
-        src = templateDef.src;
-        packages = templateDef.packages;
-        requiredSettings = requiredSettings;
-        assertions = templateAssertions;
+      # Define the options for the template module.
+      templateModuleOptions =
+        { lib, ... }:
+        {
+          options = {
+            src = lib.mkOption {
+              type = lib.types.path;
+              description = "Path to the gitconfig template file.";
+            };
+            packages = lib.mkOption {
+              type = lib.types.listOf lib.types.package;
+              default = [ ];
+              description = "Extra packages to install.";
+            };
+            requiredSettings = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              description = "List of setting names that must be provided.";
+            };
+            assertions = lib.mkOption {
+              type = lib.types.listOf (
+                lib.types.submodule {
+                  options = {
+                    assertion = lib.mkOption {
+                      type = lib.types.bool;
+                      description = "The assertion expression";
+                    };
+                    message = lib.mkOption {
+                      type = lib.types.str;
+                      description = "The error message to show if the assertion fails.";
+                    };
+                  };
+                }
+              );
+              default = [ ];
+              description = "A list of assertions to run against the settings.";
+            };
+          };
+        };
+
+      # Evaluate the user's template file
+      eval = lib.evalModules {
+        modules = [
+          templateModuleOptions
+          gitCfg.template
+        ];
+        specialArgs = {
+          inherit pkgs config;
+        };
       };
+    in
+    eval.config;
 
   validatedTemplates = lib.mapAttrs (
-    userName: userConfig: validateTemplate userName userConfig.programs.git
+    userName: userConfig: getValidatedTemplate userName userConfig.programs.git
   ) gitUsers;
 in
 {
@@ -93,9 +75,8 @@ in
       userName: userConfig:
       let
         gitCfg = userConfig.programs.git;
-        settings = gitCfg.settings;
         templateDef = validatedTemplates.${userName};
-        vars = lib.filterAttrs (_: value: value != null) settings;
+        vars = lib.filterAttrs (_: value: value != null) gitCfg.settings;
 
         finalConfigPath = pkgs.replaceVars templateDef.src vars;
 
@@ -124,6 +105,8 @@ in
           gitCfg = userConfig.programs.git;
           settings = gitCfg.settings;
           templateDef = validatedTemplates.${userName};
+
+          # Check for required settings
           requiredSettingAssertions = map (
             settingName:
             let
@@ -134,6 +117,8 @@ in
               message = "User '${userName}' uses a git template that requires 'programs.git.settings.${settingName}' to be set.";
             }
           ) templateDef.requiredSettings;
+
+          # Pass-through assertions from the template
           templateAssertions = map (
             tplAssertion: tplAssertion // { message = "User '${userName}': ${tplAssertion.message}"; }
           ) templateDef.assertions;

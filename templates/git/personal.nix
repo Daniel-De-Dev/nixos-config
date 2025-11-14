@@ -1,14 +1,13 @@
 {
   pkgs,
-  settings,
   config,
   ...
 }:
 {
+  src = ./gitconfig.personal.template;
+
   packages = [
   ];
-
-  src = ./gitconfig.personal.template;
 
   requiredSettings = [
     "userName"
