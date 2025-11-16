@@ -59,7 +59,11 @@ let
           gitCfg.template
         ];
         specialArgs = {
-          inherit pkgs config;
+          inherit
+            pkgs
+            config
+            lib
+            ;
         };
       };
     in

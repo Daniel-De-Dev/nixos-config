@@ -8,3 +8,95 @@
 
 [commit]
   gpgsign = true
+  verbose = true
+
+[push]
+  autosetupremote = true
+  followTags = true
+  default = simple
+
+[pull]
+  rebase = true
+
+[init]
+  defaultBranch = main
+
+[rebase]
+  autoStash = true
+  missingCommitsCheck = error
+  updateRefs = true
+  autosquash = true
+
+[fetch]
+  prune = true
+  prunetags = true
+  fsckObjects = true
+
+[merge]
+  conflictstyle = zdiff3
+
+[rerere]
+  enabled = true
+
+[help]
+  autocorrect = 10
+
+[diff]
+  tool = difftastic
+  algorithm = histogram
+  colorMoved = default
+  context = 10
+
+[status]
+  submoduleSummary = 1
+
+[core]
+  pager = delta
+  editor = nvim
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  navigate = true
+  line-numbers = true
+  side-by-side = true
+  hyperlinks = true
+
+[url "git@github.com:"]
+  insteadOf = https://github.com/
+
+[transfer]
+  fsckObjects = true
+
+[receive]
+  fsckObjects = true
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = -taggerdate
+
+[difftool]
+  prompt = false
+
+[difftool "difftastic"]
+  cmd = difft "$LOCAL" "$REMOTE" --background=dark
+
+[log]
+  date = iso
+
+[alias]
+  # List available aliases (except itself)
+  aliases = "!git config --get-regexp '^alias\\.' \
+  | sed -E 's/^alias\\.([^ ]*) (.*)$/\\1 = \\2/' \
+  | sed -E '/^aliases = /d'"
+  ci = commit
+  st = status -sb
+  lg = log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'
+  oops = commit --amend --no-edit
+  reword = commit --amend
+  uncommit = reset --soft HEAD~1
+  untrack = rm --cached --
+  rmt = rm --
