@@ -16,7 +16,7 @@
         {
           options = {
             name = lib.mkOption {
-              type = lib.types.str; # Enforce regex eventually
+              type = lib.types.strMatching "^[a-z_][a-z0-9_-]*$";
               default = name;
               description = ''
                 The user's login name, defaults to the attribute name
