@@ -16,7 +16,7 @@ in
     assertions = lib.flatten (
       lib.mapAttrsToList (userName: userConfig: [
         {
-          assertion = config.security.sudo.enable == true;
+          assertion = config.security.sudo.enable == true || config.security.sudo-rs.enable == true;
           message = ''
             User '${userName}' has 'features.sudo' enabled, but
             'security.sudo.enable' is not true.
