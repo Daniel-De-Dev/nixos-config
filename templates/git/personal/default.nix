@@ -26,7 +26,7 @@ let
   );
 in
 {
-  src = ./gitconfig.personal.template;
+  src = ./gitconfig;
 
   packages = [
     myDelta

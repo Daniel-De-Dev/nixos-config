@@ -21,7 +21,7 @@
       gpg.enable = true;
     };
 
-    programs.git.template = ../../templates/git/personal.nix;
+    programs.git.template = ../../templates/git/personal;
   };
 
   users.users.main = {
