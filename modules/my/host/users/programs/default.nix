@@ -1,3 +1,3 @@
 {
-  imports = [ ./git ];
+  imports = [ ./git.nix ];
 }
