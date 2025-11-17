@@ -100,3 +100,4 @@
   uncommit = reset --soft HEAD~1
   untrack = rm --cached --
   rmt = rm --
+  dt = difftool
