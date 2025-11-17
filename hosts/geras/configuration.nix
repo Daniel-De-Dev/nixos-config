@@ -21,7 +21,15 @@
       gpg.enable = true;
     };
 
-    programs.git.template = ../../templates/git/personal;
+    programs = {
+      git.template = ../../templates/git/personal;
+
+      neovim = {
+        enable = true;
+        profile = "personal";
+      };
+    };
+
   };
 
   users.users.main = {

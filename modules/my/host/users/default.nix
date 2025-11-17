@@ -60,42 +60,55 @@
               };
             };
 
-            programs.git = {
-              enable = lib.mkEnableOption ''
-                Enable the setting up and managing of git configuration for
-                this user.
-              '';
-
-              template = lib.mkOption {
-                type = lib.types.path;
-                description = ''
-                  Path to the .nix file that defines the git template.
-                  (its dependecies & raw config file)
+            programs = {
+              git = {
+                enable = lib.mkEnableOption ''
+                  Enable the setting up and managing of git configuration for
+                  this user.
                 '';
-              };
 
-              settings = lib.mkOption {
-                type = lib.types.submodule {
-                  options = {
-                    userName = lib.mkOption {
-                      type = lib.types.nullOr lib.types.str;
-                      default = null;
-                      description = "Value for @userName@ placeholder.";
-                    };
-                    userEmail = lib.mkOption {
-                      type = lib.types.nullOr lib.types.str;
-                      default = null;
-                      description = "Value for @userEmail@ placeholder.";
-                    };
-                    userSigningKey = lib.mkOption {
-                      type = lib.types.nullOr lib.types.str;
-                      default = null;
-                      description = "The GPG key ID or fingerprint for commit signing. Value for @userSigningKey@ placeholder.";
+                template = lib.mkOption {
+                  type = lib.types.path;
+                  description = ''
+                    Path to the .nix file that defines the git template.
+                    (its dependecies & raw config file)
+                  '';
+                };
+
+                settings = lib.mkOption {
+                  type = lib.types.submodule {
+                    options = {
+                      userName = lib.mkOption {
+                        type = lib.types.nullOr lib.types.str;
+                        default = null;
+                        description = "Value for @userName@ placeholder.";
+                      };
+                      userEmail = lib.mkOption {
+                        type = lib.types.nullOr lib.types.str;
+                        default = null;
+                        description = "Value for @userEmail@ placeholder.";
+                      };
+                      userSigningKey = lib.mkOption {
+                        type = lib.types.nullOr lib.types.str;
+                        default = null;
+                        description = "The GPG key ID or fingerprint for commit signing. Value for @userSigningKey@ placeholder.";
+                      };
                     };
                   };
+                  default = { };
+                  description = "Private settings to substitute into the template.";
                 };
-                default = { };
-                description = "Private settings to substitute into the template.";
+              };
+
+              neovim = {
+                enable = lib.mkEnableOption ''
+                  Enable the setting up and managing of neovim configuration
+                  for this user.
+                '';
+                profile = lib.mkOption {
+                  type = lib.types.str;
+                  description = "The profile to use from 'inputs.nvim-config.configs'.";
+                };
               };
             };
           };
