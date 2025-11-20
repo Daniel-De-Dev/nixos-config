@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -29,7 +29,6 @@
         profile = "personal";
       };
     };
-
   };
 
   users.users.main = {
@@ -52,7 +51,27 @@
     defaultEditor = true;
   };
 
-  console.keyMap = config.my.host.console.keyMap;
+  services.xserver.xkb.layout = config.my.host.keyMap;
+
+  console = {
+    enable = true;
+    earlySetup = true;
+    useXkbConfig = true;
+    font = "ter-v20n";
+    packages = with pkgs; [ terminus_font ];
+  };
+
+  services.kmscon = {
+    enable = true;
+    hwRender = true;
+    useXkbConfig = true;
+    fonts = [
+      {
+        name = "JetBrainsMono Nerd Font Mono";
+        package = pkgs.nerd-fonts.jetbrains-mono;
+      }
+    ];
+  };
 
   services.openssh = {
     enable = true;

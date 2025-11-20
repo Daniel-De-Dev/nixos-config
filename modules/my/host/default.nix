@@ -15,14 +15,11 @@
       description = "The hostname for the machine. Defaults to the host's directory name.";
     };
 
-    console = {
-      keyMap = lib.mkOption {
-        type = lib.types.str;
-        default = "us";
-        description = "The keymap for the TTY console.";
-      };
+    keyMap = lib.mkOption {
+      type = lib.types.str;
+      default = "us";
+      description = "The keymap set system wide";
     };
-
   };
 
   config = {
