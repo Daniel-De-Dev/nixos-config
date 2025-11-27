@@ -63,9 +63,6 @@
   side-by-side = true
   hyperlinks = true
 
-[url "git@github.com:"]
-  insteadOf = https://github.com/
-
 [transfer]
   fsckObjects = true
 

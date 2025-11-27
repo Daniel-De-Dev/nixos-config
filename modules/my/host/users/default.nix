@@ -109,6 +109,15 @@
                   type = lib.types.str;
                   description = "The profile to use from 'inputs.nvim-config.configs'.";
                 };
+                configPath = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = ''
+                    Absolute path the where the nvim config repo lives on system
+                    Used for developer mode so it is used as config once env
+                    variable is set (see neovim.nix)
+                  '';
+                };
               };
             };
           };

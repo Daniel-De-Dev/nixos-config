@@ -3,6 +3,7 @@
   config,
   pkgs,
   inputs,
+  hostName,
   ...
 }:
 let
@@ -37,10 +38,45 @@ in
 
         nvim-wrapper = pkgs.writeShellScriptBin "nvim" ''
           #!/usr/bin/env bash
-          export XDG_CONFIG_HOME="${profile.dir}"
 
-          export XDG_CACHE_HOME="$HOME/.cache/nvim/${nvimCfg.profile}"
-          export XDG_DATA_HOME="$HOME/.local/share/nvim/${nvimCfg.profile}"
+          NVIM_REPO_PATH="${if nvimCfg.configPath != null then nvimCfg.configPath else ""}"
+          NVIM_PROFILE="${nvimCfg.profile}"
+
+          if [ "$NIX_NVIM_DEV" = "1" ]; then
+            echo "STARTING NEOVIM IN DEV MODE"
+
+            if [ -z "$NVIM_REPO_PATH" ]; then
+              echo "Error: NIX_NVIM_DEV is set to 1, but no 'configPath' was defined in the user configuration."
+              echo "Please set 'programs.neovim.configPath' to your local repo path string."
+              exit 1
+            fi
+
+            # Setup the dev environment
+            DEV_CONFIG="$HOME/.cache/nvim-dev/$NVIM_PROFILE"
+            mkdir -p "$DEV_CONFIG"
+
+            SOURCE_CONFIG="$NVIM_REPO_PATH/profiles/$NVIM_PROFILE/config"
+
+            if [ ! -d "$SOURCE_CONFIG" ]; then
+              echo "Error: Configuration profile not found at: $SOURCE_CONFIG"
+              exit 1
+            fi
+
+            # Symlink local config so Neovim finds init.lua in .../nvim/init.lua
+            ln -snf "$SOURCE_CONFIG" "$DEV_CONFIG/nvim"
+
+            export XDG_CONFIG_HOME="$DEV_CONFIG"
+            export XDG_DATA_HOME="$HOME/.local/share/nvim-dev/$NVIM_PROFILE"
+            export XDG_CACHE_HOME="$HOME/.cache/nvim-dev/$NVIM_PROFILE"
+
+          else
+            # Standard Nix mode
+            export XDG_CONFIG_HOME="${profile.dir}"
+            export XDG_CACHE_HOME="$HOME/.cache/nvim/${nvimCfg.profile}"
+            export XDG_DATA_HOME="$HOME/.local/share/nvim/${nvimCfg.profile}"
+          fi
+
+          export NIXOS_HOSTNAME="${hostName}"
 
           exec "${pkgs.neovim-unwrapped}/bin/nvim" "$@"
         '';

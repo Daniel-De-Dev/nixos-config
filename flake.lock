@@ -26,11 +26,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1763607523,
-        "narHash": "sha256-HfCUKImGCT/LSR0KD/XGhR7xjWMS0tvK2i80mZ6BFLk=",
+        "lastModified": 1764285197,
+        "narHash": "sha256-SBS+h9F/v/kqDoeA+hDPYYQZGcHv2DsoIDR6R8l8yEI=",
         "owner": "Daniel-De-Dev",
         "repo": "nvim-config",
-        "rev": "11ab6073899faffa0bda1a18fa9504ac705bc7b0",
+        "rev": "c59a73d86c092531e381c2c5170bc33195f4ee60",
         "type": "github"
       },
       "original": {

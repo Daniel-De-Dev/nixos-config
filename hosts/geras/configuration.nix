@@ -27,6 +27,7 @@
       neovim = {
         enable = true;
         profile = "personal";
+        configPath = "/home/zeus/repos/nvim-config";
       };
     };
   };
