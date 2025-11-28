@@ -34,10 +34,11 @@ in
           if systemConfigs ? ${nvimCfg.profile} then
             systemConfigs.${nvimCfg.profile}
           else
-            throw "User '${userName}': Neovim profile '${nvimCfg.profile}' does not exist in 'inputs.nvim-config.configs.${system}'. Available: ${toString (lib.attrNames systemConfigs)}";
+            throw "User '${userName}': Neovim profile '${nvimCfg.profile}' does not exist for system '${system}' in 'inputs.nvim-config.configs.${system}'. Available: ${toString (lib.attrNames systemConfigs)}";
 
         nvim-wrapper = pkgs.writeShellScriptBin "nvim" ''
           #!/usr/bin/env bash
+          set -euo pipefail
 
           NVIM_REPO_PATH="${if nvimCfg.configPath != null then nvimCfg.configPath else ""}"
           NVIM_PROFILE="${nvimCfg.profile}"
