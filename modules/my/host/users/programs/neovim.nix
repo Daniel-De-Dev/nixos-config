@@ -43,7 +43,7 @@ in
           NVIM_REPO_PATH="${if nvimCfg.configPath != null then nvimCfg.configPath else ""}"
           NVIM_PROFILE="${nvimCfg.profile}"
 
-          if [ "$NIX_NVIM_DEV" = "1" ]; then
+          if [ "''${NIX_NVIM_DEV:-0}" = "1" ]; then
             echo "STARTING NEOVIM IN DEV MODE"
 
             if [ -z "$NVIM_REPO_PATH" ]; then
@@ -68,13 +68,13 @@ in
 
             export XDG_CONFIG_HOME="$DEV_CONFIG"
             export XDG_DATA_HOME="$HOME/.local/share/nvim-dev/$NVIM_PROFILE"
-            export XDG_CACHE_HOME="$HOME/.cache/nvim-dev/$NVIM_PROFILE"
+            export XDG_CACHE_HOME="$HOME/.cache/nvim-dev/$NVIM_PROFILE-cache"
 
           else
             # Standard Nix mode
             export XDG_CONFIG_HOME="${profile.dir}"
-            export XDG_CACHE_HOME="$HOME/.cache/nvim/${nvimCfg.profile}"
             export XDG_DATA_HOME="$HOME/.local/share/nvim/${nvimCfg.profile}"
+            export XDG_CACHE_HOME="$HOME/.cache/nvim/${nvimCfg.profile}"
           fi
 
           export NIXOS_HOSTNAME="${hostName}"
