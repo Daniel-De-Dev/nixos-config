@@ -22,4 +22,10 @@
       wrap = 80;
     };
   };
+
+  # Shell / Bash
+  programs.shfmt = {
+    enable = true;
+    indent_size = 2;
+  };
 }
