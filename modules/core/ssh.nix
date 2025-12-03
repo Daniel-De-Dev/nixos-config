@@ -44,4 +44,6 @@
       LogLevel = "VERBOSE";
     };
   };
+
+  networking.firewall.allowedTCPPorts = [ 22 ];
 }

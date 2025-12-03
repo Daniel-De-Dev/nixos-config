@@ -6,5 +6,6 @@
     ./sudo.nix
     ./ssh.nix
     ./fail2ban.nix
+    ./firewall.nix
   ];
 }
