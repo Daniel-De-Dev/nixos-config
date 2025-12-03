@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }:
 {
@@ -12,7 +13,7 @@
   options.my.host.users = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule (
-        { name, ... }:
+        { name, config, ... }:
         {
           options = {
             name = lib.mkOption {
@@ -21,6 +22,15 @@
               description = ''
                 The user's login name, defaults to the attribute name
               '';
+            };
+
+            shell = lib.mkOption {
+              type = lib.types.enum [
+                "bash"
+                "fish"
+              ];
+              default = "bash";
+              description = "The shell to use for this user.";
             };
 
             features = {
@@ -119,7 +129,42 @@
                   '';
                 };
               };
+              tmux = {
+                enable = lib.mkEnableOption "Enable tmux configuration for this user.";
+
+                template = lib.mkOption {
+                  type = lib.types.path;
+                  description = "Path to the .nix file that defines the tmux template.";
+                };
+
+                settings = lib.mkOption {
+                  type = lib.types.submodule {
+                    options = {
+                      defaultShellPath = lib.mkOption {
+                        type = lib.types.str;
+                        readOnly = true;
+                        description = ''
+                          Path to the shell that the user has by defualt.
+                          Its automatically derived based on the shell selected.
+                        '';
+                      };
+                    };
+                  };
+                  default = { };
+                  description = "Private settings to substitute into the template.";
+                };
+              };
             };
+          };
+          config = {
+            programs.tmux.settings.defaultShellPath =
+              let
+                shellMap = {
+                  fish = lib.getExe pkgs.fish;
+                  bash = lib.getExe pkgs.bash;
+                };
+              in
+              shellMap.${config.shell};
           };
         }
       )

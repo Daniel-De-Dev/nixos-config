@@ -15,6 +15,8 @@
   };
 
   my.host.users.main = {
+    shell = "fish";
+
     features = {
       sudo.enable = true;
       ssh.enable = true;
@@ -27,7 +29,12 @@
       neovim = {
         enable = true;
         profile = "personal";
-        configPath = "/home/zeus/repos/nvim-config";
+        configPath = config.users.users.main.home + "/repos/nvim-config";
+      };
+
+      tmux = {
+        enable = true;
+        template = ../../templates/tmux/personal;
       };
     };
   };
@@ -72,6 +79,11 @@
         package = pkgs.nerd-fonts.jetbrains-mono;
       }
     ];
+  };
+
+  programs.direnv = {
+    enable = true;
+    silent = true;
   };
 
   services.openssh = {

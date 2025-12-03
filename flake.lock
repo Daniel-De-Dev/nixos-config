@@ -26,11 +26,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1764285197,
-        "narHash": "sha256-SBS+h9F/v/kqDoeA+hDPYYQZGcHv2DsoIDR6R8l8yEI=",
+        "lastModified": 1764632254,
+        "narHash": "sha256-SxYkYPh6FcrtyVtnVqz/u3/rGejOnPZBMIpGmCp/2uM=",
         "owner": "Daniel-De-Dev",
         "repo": "nvim-config",
-        "rev": "c59a73d86c092531e381c2c5170bc33195f4ee60",
+        "rev": "9718fd2b31c59c4519c83459d79de2caae694a38",
         "type": "github"
       },
       "original": {
@@ -42,11 +42,11 @@
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1763680926,
-        "narHash": "sha256-wpo/zLV4ngezq/+wCuLCTkKIIM4anvn+RDftZED5S60=",
+        "lastModified": 1764287706,
+        "narHash": "sha256-hLCXTchofg8xLSQXgNLCxKVleZqAp8Osl7r1wpwctVM=",
         "ref": "refs/heads/main",
-        "rev": "b7fcd76eae11bdd777099b09134487ec5ed39c7a",
-        "revCount": 11,
+        "rev": "5c780b8337d497a7a3481f07af08edd8d6df27b6",
+        "revCount": 12,
         "type": "git",
         "url": "ssh://nixos-privacy/Daniel-De-Dev/nixos-privacy.git"
       },

@@ -30,12 +30,19 @@
       supportedSystems = [ "x86_64-linux" ];
       lib = inputs.nixpkgs.lib;
       myLib = import ./lib { inherit inputs; };
+
       treefmt = import ./nix/treefmt {
+        inherit inputs;
+        inherit supportedSystems;
+      };
+
+      devShells = import ./nix/dev-shell {
         inherit inputs;
         inherit supportedSystems;
       };
     in
     treefmt
+    // devShells
     // {
       nixosModules = {
         core = import ./modules/core;
