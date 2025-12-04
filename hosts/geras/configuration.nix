@@ -14,6 +14,8 @@
     };
   };
 
+  my.host.secureBoot = true;
+
   my.host.users.main = {
     shell = "fish";
 

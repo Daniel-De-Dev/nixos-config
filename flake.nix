@@ -22,10 +22,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
+
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    inputs@{ self, ... }:
+    inputs@{ self, lanzaboote, ... }:
     let
       supportedSystems = [ "x86_64-linux" ];
       lib = inputs.nixpkgs.lib;
@@ -54,7 +59,7 @@
       };
 
       nixosConfigurations = myLib.mkHostConfigurations {
-        modules = lib.attrValues self.nixosModules;
+        modules = lib.attrValues self.nixosModules ++ [ lanzaboote.nixosModules.lanzaboote ];
         inherit supportedSystems;
       };
     };

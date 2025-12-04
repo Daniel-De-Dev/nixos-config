@@ -5,7 +5,10 @@
   ...
 }:
 {
-  imports = [ ./users ];
+  imports = [
+    ./users
+    ./secure-boot.nix
+  ];
 
   options.my.host = {
     name = lib.mkOption {
