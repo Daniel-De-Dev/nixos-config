@@ -154,22 +154,6 @@
   boot.loader.systemd-boot.editor = false;
 
   # -------------------------------------------------------------------------
-  # 8. File System Hardening
-  # -------------------------------------------------------------------------
-  # Hide processes from other users (hardening /proc).
-  # Users can only see their own processes.
-  boot.specialFileSystems."/proc" = {
-    device = "proc";
-    fsType = "proc";
-    options = [
-      "nosuid"
-      "nodev"
-      "noexec"
-      "hidepid=2"
-    ];
-  };
-
-  # -------------------------------------------------------------------------
   # 9. Authentication Hardening
   # -------------------------------------------------------------------------
   # Increase hashing rounds for passwords (slows down brute-force attacks)

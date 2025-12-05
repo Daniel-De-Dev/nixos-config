@@ -11,5 +11,6 @@
     ./networking.nix
     ./system.nix
     ./hardened-services.nix
+    ./filesystem.nix
   ];
 }
