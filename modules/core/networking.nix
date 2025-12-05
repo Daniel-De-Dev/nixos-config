@@ -64,4 +64,9 @@
     ];
     dnsovertls = "true";
   };
+
+  networking.networkmanager.wifi = {
+    macAddress = "random";
+    scanRandMacAddress = true;
+  };
 }
