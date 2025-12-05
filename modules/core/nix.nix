@@ -1,9 +1,20 @@
 { inputs, ... }:
 {
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      auto-optimise-store = true;
+    };
 
-  nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+
+    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+  };
 }

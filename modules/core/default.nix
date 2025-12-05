@@ -7,5 +7,7 @@
     ./ssh.nix
     ./fail2ban.nix
     ./firewall.nix
+    ./networking.nix
+    ./system.nix
   ];
 }
