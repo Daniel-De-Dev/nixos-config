@@ -1,4 +1,4 @@
-{ inputs, config, ... }:
+{ pkgs, ... }:
 {
   nix = {
     settings = {
@@ -19,7 +19,7 @@
       options = "--delete-older-than 7d";
     };
 
-    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+    nixPath = [ "nixpkgs=flake:nixpkgs" ];
   };
 
   systemd = {
@@ -30,7 +30,7 @@
         IOSchedulingClass = "idle";
         CPUSchedulingPolicy = "idle";
         ExecStart = [
-          "${config.nix.package}/sw/bin/nix-store"
+          "${pkgs.nix}/bin/nix-store"
           "--verify"
           "--check-contents"
         ];
