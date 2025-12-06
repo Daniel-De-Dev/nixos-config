@@ -64,4 +64,11 @@
     ];
     dnsovertls = "true";
   };
+
+  # TODO: make this securty option toggable by some setting
+  # For laptops/desktops it makes it cumbersome
+  # networking.networkmanager.wifi = {
+  #   macAddress = "random";
+  #   scanRandMacAddress = true;
+  # };
 }

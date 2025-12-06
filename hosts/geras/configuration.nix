@@ -55,6 +55,10 @@
     }
   ];
 
+  boot.kernelParams = [ "resume_offset=2664699" ];
+  boot.resumeDevice = "/dev/mapper/cryptroot";
+  powerManagement.enable = true;
+
   my.host.secureBoot = true;
 
   my.host.users.main = {

@@ -1,10 +1,12 @@
 {
   pkgs,
+  config,
   ...
 }:
 {
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_hardened;
-  # The recompile takes way to long, run it later
+  # TODO: The recompile takes way to long, run it later
+  # Add option to enable this
   # boot.kernelPatches = [{
   #     name = "kernel-lockdown";
   #     patch = null;
@@ -14,9 +16,15 @@
   #     '';
   # }];
 
-  # Prevent replacing the running kernel image (kexec).
   # Prevents root from swapping the kernel to a compromised one.
-  security.protectKernelImage = true;
+  # (enabling it makes hibernation disabled)
+  security.protectKernelImage = !config.my.host.hibernation.enable;
+
+  # TODO: Make this togglable, for desktops & laptops this is impractical
+  # The 'hardened' profile normally sets this to true, which prevents ANY new
+  # module loading after boot. This breaks USB wifi, some peripherals, and
+  # virtualization if not pre-loaded.
+  security.lockKernelModules = true;
 
   # -------------------------------------------------------------------------
   # 2. Kernel Parameters (Boot Flags)
@@ -42,11 +50,12 @@
 
     "module.sig_enforce=1"
 
-    # --- Lockdown Mode ---
     # Prevents root from modifying kernel code/data.
-    # 'confidentiality' is the strictest, but might break some hardware tools.
-    # 'integrity' is a safer middle ground if this causes issues.
-    "lockdown=confidentiality"
+    # NOTE: Doesnt seems to work or be recognized by the kernel.
+    # Might actually need the recompiling of the kernel
+    # havent tested, but make addition togglable together with the patch
+    # further, probably breaks hibernation too
+    #"lockdown=confidentiality"
   ];
 
   # -------------------------------------------------------------------------

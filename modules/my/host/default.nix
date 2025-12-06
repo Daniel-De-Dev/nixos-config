@@ -24,6 +24,10 @@
       default = "us";
       description = "The keymap set system wide";
     };
+
+    hibernation = {
+      enable = lib.mkEnableOption "system hibernation support (disables conflicting security hardening)";
+    };
   };
 
   config = {
