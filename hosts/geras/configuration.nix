@@ -14,6 +14,47 @@
     };
   };
 
+  my.host.hardware = {
+    disks = {
+      "/dev/disk/by-uuid/aae4e3b1-b95d-4be0-b050-5ffcbf16784a" = {
+        type = "ssd";
+      };
+    };
+
+    luks = {
+      "cryptroot" = {
+        device = "/dev/disk/by-uuid/aae4e3b1-b95d-4be0-b050-5ffcbf16784a";
+      };
+    };
+
+    mounts = {
+      "/" = {
+        type = "btrfs";
+        device = "cryptroot";
+      };
+      "/home" = {
+        type = "btrfs";
+        device = "cryptroot";
+      };
+      "/nix" = {
+        type = "btrfs";
+        device = "cryptroot";
+      };
+      "/swap" = {
+        type = "btrfs";
+        device = "cryptroot";
+        compress = false;
+      };
+    };
+  };
+
+  swapDevices = [
+    {
+      device = "/swap/swapfile";
+      size = 15259; # ~16 GB
+    }
+  ];
+
   my.host.secureBoot = true;
 
   my.host.users.main = {

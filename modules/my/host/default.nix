@@ -8,6 +8,7 @@
   imports = [
     ./users
     ./secure-boot.nix
+    ./hardware/storage.nix
   ];
 
   options.my.host = {
