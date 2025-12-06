@@ -3,7 +3,7 @@
   ...
 }:
 {
-  boot.kernelPackages = pkgs.linuxPackages_hardened;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_hardened;
   # The recompile takes way to long, run it later
   # boot.kernelPatches = [{
   #     name = "kernel-lockdown";
@@ -18,12 +18,6 @@
   # Prevents root from swapping the kernel to a compromised one.
   security.protectKernelImage = true;
 
-  # "Lock" kernel modules?
-  # The 'hardened' profile normally sets this to true, which prevents ANY new
-  # module loading after boot. This breaks USB wifi, some peripherals, and
-  # virtualization if not pre-loaded.
-  security.lockKernelModules = true;
-
   # -------------------------------------------------------------------------
   # 2. Kernel Parameters (Boot Flags)
   # -------------------------------------------------------------------------
@@ -32,6 +26,7 @@
     "slab_nomerge" # Isolate kernel structures to prevent heap spraying
     "init_on_alloc=1" # Zero-init memory to prevent use-after-free info leaks
     "init_on_free=1" # Zero-fill freed memory
+    "page_poison=1" # Overwrite free'd pages
     "page_alloc.shuffle=1" # Randomize page allocator freelists
     "pti=on" # Force Page Table Isolation (Meltdown mitigation)
     "randomize_kstack_offset=on" # Randomize kernel stack offset on syscalls
@@ -126,6 +121,31 @@
     # Hardware/Legacy (disable if you actually use Firewire/Thunderbolt)
     "firewire-core"
     "thunderbolt"
+    # Obscure network protocols
+    "ax25"
+    "netrom"
+    "rose"
+    # Old or rare or insufficiently audited filesystems
+    "adfs"
+    "affs"
+    "bfs"
+    "befs"
+    "cramfs"
+    "efs"
+    "erofs"
+    "exofs"
+    "freevxfs"
+    "f2fs"
+    "hpfs"
+    "jfs"
+    "minix"
+    "nilfs2"
+    "ntfs"
+    "omfs"
+    "qnx4"
+    "qnx6"
+    "sysv"
+    "ufs"
   ];
 
   # -------------------------------------------------------------------------
@@ -134,17 +154,6 @@
   # Ensure the system has plenty of entropy during boot (critical for crypto)
   services.jitterentropy-rngd.enable = true;
   boot.kernelModules = [ "jitterentropy_rng" ];
-
-  # -------------------------------------------------------------------------
-  # 6. User Space Hardening
-  # -------------------------------------------------------------------------
-
-  # Scudo memory allocator (hardened malloc)
-  # This provides excellent heap protection for user-space programs.
-  # WARNING: May cause crashes in some poorly written software.
-  # Comment out if you experience instability.
-  environment.memoryAllocator.provider = "scudo";
-  environment.variables.SCUDO_OPTIONS = "ZeroContents=1";
 
   # -------------------------------------------------------------------------
   # 7. Bootloader Hardening
@@ -161,13 +170,6 @@
 
   # Prevent root login on TTYs (physical terminals)
   environment.etc."securetty".text = "";
-
-  security.audit = {
-    enable = true;
-    rules = [
-      "-a exit,always -F arch=b64 -S execve" # Log all command executions
-    ];
-  };
 
   services.usbguard = {
     enable = true;

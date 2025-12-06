@@ -1,4 +1,4 @@
-{ lib, config, ...}:
+{ lib, config, ... }:
 {
   # 1. Secure /boot (ESP)
   # Prevents modification of boot files by non-root users.
@@ -41,9 +41,10 @@
   };
 
   # 4. Restrict /home
-  fileSystems."/home".options =
-    lib.mkIf (config.fileSystems ? "/home")
-    [ "nodev" "nosuid" ];
+  fileSystems."/home".options = lib.mkIf (config.fileSystems ? "/home") [
+    "nodev"
+    "nosuid"
+  ];
 
   # Hide processes from other users (hardening /proc).
   # Users can only see their own processes.
