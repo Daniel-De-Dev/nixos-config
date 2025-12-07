@@ -24,7 +24,7 @@
   # The 'hardened' profile normally sets this to true, which prevents ANY new
   # module loading after boot. This breaks USB wifi, some peripherals, and
   # virtualization if not pre-loaded.
-  security.lockKernelModules = true;
+  # security.lockKernelModules = true;
 
   # -------------------------------------------------------------------------
   # 2. Kernel Parameters (Boot Flags)

@@ -14,6 +14,7 @@
     };
   };
 
+  my.host.hibernation.enable = true;
   my.host.hardware = {
     disks = {
       "/dev/disk/by-uuid/aae4e3b1-b95d-4be0-b050-5ffcbf16784a" = {
@@ -116,22 +117,70 @@
     packages = with pkgs; [ terminus_font ];
   };
 
-  services.kmscon = {
-    enable = true;
-    hwRender = true;
-    useXkbConfig = true;
-    fonts = [
-      {
-        name = "JetBrainsMono Nerd Font Mono";
-        package = pkgs.nerd-fonts.jetbrains-mono;
-      }
-    ];
-  };
-
   programs.direnv = {
     enable = true;
     silent = true;
   };
+
+  # GUI related configurations
+  # NOTE: Will be moved to a profile once complete
+  services.displayManager = {
+    enable = true;
+    ly = {
+      enable = true;
+      settings = {
+        # --- Authentication & Input ---
+        allow_empty_password = false;
+        clear_password = true;
+        default_input = "password";
+
+        # --- Appearance ---
+        # 0xSSRRGGBB: SS=Style, RR=Red, GG=Green, BB=Blue
+        bg = "0x001d1d1d";
+        fg = "0x00c0c0c0";
+        border_fg = "0x00595959";
+
+        # --- UI Elements ---
+        clock = "%H:%M";
+        hide_key_hints = true;
+        hide_version_string = true;
+        xinitrc = null;
+
+        # TODO: add my.host.hardware.battery or something for this
+        # or a "battery powered" option or something
+        # Identifier for battery whose charge to display at top left
+        # Primary battery is usually BAT0 or BAT1
+        # If set to null, battery status won't be shown
+        battery_id = "BAT0";
+
+        # --- Power & Commands ---
+        sleep_cmd = "/run/current-system/sw/bin/systemctl sleep";
+
+        # INFO: This isn't implemented in v1.2.0 (nixpkgs)
+        # Either it works, or doesnt...
+        # hibernate_cmd = "/run/current-system/sw/bin/systemctl hibernate";
+
+        # TODO: Incorporate this with power management (sleep-then-hibernate)
+        # Command executed when no input is detected for a certain time
+        # If null, no command will be executed
+        # INFO: This isn't implemented in v1.2.0
+        # inactivity_cmd = null;
+        # Executes a command after a certain amount of seconds
+        # inactivity_delay = 0;
+      };
+    };
+  };
+
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+
+  environment.systemPackages = with pkgs; [
+    kitty
+  ];
+
+  # end if GUI changes
 
   system.stateVersion = "25.05";
 }
