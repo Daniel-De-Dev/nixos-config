@@ -8,6 +8,7 @@
   imports = [
     ./features
     ./programs
+    ./configs.nix
   ];
 
   options.my.host.users = lib.mkOption {

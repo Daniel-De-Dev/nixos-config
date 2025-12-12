@@ -17,6 +17,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    dotfiles = {
+      url = "github:Daniel-De-Dev/dotfiles";
+      flake = false;
+    };
+
     nvim-config = {
       url = "github:Daniel-De-Dev/nvim-config";
       inputs.nixpkgs.follows = "nixpkgs";

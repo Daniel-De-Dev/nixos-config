@@ -11,8 +11,6 @@ let
   sshInitScript = ''
     # --- auto ssh key generation (NixOS) ---
     _nixos_auto_sshgen() {
-      set +e
-
       currentUser=$(id -un)
       email=""
       activated=0

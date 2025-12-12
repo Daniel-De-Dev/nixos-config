@@ -11,8 +11,6 @@ let
   gpgInitScript = ''
     # --- auto gpg key generation (NixOS) ---
     _nixos_auto_gpggen() {
-      set +e
-
       currentUser=$(id -un)
       realName=""
       email=""

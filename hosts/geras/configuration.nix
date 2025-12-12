@@ -1,4 +1,28 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
+let
+  lyLoginCmd = pkgs.writeShellScript "ly-login-cmd" ''
+    set -eu
+    cmd="$*"
+    case "$cmd" in
+      *uwsm*)
+        ${pkgs.systemd}/bin/systemctl --user stop \
+          graphical-session.target \
+          graphical-session-pre.target \
+          xdg-desktop-autostart.target \
+          2>/dev/null || true
+
+        ${pkgs.systemd}/bin/systemctl --user stop 'wayland-wm@*.service' 2>/dev/null || true
+        ${pkgs.systemd}/bin/systemctl --user reset-failed 2>/dev/null || true
+        ;;
+    esac
+    exec "$@"
+  '';
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -71,6 +95,7 @@
       gpg.enable = true;
     };
 
+    # TODO: Move the config to the new generic config implementation
     programs = {
       git.template = ../../templates/git/personal;
 
@@ -167,6 +192,9 @@
         # inactivity_cmd = null;
         # Executes a command after a certain amount of seconds
         # inactivity_delay = 0;
+
+        # INFO: Fixes the "A compositor or graphical-session* target is already active!" error
+        login_cmd = "${lyLoginCmd}";
       };
     };
   };
@@ -174,11 +202,86 @@
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
+    withUWSM = true;
   };
 
-  environment.systemPackages = with pkgs; [
-    kitty
+  fonts.fontDir.enable = true;
+  fonts.packages = with pkgs; [
+    fira-sans
+    font-awesome
+    nerd-fonts.jetbrains-mono
   ];
+
+  # TODO: Define system-wide (core) settings for it
+  # (without actually enabling it, so once enable they take effect)
+  security.polkit.enable = true;
+
+  my.host.users.main.config = {
+    fish = {
+      enable = true;
+      src = "${inputs.dotfiles}/fish";
+      symlink = false;
+      deploy."fish-config" = {
+        source = "";
+        target = "${config.users.users.main.home}/.config/fish";
+      };
+    };
+    hyprland = {
+      enable = true;
+      src = "${inputs.dotfiles}/hypr";
+      deploy."hypr-config" = {
+        source = "";
+        target = "${config.users.users.main.home}/.config/hypr";
+      };
+    };
+    kitty = {
+      enable = true;
+      src = "${inputs.dotfiles}/kitty";
+      deploy."kitty-config" = {
+        source = "";
+        target = "${config.users.users.main.home}/.config/kitty";
+      };
+    };
+    rofi = {
+      enable = true;
+      src = "${inputs.dotfiles}/rofi";
+      deploy."rofi-config" = {
+        source = "";
+        target = "${config.users.users.main.home}/.config/rofi";
+      };
+    };
+    swaync = {
+      enable = true;
+      src = "${inputs.dotfiles}/swaync";
+      deploy."swaync-config" = {
+        source = "";
+        target = "${config.users.users.main.home}/.config/swaync";
+      };
+    };
+    waybar = {
+      enable = true;
+      src = "${inputs.dotfiles}/waybar";
+      deploy."waybar-config" = {
+        source = "";
+        target = "${config.users.users.main.home}/.config/waybar";
+      };
+    };
+  };
+
+  # INFO: Belongs with GUI since servers wont need these
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
+  # Bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
 
   # end if GUI changes
 
