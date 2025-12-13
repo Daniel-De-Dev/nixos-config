@@ -6,7 +6,7 @@
   my = {
     privacy = {
       enable = true;
-
+      bootstrap = false;
       sshAliasConfig = {
         enable = true;
         sshKey = "/etc/nixos/secrets/nixos-privacy-key";
@@ -14,26 +14,28 @@
     };
 
     host = {
-      profiles.desktop.enable = true;
-
       users.main = {
+        name = "zeus";
         features = {
           ssh.enable = true;
           gpg.enable = true;
         };
       };
 
+      profiles.desktop.enable = true;
+
       hibernation.enable = true;
+
       hardware = {
         disks = {
-          "/dev/disk/by-uuid/aae4e3b1-b95d-4be0-b050-5ffcbf16784a" = {
+          "/dev/disk/by-uuid/993242b4-5b5d-43b7-b526-771570329a2e" = {
             type = "ssd";
           };
         };
 
         luks = {
           "cryptroot" = {
-            device = "/dev/disk/by-uuid/aae4e3b1-b95d-4be0-b050-5ffcbf16784a";
+            device = "/dev/disk/by-uuid/993242b4-5b5d-43b7-b526-771570329a2e";
           };
         };
 
@@ -63,11 +65,11 @@
   swapDevices = [
     {
       device = "/swap/swapfile";
-      size = 15259; # ~16 GB
+      size = 34332; # ~36 GB
     }
   ];
 
-  boot.kernelParams = [ "resume_offset=2664699" ];
+  boot.kernelParams = [ "resume_offset=10008738" ];
   boot.resumeDevice = "/dev/mapper/cryptroot";
   powerManagement.enable = true;
 

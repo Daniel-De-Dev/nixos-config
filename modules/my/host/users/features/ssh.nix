@@ -95,7 +95,7 @@ in
     lib.mapAttrsToList (name: u: [
       {
         assertion = (u.features.ssh.email or null) != null;
-        message = "User '${u.name}' enabled my.host.users.${name}.features.ssh but did not set email.";
+        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.ssh but did not set email.";
       }
     ]) sshUsers
   );

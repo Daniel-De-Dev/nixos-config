@@ -9,6 +9,7 @@
     ./users
     ./secure-boot.nix
     ./hardware/storage.nix
+    ./profiles
   ];
 
   options.my.host = {

@@ -99,15 +99,15 @@ in
     lib.mapAttrsToList (name: u: [
       {
         assertion = (u.features.gpg.realName or null) != null;
-        message = "User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set realName.";
+        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set realName.";
       }
       {
         assertion = (u.features.gpg.email or null) != null;
-        message = "User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set email.";
+        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set email.";
       }
       {
         assertion = config.programs.gnupg.agent.enable == true;
-        message = "User '${u.name}' enabled my.host.users.${name}.features.gpg but config.programs.gnupg.agent.enable is false.";
+        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but config.programs.gnupg.agent.enable is false.";
       }
     ]) gpgUsers
   );
