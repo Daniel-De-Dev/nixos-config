@@ -19,6 +19,13 @@
       description = "The keymap set system wide";
     };
 
+    hardware.battery = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "BAT0";
+      description = "The battery identifier (BAT0). Used by modules to configure accordingly";
+    };
+
     hibernation = {
       enable = lib.mkEnableOption "system hibernation support (disables conflicting security hardening)";
     };
@@ -27,5 +34,4 @@
   config = {
     networking.hostName = config.my.host.name;
   };
-
 }
