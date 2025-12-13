@@ -91,14 +91,33 @@ let
   '';
 in
 {
-  assertions = lib.flatten (
-    lib.mapAttrsToList (name: u: [
-      {
-        assertion = (u.features.ssh.email or null) != null;
-        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.ssh but did not set email.";
+  options.my.host.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        options.features.ssh = {
+          enable = lib.mkEnableOption "automatic SSH key generation on first login";
+          email = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = ''
+              Email address to use as a comment for the SSH key.
+              Required if enabled.
+            '';
+          };
+        };
       }
-    ]) sshUsers
-  );
+    );
+  };
 
-  environment.interactiveShellInit = lib.mkAfter sshInitScript;
+  config = {
+    assertions = lib.flatten (
+      lib.mapAttrsToList (name: u: [
+        {
+          assertion = (u.features.ssh.email or null) != null;
+          message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.ssh but did not set email.";
+        }
+      ]) sshUsers
+    );
+    environment.interactiveShellInit = lib.mkAfter sshInitScript;
+  };
 }

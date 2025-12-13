@@ -11,6 +11,32 @@ let
   nvimUsers = lib.filterAttrs (_: u: u.programs.neovim.enable) allUsers;
 in
 {
+  options.my.host.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        options.programs.neovim = {
+          enable = lib.mkEnableOption ''
+            Enable the setting up and managing of neovim configuration
+            for this user.
+          '';
+          profile = lib.mkOption {
+            type = lib.types.str;
+            description = "The profile to use from 'inputs.nvim-config.configs'.";
+          };
+          configPath = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = ''
+              Absolute path the where the nvim config repo lives on system
+              Used for developer mode so it is used as config once env
+              variable is set (see neovim.nix)
+            '';
+          };
+        };
+      }
+    );
+  };
+
   config = {
     users.users = lib.mapAttrs (
       userName: userConfig:

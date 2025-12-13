@@ -82,6 +82,48 @@ let
   userConfig.programs.tmux.programs.settings.defaultShellPath = lib.getExe shellPkg;
 in
 {
+  options.my.host.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule (
+        { config, ... }:
+        {
+          options.programs.tmux = {
+            enable = lib.mkEnableOption "Enable tmux configuration for this user.";
+            template = lib.mkOption {
+              type = lib.types.path;
+              description = "Path to the .nix file that defines the tmux template.";
+            };
+            settings = lib.mkOption {
+              type = lib.types.submodule {
+                options = {
+                  defaultShellPath = lib.mkOption {
+                    type = lib.types.str;
+                    readOnly = true;
+                    description = ''
+                      Path to the shell that the user has by defualt.
+                      Its automatically derived based on the shell selected.
+                    '';
+                  };
+                };
+              };
+              default = { };
+              description = "Private settings to substitute into the template.";
+            };
+          };
+
+          config.programs.tmux.settings.defaultShellPath =
+            let
+              shellMap = {
+                fish = lib.getExe pkgs.fish;
+                bash = lib.getExe pkgs.bash;
+              };
+            in
+            shellMap.${config.shell};
+        }
+      )
+    );
+  };
+
   config = {
     users.users = lib.mapAttrs (
       userName: userConfig:

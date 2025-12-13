@@ -8,11 +8,9 @@ let
   allUsers = config.my.host.users;
   gitUsers = lib.filterAttrs (_: userConfig: userConfig.programs.git.enable) allUsers;
 
-  # Evaluate the template file as a module.
   getValidatedTemplate =
     userName: gitCfg:
     let
-      # Define the options for the template module.
       templateModuleOptions =
         { lib, ... }:
         {
@@ -51,8 +49,6 @@ let
             };
           };
         };
-
-      # Evaluate the user's template file
       eval = lib.evalModules {
         modules = [
           templateModuleOptions
@@ -74,6 +70,51 @@ let
   ) gitUsers;
 in
 {
+  options.my.host.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        options.programs.git = {
+          enable = lib.mkEnableOption ''
+            Enable the setting up and managing of git configuration for
+            this user.
+          '';
+
+          template = lib.mkOption {
+            type = lib.types.path;
+            description = ''
+              Path to the .nix file that defines the git template.
+              (its dependecies & raw config file)
+            '';
+          };
+
+          settings = lib.mkOption {
+            type = lib.types.submodule {
+              options = {
+                userName = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = "Value for @userName@ placeholder.";
+                };
+                userEmail = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = "Value for @userEmail@ placeholder.";
+                };
+                userSigningKey = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = "The GPG key ID or fingerprint for commit signing. Value for @userSigningKey@ placeholder.";
+                };
+              };
+            };
+            default = { };
+            description = "Private settings to substitute into the template.";
+          };
+        };
+      }
+    );
+  };
+
   config = {
     users.users = lib.mapAttrs (
       userName: userConfig:
@@ -110,7 +151,6 @@ in
           settings = gitCfg.settings;
           templateDef = validatedTemplates.${userName};
 
-          # Check for required settings
           requiredSettingAssertions = map (
             settingName:
             let
@@ -122,7 +162,6 @@ in
             }
           ) templateDef.requiredSettings;
 
-          # Pass-through assertions from the template
           templateAssertions = map (
             tplAssertion: tplAssertion // { message = "User '${userName}': ${tplAssertion.message}"; }
           ) templateDef.assertions;

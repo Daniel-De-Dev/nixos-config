@@ -95,22 +95,43 @@ let
   '';
 in
 {
-  assertions = lib.flatten (
-    lib.mapAttrsToList (name: u: [
-      {
-        assertion = (u.features.gpg.realName or null) != null;
-        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set realName.";
+  options.my.host.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        options.features.gpg = {
+          enable = lib.mkEnableOption "automatic GPG key generation on first login";
+          realName = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Full name for the GPG key. Required if enabled.";
+          };
+          email = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Email address for the GPG key. Required if enabled.";
+          };
+        };
       }
-      {
-        assertion = (u.features.gpg.email or null) != null;
-        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set email.";
-      }
-      {
-        assertion = config.programs.gnupg.agent.enable == true;
-        message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but config.programs.gnupg.agent.enable is false.";
-      }
-    ]) gpgUsers
-  );
+    );
+  };
 
-  environment.interactiveShellInit = lib.mkAfter gpgInitScript;
+  config = {
+    assertions = lib.flatten (
+      lib.mapAttrsToList (name: u: [
+        {
+          assertion = (u.features.gpg.realName or null) != null;
+          message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set realName.";
+        }
+        {
+          assertion = (u.features.gpg.email or null) != null;
+          message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but did not set email.";
+        }
+        {
+          assertion = config.programs.gnupg.agent.enable == true;
+          message = "[${config.my.host.name}] User '${u.name}' enabled my.host.users.${name}.features.gpg but config.programs.gnupg.agent.enable is false.";
+        }
+      ]) gpgUsers
+    );
+    environment.interactiveShellInit = lib.mkAfter gpgInitScript;
+  };
 }
