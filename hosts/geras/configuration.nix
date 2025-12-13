@@ -25,6 +25,7 @@
 
       hibernation.enable = true;
       hardware = {
+        battery = "BAT0";
         disks = {
           "/dev/disk/by-uuid/aae4e3b1-b95d-4be0-b050-5ffcbf16784a" = {
             type = "ssd";
