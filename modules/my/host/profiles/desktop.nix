@@ -59,7 +59,6 @@ in
     };
 
     networking.networkmanager.enable = true;
-    services.xserver.xkb.layout = config.my.host.keyMap;
 
     # Console Configuration
     console = {

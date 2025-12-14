@@ -19,6 +19,12 @@
       description = "The keymap set system wide";
     };
 
+    timeZone = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "What time zone will be set system wide";
+    };
+
     hardware.battery = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
@@ -33,5 +39,8 @@
 
   config = {
     networking.hostName = config.my.host.name;
+    services.xserver.xkb.layout = config.my.host.keyMap;
+    console.keyMap = config.my.host.keyMap;
+    time.timeZone = config.my.host.timeZone;
   };
 }
