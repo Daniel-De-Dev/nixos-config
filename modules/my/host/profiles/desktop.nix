@@ -60,7 +60,8 @@ in
       };
     };
 
-    networking.networkmanager.enable = true;
+    # Secrets management
+    services.gnome.gnome-keyring.enable = true;
 
     # Console Configuration
     console = {
@@ -99,6 +100,7 @@ in
       shell = "fish";
       features = {
         sudo.enable = true;
+        networkmanager.enable = true;
       };
       # TODO: Move the config to the new generic config implementation
       programs = {

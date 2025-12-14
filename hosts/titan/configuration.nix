@@ -4,7 +4,14 @@
     ./hardware-configuration.nix
   ];
 
-  users.users.main.packages = [ pkgs.discord ];
+  users.users.main.packages = with pkgs; [
+    discord
+    protonvpn-gui
+  ];
+
+  programs.steam = {
+    enable = true;
+  };
 
   boot.kernelParams = [
     "video=DP-1:1920x1080@60"

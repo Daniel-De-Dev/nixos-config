@@ -4,5 +4,6 @@
     ./ssh.nix
     ./gpg.nix
     ./shell.nix
+    ./network.nix
   ];
 }
