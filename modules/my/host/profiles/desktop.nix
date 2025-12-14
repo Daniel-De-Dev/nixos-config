@@ -25,6 +25,8 @@ in
     my.host.services.ly.enable = true;
     my.host.services.hyprland.enable = true;
 
+    boot.loader.systemd-boot.consoleMode = "max";
+
     # Enable Sound
     security.rtkit.enable = true;
     services.pipewire = {

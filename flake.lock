@@ -18,11 +18,11 @@
     "dotfiles": {
       "flake": false,
       "locked": {
-        "lastModified": 1765548007,
-        "narHash": "sha256-nwHE4uN5g8lBwWgN/9ZqLhEtQm3lCKjvvxKJ2ap4+/E=",
+        "lastModified": 1765727535,
+        "narHash": "sha256-KL1DKQFNGq85BrfmNIHf5dCITiWs43QQVT5/8FoDt2o=",
         "owner": "Daniel-De-Dev",
         "repo": "dotfiles",
-        "rev": "de11520b49f72af9501c7918e01932c5ef80b10d",
+        "rev": "a9e43b1f0488b82efbe25a1cff0997d462935241",
         "type": "github"
       },
       "original": {

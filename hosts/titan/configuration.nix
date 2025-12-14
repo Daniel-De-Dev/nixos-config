@@ -1,10 +1,15 @@
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
   ];
 
   users.users.main.packages = [ pkgs.discord ];
+
+  boot.kernelParams = [
+    "video=DP-1:1920x1080@60"
+    "video=HDMI-A-2:1920x1080@60"
+  ];
 
   my = {
     privacy = {
@@ -22,6 +27,24 @@
           ssh.enable = true;
           gpg.enable = true;
         };
+      };
+
+      users.main.config.hyprland.variables = {
+        monitorConfig = ''
+          monitorv2 {
+            output = DP-1
+            mode = 2560x1440@170
+            position = 0x0
+            scale = 1
+          }
+          monitorv2 {
+            output = HDMI-A-2
+            mode = 1920x1080@60
+            position = 2560x360
+            scale = 1
+          }
+          monitor=,preferred,auto,1
+        '';
       };
 
       profiles.desktop.enable = true;
