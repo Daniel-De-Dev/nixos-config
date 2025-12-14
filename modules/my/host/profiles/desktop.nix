@@ -20,15 +20,10 @@ in
   config = lib.mkIf cfg.enable {
 
     # Enable Display Manager
-    my.host.services.ly.enable = true;
     services.displayManager.enable = true;
 
-    # Enable Window Manager
-    programs.hyprland = {
-      enable = true;
-      xwayland.enable = true;
-      withUWSM = true;
-    };
+    my.host.services.ly.enable = true;
+    my.host.services.hyprland.enable = true;
 
     # Enable Sound
     security.rtkit.enable = true;
@@ -50,6 +45,9 @@ in
     # Security / Polkit
     # TODO: Create secure core defaults for this (not enabling it)
     security.polkit.enable = true;
+
+    # NOTE: For desktops having this enabled is frustrating
+    security.lockKernelModules = false;
 
     # Globally installed programs
     programs = {

@@ -23,9 +23,15 @@
         };
       };
 
-      hibernation.enable = true;
       hardware = {
         battery = "BAT0";
+
+        hibernation = {
+          enable = true;
+          resumeOffset = 2664699;
+          resumeDevice = "/dev/mapper/cryptroot";
+        };
+
         disks = {
           "/dev/disk/by-uuid/aae4e3b1-b95d-4be0-b050-5ffcbf16784a" = {
             type = "ssd";
@@ -67,10 +73,6 @@
       size = 15259; # ~16 GB
     }
   ];
-
-  boot.kernelParams = [ "resume_offset=2664699" ];
-  boot.resumeDevice = "/dev/mapper/cryptroot";
-  powerManagement.enable = true;
 
   my.host.secureBoot = true;
 

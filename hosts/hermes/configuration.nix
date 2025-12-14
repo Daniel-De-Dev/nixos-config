@@ -15,7 +15,6 @@
 
     host = {
       users.main = {
-        name = "zeus";
         features = {
           ssh.enable = true;
           gpg.enable = true;
@@ -24,10 +23,15 @@
 
       profiles.desktop.enable = true;
 
-      hibernation.enable = true;
-
       hardware = {
         battery = "BAT0";
+
+        hibernation = {
+          enable = true;
+          resumeOffset = 10008738;
+          resumeDevice = "/dev/mapper/cryptroot";
+        };
+
         disks = {
           "/dev/disk/by-uuid/993242b4-5b5d-43b7-b526-771570329a2e" = {
             type = "ssd";
@@ -69,10 +73,6 @@
       size = 34332; # ~36 GB
     }
   ];
-
-  boot.kernelParams = [ "resume_offset=10008738" ];
-  boot.resumeDevice = "/dev/mapper/cryptroot";
-  powerManagement.enable = true;
 
   my.host.secureBoot = true;
 

@@ -1,40 +1,93 @@
-{ config, ... }:
+{ lib, pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
   ];
 
-  # Enable and configure the privacy module for titan
-  my.privacy = {
-    enable = true;
+  users.users.main.packages = [ pkgs.discord ];
 
-    sshAliasConfig = {
+  my = {
+    privacy = {
       enable = true;
-      sshKey = "/etc/nixos/secrets/nixos-privacy-key";
+      bootstrap = false;
+      sshAliasConfig = {
+        enable = true;
+        sshKey = "/etc/nixos/secrets/nixos-privacy-key";
+      };
+    };
+
+    host = {
+      users.main = {
+        features = {
+          ssh.enable = true;
+          gpg.enable = true;
+        };
+      };
+
+      profiles.desktop.enable = true;
+
+      hardware = {
+        gpu.type = "nvidia";
+
+        hibernation = {
+          enable = true;
+          resumeOffset = 109407071;
+          resumeDevice = "/dev/mapper/cryptroot";
+        };
+
+        disks = {
+          "/dev/disk/by-uuid/2d8f30c9-608e-4111-aa9f-ff13218b78f4" = {
+            type = "ssd";
+          };
+        };
+
+        luks = {
+          "cryptroot" = {
+            device = "/dev/disk/by-uuid/2d8f30c9-608e-4111-aa9f-ff13218b78f4";
+          };
+        };
+
+        mounts = {
+          "/" = {
+            type = "btrfs";
+            device = "cryptroot";
+          };
+          "/home" = {
+            type = "btrfs";
+            device = "cryptroot";
+          };
+          "/nix" = {
+            type = "btrfs";
+            device = "cryptroot";
+          };
+          "/swap" = {
+            type = "btrfs";
+            device = "cryptroot";
+            compress = false;
+          };
+        };
+      };
     };
   };
 
-  users.users.main = {
-    isNormalUser = true;
-  };
+  swapDevices = [
+    {
+      device = "/swap/swapfile";
+      size = 34332; # ~36 GB
+    }
+  ];
+
+  my.host.secureBoot = true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # allow for having internet upon first startup
-  networking.networkmanager.enable = true;
-
-  # git needed intially
-  programs.git.enable = true;
-
-  # Make neovim available system wide
-  programs.neovim = {
+  # Bluetooth
+  hardware.bluetooth = {
     enable = true;
-    defaultEditor = true;
+    powerOnBoot = true;
   };
-
-  console.keyMap = config.my.host.console.keyMap;
 
   system.stateVersion = "25.05";
 }

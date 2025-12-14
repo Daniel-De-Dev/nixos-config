@@ -1,6 +1,6 @@
 {
   pkgs,
-  config,
+  lib,
   ...
 }:
 {
@@ -17,14 +17,10 @@
   # }];
 
   # Prevents root from swapping the kernel to a compromised one.
-  # (enabling it makes hibernation disabled)
-  security.protectKernelImage = !config.my.host.hibernation.enable;
+  security.protectKernelImage = lib.mkDefault true;
 
-  # TODO: Make this togglable, for desktops & laptops this is impractical
-  # The 'hardened' profile normally sets this to true, which prevents ANY new
-  # module loading after boot. This breaks USB wifi, some peripherals, and
-  # virtualization if not pre-loaded.
-  # security.lockKernelModules = true;
+  # Prevents any new module loading after boot.
+  security.lockKernelModules = lib.mkDefault true;
 
   # -------------------------------------------------------------------------
   # 2. Kernel Parameters (Boot Flags)
