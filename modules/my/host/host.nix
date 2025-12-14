@@ -31,16 +31,12 @@
       example = "BAT0";
       description = "The battery identifier (BAT0). Used by modules to configure accordingly";
     };
-
-    hibernation = {
-      enable = lib.mkEnableOption "system hibernation support (disables conflicting security hardening)";
-    };
   };
 
   config = {
     networking.hostName = config.my.host.name;
     services.xserver.xkb.layout = config.my.host.keyMap;
-    console.keyMap = config.my.host.keyMap;
+    console.keyMap = lib.mkDefault config.my.host.keyMap;
     time.timeZone = config.my.host.timeZone;
   };
 }
