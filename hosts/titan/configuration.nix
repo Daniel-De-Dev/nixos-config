@@ -4,6 +4,8 @@
     ./hardware-configuration.nix
   ];
 
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+
   users.users.main.packages = with pkgs; [
     discord
     protonvpn-gui

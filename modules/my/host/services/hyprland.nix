@@ -13,6 +13,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    boot.kernel.sysctl = {
+      # Allow unprivileged user namespaces.
+      # needed for sandboxing in desktop apps (Chrome, Discord, Steam, Electron)
+      "kernel.unprivileged_userns_clone" = 1;
+    };
+
     programs.hyprland = {
       enable = true;
       xwayland.enable = true;

@@ -6,5 +6,6 @@
     ./hardware
     ./profiles
     ./services
+    ./scripts/gamemode.nix
   ];
 }

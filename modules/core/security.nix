@@ -4,7 +4,7 @@
   ...
 }:
 {
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_hardened;
+  boot.kernelPackages = lib.mkDefault pkgs.linuxKernel.packages.linux_hardened;
   # TODO: The recompile takes way to long, run it later
   # Add option to enable this
   # boot.kernelPatches = [{
@@ -16,17 +16,14 @@
   #     '';
   # }];
 
-  # Prevents root from swapping the kernel to a compromised one.
-  security.protectKernelImage = lib.mkDefault true;
+  security = {
+    protectKernelImage = lib.mkDefault true;
+    lockKernelModules = lib.mkDefault true;
+  };
 
-  # Prevents any new module loading after boot.
-  security.lockKernelModules = lib.mkDefault true;
-
-  # -------------------------------------------------------------------------
-  # 2. Kernel Parameters (Boot Flags)
-  # -------------------------------------------------------------------------
+  # Kernel Parameters
   boot.kernelParams = [
-    # --- Memory Safety & Allocator Hardening ---
+    # Memory Safety & Allocator Hardening
     "slab_nomerge" # Isolate kernel structures to prevent heap spraying
     "init_on_alloc=1" # Zero-init memory to prevent use-after-free info leaks
     "init_on_free=1" # Zero-fill freed memory
@@ -38,7 +35,7 @@
     "debugfs=off" # Reduce attack surface (unless you are debugging kernel)
     "oops=panic" # Panic on kernel oops to prevent exploit continuation
 
-    # --- IOMMU & DMA ---
+    # IOMMU & DMA
     # Force IOMMU for all devices to prevent DMA attacks
     "iommu=force"
     "intel_iommu=on"
@@ -54,16 +51,14 @@
     #"lockdown=confidentiality"
   ];
 
-  # -------------------------------------------------------------------------
-  # 3. Sysctl Hardening
-  # -------------------------------------------------------------------------
+  # Sysctl Hardening
   boot.kernel.sysctl = {
     # Restrict debug and tracing capabilities to privileged users
     "kernel.kexec_load_disabled" = 1;
     "kernel.perf_event_paranoid" = 3;
     "kernel.unprivileged_userfaultfd" = 0;
 
-    # Restrict ptrace() scope to parent processes only (prevents process injection)
+    # Restrict ptrace() scope to parent processes only
     "kernel.yama.ptrace_scope" = 1;
 
     # Hide kernel pointers from unprivileged users
@@ -78,7 +73,7 @@
     "vm.mmap_min_addr" = 65536;
     "vm.mmap_rnd_bits" = 32;
 
-    # Disable BPF JIT for unprivileged users (reduces attack surface)
+    # Disable BPF JIT for unprivileged users
     "kernel.unprivileged_bpf_disabled" = 1;
 
     # Prevent unprivileged users from creating hard/symlinks to files they don't own
@@ -90,20 +85,11 @@
     # Disable SysRq to avoid unexpected privileged actions
     "kernel.sysrq" = 0;
 
-    # Disable core dumps (can contain sensitive info like keys)
+    # Disable core dumps
     "fs.suid_dumpable" = 0;
-
-    # Unprivileged User Namespaces
-    # The hardened kernel disables this by default.
-    # We MUST enable it for modern desktop apps (Chrome, Discord, Flatpak) to work.
-    "kernel.unprivileged_userns_clone" = 1;
   };
 
-  # -------------------------------------------------------------------------
-  # 4. Attack Surface Reduction
-  # -------------------------------------------------------------------------
-
-  # Enable AppArmor (Mandatory Access Control)
+  # Attack Surface Reduction
   security.apparmor = {
     enable = true;
     killUnconfinedConfinables = true; # Kill processes that *should* be confined but aren't
@@ -123,7 +109,7 @@
     "hfsplus"
     "squashfs"
     "udf"
-    # Hardware/Legacy (disable if you actually use Firewire/Thunderbolt)
+    # Hardware/Legacy
     "firewire-core"
     "thunderbolt"
     # Obscure network protocols
@@ -153,32 +139,24 @@
     "ufs"
   ];
 
-  # -------------------------------------------------------------------------
-  # 5. Entropy & Randomness
-  # -------------------------------------------------------------------------
-  # Ensure the system has plenty of entropy during boot (critical for crypto)
+  # Entropy & Randomness
+  # Ensure the system has plenty of entropy during boot
   services.jitterentropy-rngd.enable = true;
   boot.kernelModules = [ "jitterentropy_rng" ];
 
-  # -------------------------------------------------------------------------
-  # 7. Bootloader Hardening
-  # -------------------------------------------------------------------------
-  # Prevent editing the kernel command line at boot (prevents 'init=/bin/sh' attacks).
-  # NOTE: This means if you break your boot, you need a live USB to fix it.
+  # Prevent editing the kernel command line at boot
   boot.loader.systemd-boot.editor = false;
 
-  # -------------------------------------------------------------------------
-  # 9. Authentication Hardening
-  # -------------------------------------------------------------------------
-  # Increase hashing rounds for passwords (slows down brute-force attacks)
+  # Authentication Hardening
+  # Increase hashing rounds for passwords
   security.pam.services.passwd.rules.password.unix.settings.rounds = 65536;
 
-  # Prevent root login on TTYs (physical terminals)
+  # Prevent root login on TTYs
   environment.etc."securetty".text = "";
 
   services.usbguard = {
     enable = true;
-    dbus.enable = true; # Allows GUI tools to interact with it
+    dbus.enable = true;
     implicitPolicyTarget = "block";
     presentDevicePolicy = "allow";
   };
