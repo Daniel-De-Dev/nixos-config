@@ -133,6 +133,14 @@ in
             target = "${config.users.users.main.home}/.config/hypr";
           };
         };
+        keyboard = {
+          enable = true;
+          src = "${inputs.dotfiles}/keyboard";
+          deploy."kayboard-layout" = {
+            source = "real-prog-dvorak";
+            target = "${config.users.users.main.home}/.config/xkb/symbols/real-prog-dvorak";
+          };
+        };
         kitty = {
           enable = true;
           src = "${inputs.dotfiles}/kitty";

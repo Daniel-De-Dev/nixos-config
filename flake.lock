@@ -18,11 +18,11 @@
     "dotfiles": {
       "flake": false,
       "locked": {
-        "lastModified": 1765727535,
-        "narHash": "sha256-KL1DKQFNGq85BrfmNIHf5dCITiWs43QQVT5/8FoDt2o=",
+        "lastModified": 1767616863,
+        "narHash": "sha256-ayoMlmVOo8NstyWrqLm1xHQ1JskDSvPUreMcJYTv5v4=",
         "owner": "Daniel-De-Dev",
         "repo": "dotfiles",
-        "rev": "a9e43b1f0488b82efbe25a1cff0997d462935241",
+        "rev": "2b78ad02b937adf424864e1f58454334fdaf5cef",
         "type": "github"
       },
       "original": {
@@ -118,11 +118,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1765640879,
-        "narHash": "sha256-hW9+54IqIiE/njKzrRfmmmRo8tnOkgvXyxA17N4vjZk=",
+        "lastModified": 1767614583,
+        "narHash": "sha256-yMtnpF3g7ZyP8Wyhmg4fVKiul3Mt14/TAGENDXnJTQI=",
         "owner": "Daniel-De-Dev",
         "repo": "nvim-config",
-        "rev": "4040e328fb35dc68ad5f128becab92794bab9408",
+        "rev": "1dc2a05447cd71e0b408354d80ae5ddef7de6b0d",
         "type": "github"
       },
       "original": {
