@@ -1,18 +1,14 @@
 { lib, config, ... }:
 {
-  # 1. Secure /boot (ESP)
+  # Secure /boot
   # Prevents modification of boot files by non-root users.
-  # Currently set to 0022 in your hardware-config (readable by everyone).
   fileSystems."/boot".options = lib.mkForce [ "umask=0077" ];
 
-  # 2. Harden /tmp
+  # Harden /tmp
   # Use RAM for /tmp and restrict execution.
-  # This prevents malware from dropping and running binaries in /tmp.
   boot.tmp = {
     useTmpfs = true;
-    # If you run large builds in /tmp, you might need to increase this or disable noexec
     tmpfsSize = "50%";
-    # strict mount options
     cleanOnBoot = true;
   };
 
@@ -26,8 +22,7 @@
     }
   ];
 
-  # 3. Harden Shared Memory (/dev/shm)
-  # Prevent execution in shared memory (common attack vector)
+  # Harden Shared Memory (/dev/shm)
   fileSystems."/dev/shm" = {
     device = "tmpfs";
     fsType = "tmpfs";
@@ -40,7 +35,7 @@
     ];
   };
 
-  # 4. Restrict /home
+  # Restrict /home
   fileSystems."/home".options = lib.mkIf (config.fileSystems ? "/home") [
     "nodev"
     "nosuid"
@@ -58,8 +53,4 @@
       "hidepid=2"
     ];
   };
-
-  systemd.tmpfiles.rules = [
-    "Z /home/* ~0700 - - - -"
-  ];
 }
