@@ -4,11 +4,6 @@
     ./hardware-configuration.nix
   ];
 
-  users.users.main.packages = with pkgs; [
-    # TODO: Move to desktop and integrate it with dotfiles/hyprland
-    protonvpn-gui
-  ];
-
   # NOTE: Split keyboard
   services.usbguard.rules = ''
     allow id 05e3:0608 name "USB2.0 Hub"

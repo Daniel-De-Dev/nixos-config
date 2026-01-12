@@ -8,7 +8,6 @@
 
   users.users.main.packages = with pkgs; [
     discord
-    protonvpn-gui
   ];
 
   programs.steam = {
