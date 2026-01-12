@@ -31,6 +31,12 @@
       example = "BAT0";
       description = "The battery identifier (BAT0). Used by modules to configure accordingly";
     };
+
+    hardware.internalMonitor = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "The name of the internal display.";
+    };
   };
 
   config = {

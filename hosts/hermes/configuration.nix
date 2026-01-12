@@ -38,6 +38,8 @@
       hardware = {
         battery = "BAT0";
 
+        internalMonitor = "eDP-1";
+
         hibernation = {
           enable = true;
           resumeOffset = 10008738;
