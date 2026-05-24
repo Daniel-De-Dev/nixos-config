@@ -1,0 +1,114 @@
+[user]
+  name = @userName@
+  email = @userEmail@
+  signingkey = @userSshKey@
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  allowedSignersFile = @allowedSignersPath@
+
+[commit]
+  gpgsign = true
+  verbose = true
+  cleanup = scissors
+
+[push]
+  autoSetupRemote = true
+  followTags = true
+  default = simple
+
+[pull]
+  rebase = true
+
+[init]
+  defaultBranch = main
+
+[rebase]
+  autoStash = true
+  autoSquash = true
+  updateRefs = true
+  missingCommitsCheck = error
+  rescheduleFailedExec = true
+
+[fetch]
+  prune = true
+  pruneTags = true
+  fsckObjects = true
+  writeCommitGraph = true
+
+[merge]
+  conflictStyle = zdiff3
+
+[rerere]
+  enabled = true
+  autoUpdate = true
+
+[help]
+  autoCorrect = prompt
+
+[diff]
+  tool = difftastic
+  algorithm = histogram
+  colorMoved = default
+  context = 10
+  mnemonicPrefix = true
+  renames = copies
+
+[status]
+  submoduleSummary = 1
+
+[core]
+  pager = @delta@
+  editor = @nvim@
+  untrackedCache = true
+  fsmonitor = true
+
+[interactive]
+  diffFilter = @delta@ --color-only
+
+[delta]
+  navigate = true
+  line-numbers = true
+  side-by-side = true
+  hyperlinks = true
+
+[transfer]
+  fsckObjects = true
+
+[receive]
+  fsckObjects = true
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = -taggerdate
+
+[column]
+  ui = auto
+
+[difftool]
+  prompt = false
+
+[difftool "difftastic"]
+  cmd = @difft@ "$LOCAL" "$REMOTE" --background=dark
+
+[log]
+  date = iso
+
+[alias]
+  # List available aliases (except itself)
+  aliases = "!git config --get-regexp '^alias\\.' \
+  | sed -E 's/^alias\\.([^ ]*) (.*)$/\\1 = \\2/' \
+  | sed -E '/^aliases = /d'"
+  ci = commit
+  st = status -sb
+  lg = log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'
+  oops = commit --amend --no-edit
+  reword = commit --amend
+  uncommit = reset --soft HEAD~1
+  untrack = rm --cached --
+  rmt = rm --
+  dt = difftool
