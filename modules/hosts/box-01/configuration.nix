@@ -12,16 +12,17 @@
 
       imports = [ self.nixosModules.box-01Hardware ];
 
+      my.hardware.secure-boot.enable = true;
+      my.programs.git.enable = true;
+      my.programs.ssh.enable = true;
+
       # Bootloader specific to this machine's motherboard
       boot.loader.systemd-boot.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;
 
-      # Do not change this value after initial installation
       system.stateVersion = "24.11";
 
       # INFO: TEMPORARY -----
-      # 1. Networking
-      # NetworkManager is required to easily connect to WiFi via nmcli or nmtui.
       services.displayManager.ly.enable = true;
 
       # 2. Window Manager

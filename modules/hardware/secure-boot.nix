@@ -18,10 +18,12 @@
       ...
     }:
     {
-      # Ingest the external Lanzaboote module dynamically
       imports = [ inputs.lanzaboote.nixosModules.lanzaboote ];
 
-      config = {
+      options.my.hardware.secure-boot.enable =
+        lib.mkEnableOption "Secure Boot via Lanzaboote";
+
+      config = lib.mkIf config.my.hardware.secure-boot.enable {
         # Secure Boot requires systemd-boot to be explicitly disabled so Lanzaboote
         # can take over the UEFI stub generation.
         boot.loader.systemd-boot.enable = lib.mkForce false;
