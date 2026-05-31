@@ -44,6 +44,9 @@
         # INFO: `ssh-forge.sh` ensures to generate this when generating `sign`
         # scoped key
         allowedSignersPath = "~/.ssh/allowed_signers";
+        nvim = "${pkgs.neovim}/bin/nvim";
+        delta = "${myDelta}/bin/delta";
+        difft = "${pkgs.difftastic}/bin/difft";
       };
 
       wm-eval = inputs.wrapper-manager.lib {
@@ -52,17 +55,6 @@
           {
             wrappers.git = {
               basePackage = pkgs.git;
-              env.GIT_CONFIG_GLOBAL.value = toString compiledGitConfig;
-
-              pathAdd = [
-                wm-eval.config.wrappers.delta.wrapped
-                pkgs.difftastic
-                pkgs.neovim
-              ];
-            };
-
-            wrappers.delta = {
-              basePackage = myDelta;
               env.GIT_CONFIG_GLOBAL.value = toString compiledGitConfig;
             };
           }
