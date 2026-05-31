@@ -47,7 +47,7 @@
       };
 
       # -----------------------------------------------------------------------
-      # THE COMPILER: Converts Attrs to SSH Config String
+      # Converts Attrs to SSH Config String
       # -----------------------------------------------------------------------
       compileSshOptions =
         options:
@@ -76,9 +76,9 @@
           sshMonitor
         ];
 
-        # -----------------------------------------------------------------------
-        # CLIENT: Outbound Configuration & Routing
-        # -----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
+        # Outbound Configuration & Routing
+        # ---------------------------------------------------------------------
         programs.ssh = {
           startAgent = true;
 
@@ -94,11 +94,12 @@
           '';
         };
 
-        # -----------------------------------------------------------------------
-        # SERVER: Inbound Configuration & Hardening
-        # -----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
+        # Inbound Configuration & Hardening
+        # ---------------------------------------------------------------------
         services.openssh = {
           enable = true;
+          openFirewall = false; # Host must explicitly open port 22
 
           hostKeys = [
             {
@@ -108,21 +109,53 @@
           ];
 
           settings = {
+            PermitRootLogin = "no";
             PasswordAuthentication = false;
             KbdInteractiveAuthentication = false;
-            PermitRootLogin = "no";
+            PubkeyAuthentication = true;
+            AuthenticationMethods = "publickey";
+
+            # Hardened Cryptography
+            KexAlgorithms = [
+              "sntrup761x25519-sha512@openssh.com"
+              "curve25519-sha256"
+              "curve25519-sha256@libssh.org"
+              "diffie-hellman-group18-sha512"
+              "diffie-hellman-group16-sha512"
+            ];
+            Ciphers = [
+              "chacha20-poly1305@openssh.com"
+              "aes256-gcm@openssh.com"
+              "aes128-gcm@openssh.com"
+            ];
+            Macs = [
+              "hmac-sha2-512-etm@openssh.com"
+              "hmac-sha2-256-etm@openssh.com"
+            ];
+
+            # Feature Restriction
             X11Forwarding = false;
-            AllowAgentForwarding = false;
+            AllowAgentForwarding = "no";
+            AllowTcpForwarding = "no";
+            AllowStreamLocalForwarding = "no";
+            PermitTunnel = "no";
+
+            # Connection Limits
+            MaxStartups = "10:30:60";
+            MaxSessions = 3;
+            MaxAuthTries = 3;
+            LoginGraceTime = "20s";
             ClientAliveInterval = 300;
             ClientAliveCountMax = 2;
+            LogLevel = "VERBOSE";
           };
         };
 
         users.users.${opUsername}.openssh.authorizedKeys.keys = hostAuthorizedKeys;
 
-        # -----------------------------------------------------------------------
-        # HYGIENE: Background Rotation Monitor
-        # -----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
+        # Background Rotation Monitor
+        # ---------------------------------------------------------------------
         systemd.user.services.ssh-rotation-monitor = {
           description = "Monitor SSH key age and notify if rotation is required";
           serviceConfig = {
