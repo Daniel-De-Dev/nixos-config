@@ -151,6 +151,17 @@
               description = "Host-specific SSH client routing and identity rules.";
             };
           };
+
+          security = {
+            usbguard = lib.mkOption {
+              type = lib.types.bool;
+              description = "Enable strict USBGuard device whitelisting.";
+            };
+            strictKernel = lib.mkOption {
+              type = lib.types.bool;
+              description = "Enable lockdown=integrity and aggressive memory allocator hardening.";
+            };
+          };
         };
       };
 
@@ -191,6 +202,11 @@
           ssh = {
             authorizedKeys = lib.mkDefault (rawPrivacy.ssh.authorizedKeys or [ ]);
             matchBlocks = lib.mkDefault (rawPrivacy.ssh.matchBlocks or { });
+          };
+
+          security = {
+            usbguard = lib.mkDefault (rawPrivacy.security.usbguard or false);
+            strictKernel = lib.mkDefault (rawPrivacy.security.strictKernel or true);
           };
         };
       };

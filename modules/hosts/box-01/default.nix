@@ -14,6 +14,7 @@
       self.nixosModules.core-network
       self.nixosModules.core-locale
       self.nixosModules.core-operator
+      self.nixosModules.core-security
       self.nixosModules.hardware-secure-boot
       self.nixosModules.programs-git
       self.nixosModules.programs-ssh
