@@ -9,6 +9,10 @@ abbr nd "nix develop"
 abbr nr "nixos-rebuild switch --flake .#@machine@ --sudo"
 abbr ngc "nix-collect-garbage -d"
 
+abbr nfu "nix flake update"
+abbr nfc "nix flake check"
+abbr nfmt "nix fmt"
+
 # Editor
 abbr v "nvim ."
 abbr vi nvim
