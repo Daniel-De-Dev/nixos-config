@@ -15,6 +15,7 @@
       my.hardware.secure-boot.enable = true;
       my.programs.git.enable = true;
       my.programs.ssh.enable = true;
+      my.programs.fish.enable = true;
 
       # Bootloader specific to this machine's motherboard
       boot.loader.systemd-boot.enable = true;

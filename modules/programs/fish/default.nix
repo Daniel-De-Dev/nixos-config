@@ -1,8 +1,5 @@
 # =============================================================================
 # Configures the Fish shell and sets it as the default interactive environment.
-#
-# DESIGN CONSTRAINTS:
-# 1. Must be added to `environment.shells` to be valid as a login shell.
 # =============================================================================
 { ... }:
 {
@@ -12,52 +9,64 @@
       config,
       inputs,
       lib,
+      machine,
       ...
     }:
     let
       cfg = config.my.programs.fish;
       opUsername = config.my.operator.username;
 
-      # -----------------------------------------------------------------------
-      # 1. Core Configuration File
-      # -----------------------------------------------------------------------
-      compiledFishConfig = pkgs.writeText "config.fish" ''
-        # Disable the default greeting
-        set -g fish_greeting ""
+      confDir = ./conf.d;
 
-        # Construct a simple prompt featuring a 24-hour European time format
-        function fish_prompt
-            set_color cyan
-            echo -n "["(date +%H:%M)"] "
-            set_color blue
-            echo -n (prompt_pwd)
-            set_color normal
-            echo -n ' > '
-        end
+      rawFishFiles = builtins.filter (
+        name: lib.hasSuffix ".fish" name && name != "30-abbr.fish"
+      ) (builtins.attrNames (builtins.readDir confDir));
+
+      sortedRawFiles = builtins.sort builtins.lessThan rawFishFiles;
+
+      dynamicSources = lib.concatMapStringsSep "\n" (
+        name: "source ${confDir}/${name}"
+      ) sortedRawFiles;
+
+      processedAbbr = pkgs.replaceVars ./conf.d/30-abbr.fish { machine = machine; };
+
+      compiledInit = pkgs.writeText "fish-init.fish" ''
+        set -p fish_function_path ${pkgs.fishPlugins.fzf-fish}/share/fish/vendor_functions.d
+        source ${pkgs.fishPlugins.fzf-fish}/share/fish/vendor_conf.d/fzf.fish
+
+        # Source the root configuration
+        source ${./config.fish}
+
+        ${dynamicSources}
+
+        source ${processedAbbr}
       '';
 
-      # -----------------------------------------------------------------------
-      # 2. Wrapper Engine
-      # -----------------------------------------------------------------------
       wm-eval = inputs.wrapper-manager.lib {
         inherit pkgs;
         modules = [
           {
             wrappers.fish = {
               basePackage = pkgs.fish;
-              
-              # wrapper-manager handles aliases natively, preventing the need
-              # to hardcode them into the config script.
-              aliases = {
-                ".." = "cd ..";
-                "..." = "cd ../..";
-                ll = "ls -lh";
-                la = "ls -lha";
-              };
 
-              # Inject the configuration file directly into the shell on startup
+              pathAdd = with pkgs; [
+                starship
+                eza
+                bat
+                zoxide
+                fzf
+                fd
+                ripgrep
+                tldr
+              ];
+
+              # Lock the Starship configuration globally
+              env.STARSHIP_CONFIG.value = toString ./starship.toml;
+
+              # Pass a single, clean instruction to bypass bash array issues
               prependFlags = [
-                "--init-command" "source ${compiledFishConfig}"
+                "--init-command"
+                "source ${compiledInit}"
               ];
             };
           }
@@ -70,16 +79,11 @@
       options.my.programs.fish.enable = lib.mkEnableOption "Fish shell";
 
       config = lib.mkIf cfg.enable {
-        # REQUIRED: Generates NixOS environment hooks so $PATH populates correctly.
-        programs.fish.enable = true;
+        programs.fish = {
+          enable = true;
+          package = wrappedFish;
+        };
 
-        # Expose the wrapped shell to the user profile
-        users.users.${opUsername}.packages = [ wrappedFish ];
-
-        # Register the wrapped binary as a valid system login shell
-        environment.shells = [ wrappedFish ];
-
-        # Set the wrapped binary as the default shell for the operator
         users.users.${opUsername}.shell = wrappedFish;
       };
     };

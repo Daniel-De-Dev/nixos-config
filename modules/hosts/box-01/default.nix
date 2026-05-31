@@ -21,6 +21,7 @@
       self.nixosModules.desktop-display-manager
       self.nixosModules.programs-git
       self.nixosModules.programs-ssh
+      self.nixosModules.programs-fish
     ];
   };
 }

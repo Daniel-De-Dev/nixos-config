@@ -204,8 +204,8 @@
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1780161978,
-        "narHash": "sha256-aQWQmv8Nlxu3rWsGEpSHmePmiAGmpJe3YV8bfkRmxwQ=",
+        "lastModified": 1780186426,
+        "narHash": "sha256-GCfQa0h+47DAUzhl3LeFd785+huXEbhhxjwNnSvKx0g=",
         "path": "/home/zeus/repos/nixos-privacy",
         "type": "path"
       },
@@ -259,11 +259,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1779645568,
-        "narHash": "sha256-CL6/RvJszPVtMpb3BDNhCpwBuwRD6Zhi6zsT7ra05Lw=",
+        "lastModified": 1780242102,
+        "narHash": "sha256-e+1qryLiKzsaLtX4qcGo7WOpPFATkDBKC8yNUBpM2ps=",
         "owner": "Daniel-De-Dev",
         "repo": "nixos-standards",
-        "rev": "0559a05cb1cf4607fa681bf0c06eff619b68febd",
+        "rev": "ddd79ba72274ee0d782d761dbec5055606231725",
         "type": "github"
       },
       "original": {
@@ -301,11 +301,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775636079,
-        "narHash": "sha256-pc20NRoMdiar8oPQceQT47UUZMBTiMdUuWrYu2obUP0=",
+        "lastModified": 1780220602,
+        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "790751ff7fd3801feeaf96d7dc416a8d581265ba",
+        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
         "type": "github"
       },
       "original": {

@@ -1,0 +1,60 @@
+format = """
+$os\
+$directory\
+$git_branch\
+$git_status\
+$nix_shell\
+$rust\
+$fill\
+$cmd_duration\
+$time\
+\n$character"""
+
+[os]
+disabled = false
+style = "bg:#a0a0a0 fg:#090c0c"
+format = "[](fg:#a0a0a0)[$symbol]($style)[ ](fg:#a0a0a0)"
+  [os.symbols]
+  NixOS = " "
+
+[directory]
+style = "fg:#e3e5e5 bg:#769ff0"
+format = "[](fg:#769ff0)[ $path ]($style)[ ](fg:#769ff0)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = ""
+style = "bg:#394260 fg:#769ff0"
+format = "[](fg:#394260)[ $symbol $branch ]($style)[ ](fg:#394260)"
+
+[git_status]
+style = "bg:#394260 fg:#e3e5e5"
+format = "[](fg:#394260)[ $all_status$ahead_behind ]($style)[ ](fg:#394260)"
+
+[nix_shell]
+symbol = ""
+style = "bg:#212736 fg:#769ff0"
+format = "[](fg:#212736)[ $symbol shell ]($style)[ ](fg:#212736)"
+
+[rust]
+symbol = ""
+style = "bg:#212736 fg:#769ff0"
+format = "[](fg:#212736)[ $symbol ($version) ]($style)[ ](fg:#212736)"
+
+[fill]
+symbol = " "
+
+[cmd_duration]
+style = "bg:#1d2230 fg:#a0a9cb"
+format = "[](fg:#1d2230)[  $duration ]($style)[ ](fg:#1d2230)"
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:#1d2230 fg:#a0a9cb"
+format = "[](fg:#1d2230)[  $time ]($style)[](fg:#1d2230)"
+
+[character]
+success_symbol = "[❯](bold #769ff0)"
+error_symbol = "[❯](bold red)"
