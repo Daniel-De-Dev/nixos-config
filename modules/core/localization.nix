@@ -22,7 +22,7 @@
 
       # Keyboard Layout
       services.xserver.xkb.layout = hostKeyMap;
-      console.keyMap = hostKeyMap;
+      console.useXkbConfig = true;
 
       # System Language
       i18n.defaultLocale = opDefaultLocale;

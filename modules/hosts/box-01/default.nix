@@ -17,6 +17,7 @@
       self.nixosModules.core-security
       self.nixosModules.core-console
       self.nixosModules.hardware-secure-boot
+      self.nixosModules.desktop-display-manager
       self.nixosModules.programs-git
       self.nixosModules.programs-ssh
     ];

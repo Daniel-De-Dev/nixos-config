@@ -22,11 +22,11 @@
 
       my.host.security.strictKernel = true;
 
+      my.desktops.greetd.enable = true;
+
       system.stateVersion = "24.11";
 
       # INFO: TEMPORARY -----
-      services.displayManager.ly.enable = true;
-
       # 2. Window Manager
       # This automatically enables OpenGL, XWayland, and the required display variables.
       programs.hyprland.enable = true;
