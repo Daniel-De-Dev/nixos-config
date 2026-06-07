@@ -167,8 +167,8 @@
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1780662469,
-        "narHash": "sha256-98eGpNzV0xTHS3XKU4k9m1nt7i4izz4KWpzf03oBVxc=",
+        "lastModified": 1780749090,
+        "narHash": "sha256-bkufSKQKqKJrj3iSIbiEU4YHzCo84BRohKiJqoI/Gnc=",
         "path": "/home/zeus/repos/nixos-privacy",
         "type": "path"
       },

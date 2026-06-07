@@ -79,6 +79,41 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
       { desc = 'Git: Diff against Last Commit (HEAD~1)' }
     )
 
+    -- Custom toggle for intent-to-add
+    local function toggle_intent_to_add()
+      local file = vim.api.nvim_buf_get_name(0)
+      if file == '' then return end
+
+      -- Check if the file is currently tracked by Git
+      local check =
+        vim.system({ 'git', 'ls-files', '--error-unmatch', file }):wait()
+
+      if check.code ~= 0 then
+        -- Add intent-to-track
+        vim.system({ 'git', 'add', '--intent-to-add', file }):wait()
+        vim.notify(
+          'Tracking intent added: ' .. vim.fn.fnamemodify(file, ':t'),
+          vim.log.levels.INFO
+        )
+      else
+        -- Untrack it
+        vim.system({ 'git', 'rm', '--cached', file }):wait()
+        vim.notify(
+          'Untracked: ' .. vim.fn.fnamemodify(file, ':t'),
+          vim.log.levels.INFO
+        )
+      end
+
+      require('gitsigns').refresh()
+    end
+
+    map(
+      'n',
+      '<leader>gi',
+      toggle_intent_to_add,
+      { desc = 'Git: Toggle Intent-to-Add' }
+    )
+
     return true
   end,
 })

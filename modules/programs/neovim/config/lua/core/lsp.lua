@@ -2,6 +2,10 @@
 ---@type lsp.ClientCapabilities
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 
+-- blink.cmp capabilities are merged to receive snippets and auto-imports
+local has_blink, blink = pcall(require, 'blink.cmp')
+if has_blink then capabilities = blink.get_lsp_capabilities(capabilities) end
+
 vim.lsp.config('*', { capabilities = capabilities })
 
 -- Global Diagnostics Config
@@ -9,6 +13,8 @@ vim.diagnostic.config({
   signs = true,
   underline = true,
   virtual_text = true,
+  update_in_insert = false,
+  severity_sort = true,
 })
 
 -- Universal LSP Attach Behaviour
@@ -26,12 +32,16 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
 
     map('n', 'gd', vim.lsp.buf.definition, 'LSP: Goto Definition')
+    map('n', 'K', vim.lsp.buf.hover, 'LSP: Hover Documentation')
     map(
       'n',
       '<leader>ld',
       vim.diagnostic.open_float,
       'LSP: Show Line Diagnostics'
     )
+    map('n', '<leader>rn', vim.lsp.buf.rename, 'LSP: Rename Symbol')
+    map({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, 'LSP: Code Action')
+    map('n', 'gr', vim.lsp.buf.references, 'LSP: References')
 
     -- Inlay Hints
     if client:supports_method('textDocument/inlayHint', bufnr) then
@@ -68,25 +78,39 @@ local servers = {
   css_variables = 'css-variables-language-server',
 }
 
+local activation_group =
+  vim.api.nvim_create_augroup('LspActivation', { clear = true })
+
 for server_name, executable in pairs(servers) do
-  if vim.fn.executable(executable) == 1 then
-    -- Load the configuration table from lua/lsp/<server_name>.lua
-    ---@type boolean, vim.lsp.Config
-    local ok, server_config = pcall(require, 'lsp.' .. server_name)
+  -- Load the configuration table from lua/lsp/<server_name>.lua
+  ---@type boolean, vim.lsp.Config
+  local ok, server_config = pcall(require, 'lsp.' .. server_name)
 
-    if ok then
-      vim.lsp.config(server_name, server_config)
+  if ok then
+    -- Register the configuration natively
+    vim.lsp.config(server_name, server_config)
+
+    -- If the config specifies filetypes, defer the executable check and enablement
+    if server_config.filetypes then
+      vim.api.nvim_create_autocmd('FileType', {
+        group = activation_group,
+        pattern = server_config.filetypes,
+        callback = function()
+          -- Check for the binary only when opening a matching file
+          if vim.fn.executable(executable) == 1 then
+            vim.lsp.enable(server_name)
+          end
+          return true
+        end,
+      })
     else
-      vim.notify(
-        'Warning: No config file found at lua/lsp/' .. server_name .. '.lua',
-        vim.log.levels.WARN
-      )
+      -- Fallback if no filetypes are defined in the modular config file
+      if vim.fn.executable(executable) == 1 then vim.lsp.enable(server_name) end
     end
-
-    vim.lsp.enable(server_name)
   else
+    -- If the configuration file itself is missing
     vim.notify(
-      'LSP executable not found in PATH: ' .. executable,
+      'Warning: No config file found at lua/lsp/' .. server_name .. '.lua',
       vim.log.levels.WARN
     )
   end
