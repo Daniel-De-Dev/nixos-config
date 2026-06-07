@@ -27,16 +27,6 @@
       url = "github:nix-community/lanzaboote/v1.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    dotfiles = {
-      url = "git+file:///home/zeus/repos/dotfiles";
-      flake = false;
-    };
-
-    nvim-config = {
-      url = "github:Daniel-De-Dev/nvim-config";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =

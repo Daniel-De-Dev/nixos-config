@@ -31,14 +31,17 @@
           useTextGreeter = true;
           settings = {
             default_session = {
-              command = ''
-                  ${pkgs.tuigreet}/bin/tuigreet \
-                --time \
-                --remember \
-                --remember-user-session \
-                --asterisks \
-                --sessions /run/current-system/sw/share/wayland-sessions:/run/current-system/sw/share/xsessions
-              '';
+              command = builtins.concatStringsSep " " [
+                "${lib.getExe pkgs.tuigreet}"
+                "--time"
+                "--remember"
+                "--remember-user-session"
+                "--asterisks"
+                "--power-shutdown 'systemctl poweroff'"
+                "--power-reboot 'systemctl reboot'"
+                "--time-format '%A, %d %B %Y  •  %H:%M'"
+                "--sessions /run/current-system/sw/share/wayland-sessions:/run/current-system/sw/share/xsessions"
+              ];
               user = "greeter";
             };
           };

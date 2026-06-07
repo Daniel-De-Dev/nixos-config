@@ -1,4 +1,4 @@
-{ self, inputs, ... }:
+{ self, ... }:
 {
 
   flake.nixosModules.box-01Configuration =
@@ -16,6 +16,7 @@
       my.programs.git.enable = true;
       my.programs.ssh.enable = true;
       my.programs.fish.enable = true;
+      my.programs.nvim.enable = true;
 
       # Bootloader specific to this machine's motherboard
       boot.loader.systemd-boot.enable = true;
@@ -36,7 +37,6 @@
       environment.systemPackages = with pkgs; [
         kitty # Hyprland's hardcoded default terminal (needed to open a shell)
         brave # Web browser
-        neovim # Text editor for iterative config work
         obsidian
         steam
         ripgrep

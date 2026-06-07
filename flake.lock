@@ -15,22 +15,6 @@
         "type": "github"
       }
     },
-    "dotfiles": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1779548317,
-        "narHash": "sha256-fPqHJHzlmj86WKx4Z0APXBS1iueL1pfTvKOt9hob3Ec=",
-        "ref": "refs/heads/main",
-        "rev": "12e504207e9aeb70474887821c6285d8dab03e06",
-        "revCount": 22,
-        "type": "git",
-        "url": "file:///home/zeus/repos/dotfiles"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/zeus/repos/dotfiles"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -128,11 +112,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1779560665,
-        "narHash": "sha256-tpyBcxPpcQb8ukyNF7DoCwfSY3VPsxHoYwj00Cayv5o=",
+        "lastModified": 1780243769,
+        "narHash": "sha256-x5UQuRsH3MqI0U9afaXSNqzTPSeZlRLvFAav2Ux1pNw=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "64c08a7ca051951c8eae34e3e3cb1e202fe36786",
+        "rev": "331800de5053fcebacf6813adb5db9c9dca22a0c",
         "type": "github"
       },
       "original": {
@@ -154,27 +138,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "nixpkgs.lib",
-        "type": "github"
-      }
-    },
-    "nvim-config": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": "treefmt-nix"
-      },
-      "locked": {
-        "lastModified": 1774805648,
-        "narHash": "sha256-xwyfQcxRyK7PsykOhZU5AYm750OzhtuDBBTNDJKPeOU=",
-        "owner": "Daniel-De-Dev",
-        "repo": "nvim-config",
-        "rev": "d416f41156cf66fe77c0920097ec97e3007ebc8f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Daniel-De-Dev",
-        "repo": "nvim-config",
         "type": "github"
       }
     },
@@ -204,8 +167,8 @@
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1780186426,
-        "narHash": "sha256-GCfQa0h+47DAUzhl3LeFd785+huXEbhhxjwNnSvKx0g=",
+        "lastModified": 1780662469,
+        "narHash": "sha256-98eGpNzV0xTHS3XKU4k9m1nt7i4izz4KWpzf03oBVxc=",
         "path": "/home/zeus/repos/nixos-privacy",
         "type": "path"
       },
@@ -216,12 +179,10 @@
     },
     "root": {
       "inputs": {
-        "dotfiles": "dotfiles",
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
         "lanzaboote": "lanzaboote",
         "nixpkgs": "nixpkgs",
-        "nvim-config": "nvim-config",
         "privacy": "privacy",
         "standards": "standards",
         "wrapper-manager": "wrapper-manager"
@@ -256,14 +217,14 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "treefmt-nix": "treefmt-nix_2"
+        "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1780242102,
-        "narHash": "sha256-e+1qryLiKzsaLtX4qcGo7WOpPFATkDBKC8yNUBpM2ps=",
+        "lastModified": 1780598826,
+        "narHash": "sha256-UVV6OSobITzP3keh8+j4hLOWlANvGeDT/hVcNxsr6oU=",
         "owner": "Daniel-De-Dev",
         "repo": "nixos-standards",
-        "rev": "ddd79ba72274ee0d782d761dbec5055606231725",
+        "rev": "63fa909abedba732c39e14a15dfa8836c5a0af0f",
         "type": "github"
       },
       "original": {
@@ -273,27 +234,6 @@
       }
     },
     "treefmt-nix": {
-      "inputs": {
-        "nixpkgs": [
-          "nvim-config",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1762938485,
-        "narHash": "sha256-AlEObg0syDl+Spi4LsZIBrjw+snSVU4T8MOeuZJUJjM=",
-        "owner": "numtide",
-        "repo": "treefmt-nix",
-        "rev": "5b4ee75aeefd1e2d5a1cc43cf6ba65eba75e83e4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": [
           "standards",

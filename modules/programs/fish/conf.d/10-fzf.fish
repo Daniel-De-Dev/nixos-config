@@ -5,5 +5,7 @@ set -gx FZF_ALT_C_COMMAND "fd --type d --hidden --exclude .git"
 set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border --info=inline"
 
 if status is-interactive
-    fzf_configure_bindings --directory=\ct --git_log=\cg --history=\cr --variables=\cv
+    if type -q fzf_configure_bindings
+        eval 'fzf_configure_bindings --directory=\ct --git_log=\cg --history=\cr --variables=\cv'
+    end
 end
