@@ -2,12 +2,7 @@
 {
 
   flake.nixosModules.box-01Configuration =
-    {
-      pkgs,
-      lib,
-      config,
-      ...
-    }:
+    { pkgs, lib, ... }:
     {
 
       imports = [ self.nixosModules.box-01Hardware ];
@@ -24,55 +19,55 @@
 
       my.host.security.strictKernel = true;
 
-      my.desktops.greetd.enable = true;
+      my.desktops.ly.enable = true;
+      my.desktop.hyprland.enable = true;
+
+      my.hardware.hibernation = {
+        enable = true;
+        resumeDevice = "/dev/mapper/cryptroot";
+        resumeOffset = 91848876;
+      };
+
+      swapDevices = [
+        {
+          device = "/swap/swapfile";
+          size = 36 * 1024;
+        }
+      ];
+
+      my.hardware.gpu.vendor = "nvidia";
+      my.hardware.gpu.multiGpu = true;
+
+      # Fixes ACPI instant-wake loop from suspend
+      services.udev.extraRules = ''
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1483", ATTR{power/wakeup}="disabled"
+      '';
 
       system.stateVersion = "24.11";
 
       # INFO: TEMPORARY -----
-      # 2. Window Manager
-      # This automatically enables OpenGL, XWayland, and the required display variables.
-      programs.hyprland.enable = true;
-
-      # 3. Essential Packages
+      # Essential Packages
       environment.systemPackages = with pkgs; [
         kitty # Hyprland's hardcoded default terminal (needed to open a shell)
         brave # Web browser
         obsidian
-        steam
         ripgrep
       ];
 
-      nixpkgs.config.allowUnfreePredicate =
-        pkg:
-        builtins.elem (lib.getName pkg) [
-          "nvidia-x11"
-          "obsidian"
-          "nvidia-settings"
-          "nvidia-kernel-modules"
-          "steam-unwrapped"
-          "steam"
-        ];
+      my.allowedUnfree = [
+        "obsidian"
+        "steam-unwrapped"
+        "steam"
+      ];
 
-      hardware.graphics.enable = true;
+      environment.sessionVariables = {
+        XDG_SESSION_TYPE = "wayland";
+      };
 
-      # Tells Xorg and Wayland to use the NVIDIA drivers
-      services.xserver.videoDrivers = [ "nvidia" ];
-
-      hardware.nvidia = {
-        # Modesetting is strictly required for Hyprland/Wayland
-        modesetting.enable = true;
-
-        # Power management is experimental; generally safer left disabled initially
-        powerManagement.enable = false;
-
-        # Use the proprietary NVML driver (set to true ONLY if you have a Turing or newer GPU and want the open kernel module)
-        open = false;
-
-        # Enables the nvidia-settings control panel
-        nvidiaSettings = true;
-
-        # Force the stable driver branch
-        package = config.boot.kernelPackages.nvidiaPackages.stable;
+      programs.steam = {
+        enable = true;
+        remotePlay.openFirewall = true;
+        dedicatedServer.openFirewall = true;
       };
       # --------
     };

@@ -11,6 +11,7 @@
     modules = [
       self.nixosModules.box-01Configuration
       self.nixosModules.core
+      self.nixosModules.core-unfree
       self.nixosModules.core-network
       self.nixosModules.core-locale
       self.nixosModules.core-operator
@@ -18,6 +19,10 @@
       self.nixosModules.core-console
       self.nixosModules.core-fonts
       self.nixosModules.hardware-secure-boot
+      self.nixosModules.hardware-hibernation
+      self.nixosModules.hardware-power
+      self.nixosModules.hardware-gpu
+      self.nixosModules.hyprland
       self.nixosModules.desktop-display-manager
       self.nixosModules.programs-git
       self.nixosModules.programs-ssh
