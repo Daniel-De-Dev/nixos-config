@@ -4,8 +4,7 @@
 # DESIGN CONSTRAINTS:
 # 1. Ensure minimal overlap with existing moduels
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.core-security =
     {
       lib,

@@ -5,8 +5,7 @@
 # 1. Opt-in via `my.hardware.hibernation.enable`.
 # 2. Requires the host to explicitly map the `resumeDevice` to its physical topology.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.hardware-hibernation =
     { lib, config, ... }:
     let

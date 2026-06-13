@@ -7,8 +7,7 @@
 #    (Generate and install keys)
 # 2. Automatically disables standard systemd-boot to prevent conflicts.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.hardware-secure-boot =
     {
       lib,

@@ -5,8 +5,7 @@
 # 1. All regional data is considered sensitive and is routed through the
 #    privacy data bus.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.core-locale =
     { config, ... }:
     let

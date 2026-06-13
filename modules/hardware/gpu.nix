@@ -6,8 +6,7 @@
 # 2. Enforces VRAM allocation preservation to survive suspend and hibernation
 #    states.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.hardware-gpu =
     { lib, config, ... }:
     let

@@ -1,8 +1,7 @@
 # =============================================================================
 # Configures the Fish shell and sets it as the default interactive environment.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.programs-fish =
     {
       pkgs,

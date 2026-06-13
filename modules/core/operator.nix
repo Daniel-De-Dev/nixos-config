@@ -8,8 +8,7 @@
 # 2. Imperative user management is disabled. All identity changes, authorized
 #    SSH keys, and group policies must be declared here.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.core-operator =
     { lib, config, ... }:
     let

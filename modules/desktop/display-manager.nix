@@ -5,8 +5,7 @@
 # 1. Enforces a minimal, terminal-based aesthetic via the Ly display manager.
 # 2. Integrates natively with the system's displayManager domain.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.desktop-display-manager =
     {
       pkgs,

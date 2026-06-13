@@ -28,8 +28,7 @@
 # 3. Downstream hosts can override these values imperatively because they
 #    are mapped using `lib.mkDefault`.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.core =
     {
       lib,

@@ -6,8 +6,7 @@
 # 1.  Keys must be generated uniquely per host using the provided
 #    `ssh-forge` script to prevent key reuse across the fleet.
 # =============================================================================
-{ ... }:
-{
+{ ... }: {
   flake.nixosModules.programs-ssh =
     {
       lib,
