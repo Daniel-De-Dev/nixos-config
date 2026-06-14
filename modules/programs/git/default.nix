@@ -1,7 +1,7 @@
 # =============================================================================
 # Configures the Git version control system and injects signing identities.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.programs-git =
     {
       pkgs,

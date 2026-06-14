@@ -6,7 +6,7 @@
 # 2. Physical layout (keymap) is inherited from the XKB configuration,
 #    which is governed by the Host API.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.core-console = { config, pkgs, ... }: {
     console = {
       enable = true;

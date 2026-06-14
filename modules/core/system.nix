@@ -8,7 +8,7 @@
 # 2. Do not use conditional toggles (`mkIf`) or abstract custom choices here;
 #    a host inherits this entire profile explicitly.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.core = { pkgs, ... }: {
     nix = {
       settings = {
@@ -39,7 +39,7 @@
 
       registry.nixpkgs.to = {
         type = "path";
-        path = pkgs.path;
+        inherit (pkgs) path;
       };
 
       nixPath = [ "nixpkgs=flake:nixpkgs" ];

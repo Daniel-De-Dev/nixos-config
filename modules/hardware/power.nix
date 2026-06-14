@@ -6,7 +6,7 @@
 # 1. Opt-in via defining a `batteryId`. If null, the machine is treated as a
 #    desktop.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.hardware-power =
     { lib, config, ... }:
     let

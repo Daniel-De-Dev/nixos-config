@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   flake.nixosModules.box-01Hardware =
     {
       config,

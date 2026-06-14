@@ -1,7 +1,7 @@
 # =============================================================================
 # Configures the Fish shell and sets it as the default interactive environment.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.programs-fish =
     {
       pkgs,
@@ -27,7 +27,7 @@
         name: "source ${confDir}/${name}"
       ) sortedRawFiles;
 
-      processedAbbr = pkgs.replaceVars ./conf.d/30-abbr.fish { machine = machine; };
+      processedAbbr = pkgs.replaceVars ./conf.d/30-abbr.fish { inherit machine; };
 
       compiledInit = pkgs.writeText "fish-init.fish" ''
         set -p fish_function_path ${pkgs.fishPlugins.fzf-fish}/share/fish/vendor_functions.d

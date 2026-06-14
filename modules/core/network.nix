@@ -8,7 +8,7 @@
 # 2. Active mitigation against IP spoofing, routing table manipulation, and
 #    ICMP-based denial of service.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.core-network =
     { lib, config, ... }:
     let

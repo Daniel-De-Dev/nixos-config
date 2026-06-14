@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   flake.nixosModules.brave =
     {
       config,
@@ -8,7 +8,7 @@
     }:
     let
       cfg = config.my.desktop.hyprland;
-      palette = cfg.palette;
+      inherit (cfg) palette;
       protonPass = "ghmbeldphafepmbegfdlkpapadhbakde";
     in
     {

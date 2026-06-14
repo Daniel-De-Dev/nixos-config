@@ -5,7 +5,7 @@
 # 1. Modules and hosts must append to `my.allowedUnfree` rather than defining
 #    their own `nixpkgs.config.allowUnfreePredicate`.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.core-unfree = { lib, config, ... }: {
     options.my.allowedUnfree = lib.mkOption {
       type = lib.types.listOf lib.types.str;

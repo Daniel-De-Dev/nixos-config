@@ -8,7 +8,7 @@
 # 2. Imperative user management is disabled. All identity changes, authorized
 #    SSH keys, and group policies must be declared here.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.core-operator =
     { lib, config, ... }:
     let
@@ -24,7 +24,7 @@
         users.users.${cfg.username} = {
           isNormalUser = true;
           description = "Primary System Operator";
-          hashedPassword = cfg.hashedPassword;
+          inherit (cfg) hashedPassword;
           group = cfg.username;
 
           extraGroups = [
@@ -51,7 +51,7 @@
               let
                 sshEnabled = config.services.openssh.enable;
                 passAuthDisabled =
-                  (config.services.openssh.settings.PasswordAuthentication) == false;
+                  config.services.openssh.settings.PasswordAuthentication == false;
                 hasKeys = config.my.host.ssh.authorizedKeys != [ ];
               in
               (sshEnabled && passAuthDisabled) -> hasKeys;

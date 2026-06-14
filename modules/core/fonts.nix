@@ -1,7 +1,7 @@
 # =============================================================================
 # Provisions system-wide typography, icon fonts, and rendering fallbacks.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.core-fonts =
     {
       pkgs,

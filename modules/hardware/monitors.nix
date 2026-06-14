@@ -7,7 +7,7 @@
 # 2. Provides a centralized data structure for Window Managers to consume for
 #    their own layout configurations.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.hardware-monitors =
     { lib, config, ... }:
     let

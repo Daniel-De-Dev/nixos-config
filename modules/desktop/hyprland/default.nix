@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   flake.nixosModules.hyprland =
     {
       config,
@@ -9,7 +9,7 @@
     }:
     let
       cfg = config.my.desktop.hyprland;
-      palette = cfg.palette;
+      inherit (cfg) palette;
 
       cursorTheme = "Posy_Cursor_Black";
       cursorSize = "24";
@@ -19,8 +19,8 @@
       };
 
       autostartConf = pkgs.replaceVars ./src/autostart.lua {
-        cursorTheme = cursorTheme;
-        cursorSize = cursorSize;
+        inherit cursorTheme;
+        inherit cursorSize;
       };
 
       themeLua = pkgs.replaceVars ./src/theme.lua {

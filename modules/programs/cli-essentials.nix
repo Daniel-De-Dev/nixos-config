@@ -1,7 +1,7 @@
 # =============================================================================
 # Bundles most foundational command-line tools and modern coreutil replacements.
 # =============================================================================
-{ ... }: {
+_: {
   flake.nixosModules.programs-cli-essentials = { pkgs, ... }: {
     environment.systemPackages = with pkgs; [
       # Network
