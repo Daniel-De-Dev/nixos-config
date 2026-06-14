@@ -21,8 +21,10 @@
       self.nixosModules.hardware-hibernation
       self.nixosModules.hardware-power
       self.nixosModules.hardware-gpu
+      self.nixosModules.hardware-monitors
       self.nixosModules.hyprland
       self.nixosModules.desktop-display-manager
+      self.nixosModules.programs-cli-essentials
       self.nixosModules.programs-git
       self.nixosModules.programs-ssh
       self.nixosModules.programs-fish

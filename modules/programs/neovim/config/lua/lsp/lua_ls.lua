@@ -31,6 +31,13 @@ return {
     local current_settings = client.config.settings.Lua or {}
     ---@cast current_settings table
 
+    local library = { vim.env.VIMRUNTIME }
+    local hyprland_stubs = os.getenv('HYPRLAND_STUBS')
+
+    if hyprland_stubs and vim.uv.fs_stat(hyprland_stubs) then
+      table.insert(library, hyprland_stubs)
+    end
+
     client.config.settings.Lua =
       vim.tbl_deep_extend('force', current_settings, {
         runtime = {
@@ -42,9 +49,7 @@ return {
         },
         workspace = {
           checkThirdParty = false,
-          library = {
-            vim.env.VIMRUNTIME,
-          },
+          library = library,
         },
       })
   end,

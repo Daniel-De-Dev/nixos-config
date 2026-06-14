@@ -75,6 +75,9 @@
             wrappers.nvim = {
               basePackage = pkgs.neovim-unwrapped;
               pathAdd = nvimDeps;
+
+              env.HYPRLAND_STUBS.value = "${pkgs.hyprland}/share/hypr/stubs";
+
               prependFlags = [
                 "-u"
                 "${./config}/init.lua"
