@@ -64,13 +64,6 @@
             "nvidia.NVreg_TemporaryFilePath=/var/tmp"
           ];
 
-          # systemd.services.systemd-suspend.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS =
-          #   "false";
-          # systemd.services.systemd-hibernate.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS =
-          #   "false";
-          # systemd.services.systemd-suspend-then-hibernate.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS =
-          #   "false";
-
           systemd.services.nvidia-suspend = {
             before = [ "systemd-suspend-then-hibernate.service" ];
             wantedBy = [ "systemd-suspend-then-hibernate.service" ];
