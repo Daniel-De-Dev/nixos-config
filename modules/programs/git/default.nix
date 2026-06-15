@@ -63,6 +63,8 @@ _: {
     {
       options.my.programs.git.enable = lib.mkEnableOption "Git version control";
 
+      # TODO: Fix that typing pass for signing doenst allow for re-attempt or lose commit message
+
       config = lib.mkIf config.my.programs.git.enable {
         environment.systemPackages = [ pkgs.git ];
         users.users.${opUsername}.packages = [ wm-eval.config.wrappers.git.wrapped ];

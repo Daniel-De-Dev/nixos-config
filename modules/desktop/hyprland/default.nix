@@ -64,6 +64,8 @@ _: {
           (builtins.readFile ./src/binds.lua)
       );
 
+
+      # TODO: Fix or add a way to specify where workspace 1 and 2 intilize to
       # Generate the Lua monitor configurations
       monitorStrings =
         if (builtins.length config.my.hardware.monitors > 0) then
@@ -96,6 +98,10 @@ _: {
         mkdir -p $out
         # cp -r {./src/ags}/* $out/
       '';
+
+      # TODO: Fix hyprlock
+
+      # TODO: Add keyboard layout short cut and add keybind shortcut for hyprland
 
       # NixOS needs to apply custom overrides
       wrapperFn =
