@@ -32,6 +32,10 @@ _: {
         };
       };
 
+      # TODO: Other than the path name there is nothing else suggesting this is
+      # google drive spesific, so could just be renamed to genereic rclone or
+      # remote disk module
+
       config = lib.mkIf cfg.enable {
         environment.systemPackages = [ pkgs.rclone ];
 
@@ -47,8 +51,12 @@ _: {
               ${pkgs.rclone}/bin/rclone mount ${cfg.remoteName}: ${cfg.mountPoint} \
                 --vfs-cache-mode full \
                 --vfs-cache-max-size 50G \
-                --dir-cache-time 72h \
                 --vfs-cache-max-age 24h \
+                --vfs-write-back 30s \
+                --vfs-fast-fingerprint \
+                --dir-cache-time 8760h \
+                --attr-timeout 8760h \
+                --poll-interval 10s \
                 --log-level INFO
             '';
             ExecStop = "/run/wrappers/bin/fusermount -u ${cfg.mountPoint}";
