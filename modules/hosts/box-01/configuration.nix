@@ -24,6 +24,9 @@
       my.programs.fish.enable = true;
       my.programs.nvim.enable = true;
 
+      my.services.google-drive.enable = true;
+      my.services.google-drive.remoteName = "secret-drive";
+
       # Bootloader specific to this machine's motherboard
       boot.loader.systemd-boot.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;

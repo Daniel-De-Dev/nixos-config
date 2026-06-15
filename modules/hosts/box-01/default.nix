@@ -7,6 +7,7 @@
       machine = "box-01";
     };
 
+    # TODO: Standardize paths/names
     modules = [
       self.nixosModules.box-01Configuration
       self.nixosModules.core
@@ -22,6 +23,7 @@
       self.nixosModules.hardware-power
       self.nixosModules.hardware-gpu
       self.nixosModules.hardware-monitors
+      self.nixosModules.services-google-drive
       self.nixosModules.hyprland
       self.nixosModules.desktop-display-manager
       self.nixosModules.programs-cli-essentials
