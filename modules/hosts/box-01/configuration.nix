@@ -1,7 +1,12 @@
 { self, ... }: {
 
   flake.nixosModules.box-01Configuration =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      inputs,
+      ...
+    }:
     let
       orca-slicer-pkg = pkgs.symlinkJoin {
         name = "orca-slicer-wrapped";
@@ -16,7 +21,10 @@
     in
     {
 
-      imports = [ self.nixosModules.box-01Hardware ];
+      imports = [
+        self.nixosModules.box-01Hardware
+        inputs.spicetify-nix.nixosModules.default # TODO: Integrate this more properly, move to hyprland maybe?
+      ];
 
       my.hardware.secure-boot.enable = true;
       my.programs.git.enable = true;
@@ -91,6 +99,7 @@
         "obsidian"
         "steam-unwrapped"
         "steam"
+        "spotify"
       ];
 
       programs.steam = {
@@ -98,6 +107,32 @@
         remotePlay.openFirewall = true;
         dedicatedServer.openFirewall = true;
       };
+
+      programs.spicetify =
+        let
+          spicePkgs =
+            inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+        in
+        {
+          enable = true;
+
+          enabledExtensions = with spicePkgs.extensions; [
+            adblock
+            hidePodcasts
+            shuffle
+          ];
+          enabledCustomApps = with spicePkgs.apps; [
+            newReleases
+            ncsVisualizer
+          ];
+          enabledSnippets = with spicePkgs.snippets; [
+            rotatingCoverart
+            pointer
+          ];
+
+          theme = spicePkgs.themes.catppuccin;
+          colorScheme = "mocha";
+        };
       # --------
 
       # NOTE: Orca-slicer/3d printer realted change

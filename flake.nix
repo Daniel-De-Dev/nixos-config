@@ -17,6 +17,13 @@
       };
     };
 
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
     privacy = {
       # TODO: Switch to the remote repo
       url = "path:///home/zeus/repos/nixos-privacy";

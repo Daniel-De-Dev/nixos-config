@@ -64,7 +64,6 @@ _: {
           (builtins.readFile ./src/binds.lua)
       );
 
-
       # TODO: Fix or add a way to specify where workspace 1 and 2 intilize to
       # Generate the Lua monitor configurations
       monitorStrings =
