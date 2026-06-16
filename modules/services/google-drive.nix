@@ -36,6 +36,8 @@ _: {
       # google drive spesific, so could just be renamed to genereic rclone or
       # remote disk module
 
+      # TODO: Make the config file encrypted or password protected
+
       config = lib.mkIf cfg.enable {
         environment.systemPackages = [ pkgs.rclone ];
 
