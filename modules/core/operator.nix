@@ -35,6 +35,7 @@ _: {
             "render"
             "input"
             "systemd-journal"
+            "dialout"
           ];
 
           openssh.authorizedKeys.keys = config.my.host.ssh.authorizedKeys;

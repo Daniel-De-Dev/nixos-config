@@ -93,6 +93,10 @@
         obsidian
         orca-slicer-pkg
         networkmanagerapplet
+        pandoc
+        pulseaudio
+        inkscape
+        blender
       ];
 
       my.allowedUnfree = [
@@ -133,6 +137,11 @@
           theme = spicePkgs.themes.catppuccin;
           colorScheme = "mocha";
         };
+
+      programs.direnv = {
+        enable = true;
+        nix-direnv.enable = true;
+      };
       # --------
 
       # NOTE: Orca-slicer/3d printer realted change

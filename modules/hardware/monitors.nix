@@ -73,7 +73,7 @@ _: {
       };
 
       config = lib.mkIf (builtins.length cfg > 0) {
-        boot.kernelParams = builtins.map (
+        boot.kernelParams = map (
           m:
           "video=${m.name}:${toString m.ttyWidth}x${toString m.ttyHeight}@${toString m.ttyRefreshRate}"
         ) cfg;
