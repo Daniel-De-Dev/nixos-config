@@ -13,6 +13,7 @@ local supported_filetypes = {
   html = true,
   astro = true,
   python = true,
+  c_sharp = true,
 }
 
 vim.api.nvim_create_autocmd({ 'FileType', 'BufWinEnter' }, {

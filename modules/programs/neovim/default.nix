@@ -26,6 +26,7 @@ _: {
         typescript-language-server
         vscode-langservers-extracted
         astro-language-server
+        csharp-ls
 
         fzf
         ripgrep

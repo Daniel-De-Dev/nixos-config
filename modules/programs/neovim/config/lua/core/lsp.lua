@@ -76,6 +76,7 @@ local servers = {
   ts_ls = 'typescript-language-server',
   astro = 'astro-ls',
   css_variables = 'css-variables-language-server',
+  csharp_ls = 'csharp-ls',
 }
 
 local activation_group =
