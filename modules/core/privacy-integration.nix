@@ -32,7 +32,6 @@ _: {
   flake.nixosModules.core =
     {
       lib,
-      config,
       inputs,
       machine ? null,
       ...

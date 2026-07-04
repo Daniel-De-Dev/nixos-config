@@ -1,12 +1,18 @@
+---@class ClangdInitializeResult : lsp.InitializeResult
+---@field offsetEncoding? string
+
 local function switch_source_header(bufnr, client)
   local method_name = 'textDocument/switchSourceHeader'
+  ---@diagnostic disable-next-line: param-type-mismatch
   if not client or not client:supports_method(method_name) then
     return vim.notify(
       ('method %s is not supported'):format(method_name),
       vim.log.levels.WARN
     )
   end
-  local params = vim.lsp.util.make_text_document_params(bufnr)
+  local params = vim.lsp.util.make_text_document_params(bufnr) ---@type table
+
+  ---@diagnostic disable-next-line: param-type-mismatch
   client:request(method_name, params, function(err, result)
     if err then error(tostring(err)) end
     if not result then
@@ -18,11 +24,15 @@ end
 
 local function symbol_info(bufnr, client)
   local method_name = 'textDocument/symbolInfo'
+
+  ---@diagnostic disable-next-line: param-type-mismatch
   if not client or not client:supports_method(method_name) then
     return vim.notify('Clangd client not found', vim.log.levels.ERROR)
   end
   local win = vim.api.nvim_get_current_win()
-  local params = vim.lsp.util.make_position_params(win, client.offset_encoding)
+  local params = vim.lsp.util.make_position_params(win, client.offset_encoding) ---@type table
+
+  ---@diagnostic disable-next-line: param-type-mismatch
   client:request(method_name, params, function(err, res)
     if err or #res == 0 then return end
     local container = string.format('container: %s', res[1].containerName)
@@ -51,7 +61,7 @@ return {
     '--fallback-style=llvm',
   },
 
-  filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+  filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'asm' },
 
   root_markers = {
     '.clangd',
@@ -73,6 +83,8 @@ return {
     offsetEncoding = { 'utf-8', 'utf-16' },
   },
 
+  ---@param client vim.lsp.Client
+  ---@param init_result ClangdInitializeResult
   on_init = function(client, init_result)
     if init_result.offsetEncoding then
       client.offset_encoding = init_result.offsetEncoding
@@ -80,10 +92,6 @@ return {
   end,
 
   on_attach = function(client, bufnr)
-    local map = function(mode, lhs, rhs, desc)
-      vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
-    end
-
     vim.api.nvim_buf_create_user_command(
       bufnr,
       'LspClangdSwitchSourceHeader',

@@ -7,7 +7,7 @@
 #    which is governed by the Host API.
 # =============================================================================
 _: {
-  flake.nixosModules.core-console = { config, pkgs, ... }: {
+  flake.nixosModules.core-console = { pkgs, ... }: {
     console = {
       enable = true;
       earlySetup = true;

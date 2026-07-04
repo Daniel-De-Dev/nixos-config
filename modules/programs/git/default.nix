@@ -18,7 +18,7 @@ _: {
 
       # Using a version patched to work respect `GIT_CONFIG_GLOBAL`
       myDelta = pkgs.delta.overrideAttrs (
-        finalAttrs: prevAttrs: {
+        finalAttrs: _prevAttrs: {
           version = "0.19.2";
           src = pkgs.fetchFromGitHub {
             owner = "Daniel-De-Dev";
