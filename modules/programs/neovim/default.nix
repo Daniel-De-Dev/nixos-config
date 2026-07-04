@@ -27,6 +27,7 @@ _: {
         vscode-langservers-extracted
         astro-language-server
         csharp-ls
+        clang-tools
 
         fzf
         ripgrep

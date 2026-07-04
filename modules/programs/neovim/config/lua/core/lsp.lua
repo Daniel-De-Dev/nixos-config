@@ -77,6 +77,7 @@ local servers = {
   astro = 'astro-ls',
   css_variables = 'css-variables-language-server',
   csharp_ls = 'csharp-ls',
+  clangd = 'clangd',
 }
 
 local activation_group =
