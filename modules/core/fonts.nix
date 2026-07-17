@@ -1,50 +1,59 @@
-# =============================================================================
-# Provisions system-wide typography, icon fonts, and rendering fallbacks.
-# =============================================================================
+# Purpose: Provisions system-wide typography, icon fonts, and rendering fallbacks.
+# Scope: Host-agnostic global font configuration.
+# Invariants:
+# - Hardware independent.
 _: {
-  flake.nixosModules.core-fonts = { pkgs, ... }: {
-    fonts = {
-      enableDefaultPackages = true;
+  flake.nixosModules.core-fonts =
+    {
+      lib,
+      config,
+      pkgs,
+      ...
+    }:
+    let
+      cfg = config.my.core.fonts;
+    in
+    {
+      options.my.core.fonts.enable =
+        lib.mkEnableOption "Set preferred system fonts and typography";
 
-      fontDir.enable = true;
-
-      packages = with pkgs; [
-        nerd-fonts.jetbrains-mono
-        font-awesome
-        fira-sans
-        noto-fonts
-        noto-fonts-cjk-sans
-        noto-fonts-color-emoji
-      ];
-
-      fontconfig = {
-        enable = true;
-
-        # Enforce crisp rendering
-        antialias = true;
-        hinting = {
-          enable = true;
-          style = "slight";
-        };
-        subpixel = {
-          rgba = "rgb";
-          lcdfilter = "default";
-        };
-
-        # Explicitly map the installed packages to the system categories
-        defaultFonts = {
-          monospace = [ "JetBrainsMono Nerd Font" ];
-          sansSerif = [
-            "Noto Sans"
-            "JetBrainsMono Nerd Font"
+      config = lib.mkIf cfg.enable {
+        fonts = {
+          enableDefaultPackages = true;
+          fontDir.enable = true;
+          packages = with pkgs; [
+            nerd-fonts.jetbrains-mono
+            font-awesome
+            fira-sans
+            noto-fonts
+            noto-fonts-cjk-sans
+            noto-fonts-color-emoji
           ];
-          serif = [
-            "Noto Serif"
-            "JetBrainsMono Nerd Font"
-          ];
-          emoji = [ "Noto Color Emoji" ];
+          fontconfig = {
+            enable = true;
+            antialias = true;
+            hinting = {
+              enable = true;
+              style = "slight";
+            };
+            subpixel = {
+              rgba = "rgb";
+              lcdfilter = "default";
+            };
+            defaultFonts = {
+              monospace = [ "JetBrainsMono Nerd Font" ];
+              sansSerif = [
+                "Noto Sans"
+                "JetBrainsMono Nerd Font"
+              ];
+              serif = [
+                "Noto Serif"
+                "JetBrainsMono Nerd Font"
+              ];
+              emoji = [ "Noto Color Emoji" ];
+            };
+          };
         };
       };
     };
-  };
 }

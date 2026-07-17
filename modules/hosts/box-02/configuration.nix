@@ -7,6 +7,8 @@
       inputs.spicetify-nix.nixosModules.default # TODO: Integrate this more properly, move to hyprland maybe?
     ];
 
+    my.core.fonts.enable = true;
+
     my.hardware.secure-boot.enable = true;
     my.programs.git.enable = true;
     my.programs.ssh.enable = true;
