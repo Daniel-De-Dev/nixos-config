@@ -28,6 +28,8 @@ _: {
         environment.etc."brave/policies/managed/default.json".text = builtins.toJSON {
           BrowserThemeColor = "#${palette.bg}";
 
+          DeveloperToolsAvailability = 1;
+
           # Workflow & Interface Defaults
           PromptForDownloadLocation = true;
           RestoreOnStartup = 1;

@@ -47,8 +47,7 @@
         }
       ];
 
-      # my.hardware.gpu.vendor = "nvidia";
-      # my.hardware.gpu.multiGpu = true;
+      my.hardware.gpu.vendor = "none";
 
       # my.hardware.monitors = [
       #   {
