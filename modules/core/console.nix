@@ -1,11 +1,3 @@
-# =============================================================================
-# Configures the raw TTY console (pre-graphical environment).
-#
-# DESIGN CONSTRAINTS:
-# 1. Aesthetics (colors, fonts) are hardcoded
-# 2. Physical layout (keymap) is inherited from the XKB configuration,
-#    which is governed by the Host API.
-# =============================================================================
 _: {
   flake.nixosModules.core-console = { pkgs, ... }: {
     console = {
