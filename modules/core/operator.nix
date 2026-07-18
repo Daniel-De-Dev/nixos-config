@@ -1,13 +1,8 @@
-# =============================================================================
-# This module establishes the primary administrative identity and enforces
-# baseline access control policies for all managed machines.
-#
-# DESIGN CONSTRAINTS:
-# 1. This file strictly governs authentication and permissions. Do not
-#    configure user-space software, dotfiles, or shells here.
-# 2. Imperative user management is disabled. All identity changes, authorized
-#    SSH keys, and group policies must be declared here.
-# =============================================================================
+# Purpose: Establish primary administrative identity and baseline access control.
+# Scope: Authentication, permissions, operator identity.
+# Invariants:
+# - No user-space software, dotfiles, or shell configuration.
+# - Imperative user management disabled.
 _: {
   flake.nixosModules.core-operator =
     { lib, config, ... }:
@@ -57,8 +52,8 @@ _: {
               in
               (sshEnabled && passAuthDisabled) -> hasKeys;
             message = ''
-              The primary operator '${cfg.username}' is whitelisted for SSH, but has no 'sshKeys' defined.
-              Since PasswordAuthentication is disabled, this machine will be inaccessible over the network.
+              Primary operator '${cfg.username}' whitelisted for SSH, but `config.my.host.ssh.authorizedKeys` empty.
+              PasswordAuthentication disabled. Machine inaccessible over network.
             '';
           }
           {

@@ -1,13 +1,8 @@
-# =============================================================================
-# This module establishes the base runtime hygiene and lifecycle maintenance
-# for all managed machines.
-#
-# DESIGN CONSTRAINTS:
-# 1. Every configuration inside this file must be fully agnostic
-#    of physical form factors, storage topologies, and graphics hardware.
-# 2. Do not use conditional toggles (`mkIf`) or abstract custom choices here;
-#    a host inherits this entire profile explicitly.
-# =============================================================================
+# Purpose: Base runtime hygiene and lifecycle maintenance.
+# Scope: All managed machines.
+# Invariants:
+# - Fully agnostic of physical form factors, storage topologies, graphics hardware.
+# - No conditional toggles (`mkIf`); host inherits profile explicitly.
 _: {
   flake.nixosModules.core = { pkgs, ... }: {
     nix = {

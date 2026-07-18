@@ -1,10 +1,7 @@
-# =============================================================================
-# Polyfill for NixOS Issue #55674 (Unfree Package Merging)
-#
-# DESIGN CONSTRAINTS:
-# 1. Modules and hosts must append to `my.allowedUnfree` rather than defining
-#    their own `nixpkgs.config.allowUnfreePredicate`.
-# =============================================================================
+# Purpose: Polyfill for NixOS Issue #55674.
+# Scope: Global unfree package whitelist collection.
+# Invariants:
+# - Modules must append to `my.allowedUnfree`.
 _: {
   flake.nixosModules.core-unfree = { lib, config, ... }: {
     options.my.allowedUnfree = lib.mkOption {

@@ -1,35 +1,10 @@
-# =============================================================================
-# Data Bus & Typed Abstraction Layer
-#
-# This module acts as the central nervous system for system configuration.
-# It ingests untyped, sensitive information from an external repository
-# (inputs.privacy) and routes it into a strictly typed, globally accessible API
-# (`config.my.operator` and `config.my.host`).
-#
-# USAGE EXPECTATIONS:
-# 1. The host entry point (`nixosConfigurations."box-01"`) must inject its
-#    identity via `specialArgs = { machine = "box-01"; };`.
-# 2. Downstream modules MUST consume data via the typed API
-#    (e.g., `config.my.operator.username`), NOT the raw privacy bus.
-# 3. If the privacy input is absent, or the machine ID is not found, this
-#    module safely returns fallback defaults to prevent evaluation crashes.
-#
-# EXPECTED PRIVACY REPO SCHEMA (data.nix):
-# {
-#   global = { operator = { username = "..."; hashedPassword = "..."; }; };
-#   hosts = {
-#     "box-01" = { hostName = "..."; hostId = "..."; };
-#   };
-# }
-#
-# DESIGN CONSTRAINTS:
-# 1. The `options` block defines the strict schema contract.
-# 2. The `config` block actively routes `rawPrivacy` into that schema.
-# 3. Downstream hosts can override these values imperatively because they
-#    are mapped using `lib.mkDefault`.
-# =============================================================================
+# Purpose: Route untyped privacy data into typed global API.
+# Scope: Global configuration data bus.
+# Invariants:
+# - Graceful fallback if privacy input missing.
+# - Downstream modules consume typed API, never raw bus.
 _: {
-  flake.nixosModules.core =
+  flake.nixosModules.core-privacy =
     {
       lib,
       inputs,

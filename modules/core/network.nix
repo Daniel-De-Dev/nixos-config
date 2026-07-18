@@ -1,13 +1,5 @@
-# =============================================================================
-# Manages system-wide networking configuration, local machine identity, and
-# kernel-level packet routing optimizations.
-#
-# DESIGN CONSTRAINTS:
-# 1. Enforces strict DNS-over-TLS and DNSSEC using zero-logging,
-#    privacy-respecting European providers.
-# 2. Active mitigation against IP spoofing, routing table manipulation, and
-#    ICMP-based denial of service.
-# =============================================================================
+# Purpose: System-wide networking, machine identity, kernel packet routing.
+# Scope: Host-agnostic network baseline.
 _: {
   flake.nixosModules.core-network =
     { lib, config, ... }:
@@ -37,6 +29,8 @@ _: {
         logReversePathDrops = true;
         logRefusedConnections = false;
       };
+
+      # TODO: Variablize the ip's like ip_quad9 = "...";
 
       # DNS Resolution & Security
       networking.nameservers = [

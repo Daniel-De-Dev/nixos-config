@@ -11,6 +11,7 @@
     modules = [
       self.nixosModules.box-01Configuration
       self.nixosModules.core
+      self.nixosModules.core-privacy
       self.nixosModules.core-unfree
       self.nixosModules.core-network
       self.nixosModules.core-locale

@@ -1,9 +1,5 @@
-# =============================================================================
-# Governs baseline cryptography, access control, and network defense.
-#
-# DESIGN CONSTRAINTS:
-# 1. Ensure minimal overlap with existing moduels
-# =============================================================================
+# Purpose: Governs baseline cryptography, access control, and network defense.
+# Scope: System-wide security defaults.
 _: {
   flake.nixosModules.core-security =
     {

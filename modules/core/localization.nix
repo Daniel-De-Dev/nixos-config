@@ -1,10 +1,3 @@
-# =============================================================================
-# Governs the regional identity, language, and units of the machine.
-#
-# DESIGN CONSTRAINTS:
-# 1. All regional data is considered sensitive and is routed through the
-#    privacy data bus.
-# =============================================================================
 _: {
   flake.nixosModules.core-locale =
     { config, ... }:
