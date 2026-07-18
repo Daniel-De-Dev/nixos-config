@@ -1,11 +1,7 @@
-# =============================================================================
-# Manages power profiles, battery abstraction, and laptop-specific daemon
-# tuning.
-#
-# DESIGN CONSTRAINTS:
-# 1. Opt-in via defining a `batteryId`. If null, the machine is treated as a
-#    desktop.
-# =============================================================================
+# Purpose: Manage power profiles and battery abstraction.
+# Scope: Hardware power state.
+# Invariants:
+# - Opt-in via `batteryId`. Null treats machine as desktop.
 _: {
   flake.nixosModules.hardware-power =
     { lib, config, ... }:

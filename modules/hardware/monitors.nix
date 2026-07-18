@@ -1,12 +1,7 @@
-# =============================================================================
-# Hardware abstraction for physical displays.
-#
-# DESIGN CONSTRAINTS:
-# 1. Sets early KMS video= kernel parameters so TTY and Display Managers
-#    render at the correct resolution and refresh rate before Wayland starts.
-# 2. Provides a centralized data structure for Window Managers to consume for
-#    their own layout configurations.
-# =============================================================================
+# Purpose: Hardware abstraction for physical displays.
+# Scope: Centralized data structure for Window Managers and early KMS rendering.
+# Invariants:
+# - Sets early KMS video kernel parameters for TTY and Display Managers.
 _: {
   flake.nixosModules.hardware-monitors =
     { lib, config, ... }:
@@ -21,7 +16,7 @@ _: {
               name = lib.mkOption {
                 type = lib.types.str;
                 example = "DP-1";
-                description = "The port name of the monitor (e.g., DP-1, HDMI-A-1).";
+                description = "The port name of the monitor (DP-1, HDMI-A-1).";
               };
               primary = lib.mkOption {
                 type = lib.types.bool;

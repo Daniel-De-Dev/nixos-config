@@ -1,10 +1,5 @@
-# =============================================================================
-# Configures system hibernation and resume capabilities.
-#
-# DESIGN CONSTRAINTS:
-# 1. Opt-in via `my.hardware.hibernation.enable`.
-# 2. Requires the host to explicitly map the `resumeDevice` to its physical topology.
-# =============================================================================
+# Purpose: Configures system hibernation and resume capabilities.
+# Scope: System power state and resume targets.
 _: {
   flake.nixosModules.hardware-hibernation =
     { lib, config, ... }:

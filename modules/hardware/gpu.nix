@@ -1,11 +1,8 @@
-# =============================================================================
-# Hardware abstraction for GPU's
-#
-# DESIGN CONSTRAINTS:
-# 1. Desktop environments query `cfg.vendor` to self-configure.
-# 2. Enforces VRAM allocation preservation to survive suspend and hibernation
-#    states.
-# =============================================================================
+# Purpose: Hardware abstraction for GPUs.
+# Scope: GPU configuration and state preservation.
+# Invariants:
+# - Desktop environments query `cfg.vendor` to self-configure.
+# - Enforces VRAM allocation preservation for suspend and hibernation.
 _: {
   flake.nixosModules.hardware-gpu =
     { lib, config, ... }:

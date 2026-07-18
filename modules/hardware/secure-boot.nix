@@ -1,12 +1,8 @@
-# =============================================================================
-# Configures a cryptographic root of trust for the operating system using
-# Lanzaboote. Ensures only signed kernels and initrd images can be booted.
-#
-# DESIGN CONSTRAINTS:
-# 1. This is an opt-in hardware profile. Make sure to do the nessessary setup
-#    (Generate and install keys)
-# 2. Automatically disables standard systemd-boot to prevent conflicts.
-# =============================================================================
+# Purpose: Cryptographic root of trust via Lanzaboote.
+# Scope: Hardware bootloader override.
+# Invariants:
+# - Requires manual sbctl key generation.
+# - Disables standard systemd-boot.
 _: {
   flake.nixosModules.hardware-secure-boot =
     {
