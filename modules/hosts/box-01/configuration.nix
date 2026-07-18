@@ -23,8 +23,11 @@
 
       imports = [
         self.nixosModules.box-01Hardware
-        inputs.spicetify-nix.nixosModules.default # TODO: Integrate this more properly, move to hyprland maybe?
+        inputs.spicetify-nix.nixosModules.default # TODO: Integrate this more properly, move to programs maybe?
       ];
+
+      # TODO: Better bundle and create spesific profiles to easily enable
+      # options that are shared across usecases (desktops, workstations, servers)
 
       my.core.fonts.enable = true;
 
