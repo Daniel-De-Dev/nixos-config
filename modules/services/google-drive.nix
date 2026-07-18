@@ -1,10 +1,7 @@
-# =============================================================================
-# Provides an automated Google Drive mount using rclone.
-#
-# DESIGN CONSTRAINTS:
-# 1. Utilizes full VFS caching for offline reads and background uploads.
-# 2. Automatically provisions the mount point for the primary operator.
-# =============================================================================
+# Purpose: Automated Google Drive mount using rclone.
+# Scope: Primary operator mount provisioning.
+# Invariants:
+# - Requires full VFS caching.
 _: {
   flake.nixosModules.services-google-drive =
     {
