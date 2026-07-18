@@ -1,6 +1,6 @@
-# =============================================================================
-# Configures the Fish shell and sets it as the default interactive environment.
-# =============================================================================
+# Purpose: Configures Fish shell. Sets default interactive environment.
+# Scope: User-space shell configuration.
+# TODO: Fix tty error on launch
 _: {
   flake.nixosModules.programs-fish =
     {

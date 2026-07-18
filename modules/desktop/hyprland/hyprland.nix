@@ -1,3 +1,5 @@
+# Purpose: Configures the Hyprland desktop environment and core Wayland compositor utilities.
+# Scope: GUI environment initialization and visual appearance.
 _: {
   flake.nixosModules.hyprland =
     {
@@ -167,12 +169,6 @@ _: {
       wrappedHyprland = lib.makeOverridable wrapperFnWithArgs { };
     in
     {
-
-      imports = [
-        inputs.self.nixosModules.brave
-        inputs.self.nixosModules.palette
-      ];
-
       options.my.desktop.hyprland.enable =
         lib.mkEnableOption "Hyprland Desktop Environment";
 
@@ -230,7 +226,7 @@ _: {
 
           gpu-screen-recorder-gtk
 
-          proton-vpn # TODO: Integrate this
+          proton-vpn # TODO: Integrate this to start up automatically
 
           ags
           bun # TODO: Look into not having bun installed system wide
@@ -315,7 +311,7 @@ _: {
         };
 
         xdg.mime.defaultApplications = {
-          # route all folder requests to our custom entry
+          # route all folder requests to yazi
           "inode/directory" = "yazi-ghostty.desktop";
           "application/x-directory" = "yazi-ghostty.desktop";
 
@@ -333,31 +329,10 @@ _: {
           "video/mp4" = "brave-browser.desktop";
         };
 
-        # Set standard environment variables so CLI apps know your preference
         environment.variables = {
           TERMINAL = "ghostty";
           FILEMANAGER = "yazi";
         };
-
-        # TODO: Look into moving it into a hardware/audio.nix or soemthing
-        services.pulseaudio.enable = false;
-
-        security.rtkit.enable = true;
-
-        services.pipewire = {
-          enable = true;
-
-          alsa.enable = true;
-          alsa.support32Bit = true;
-
-          pulse.enable = true;
-
-          wireplumber.enable = true;
-        };
-
-        # --- end of audio
-
-        services.playerctld.enable = true;
 
         programs.hyprlock.enable = true;
         programs.gpu-screen-recorder.enable = true;

@@ -28,11 +28,14 @@
 
       my.core.fonts.enable = true;
 
+      my.hardware.audio.enable = true;
       my.hardware.secure-boot.enable = true;
       my.programs.git.enable = true;
       my.programs.ssh.enable = true;
       my.programs.fish.enable = true;
       my.programs.nvim.enable = true;
+
+      my.programs.cli-essentials.enable = true;
 
       my.services.google-drive.enable = true;
       my.services.google-drive.remoteName = "secret-drive";
@@ -43,7 +46,7 @@
 
       my.host.security.strictKernel = true;
 
-      my.desktops.ly.enable = true;
+      my.desktop.ly.enable = true;
       my.desktop.hyprland.enable = true;
 
       my.hardware.hibernation = {

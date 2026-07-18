@@ -1,11 +1,8 @@
-# =============================================================================
-# Manages SSH capabilities. Strictly consumes host-specific routing rules
-# and authorized keys from the external data bus.
-#
-# DESIGN CONSTRAINTS:
-# 1.  Keys must be generated uniquely per host using the provided
-#    `ssh-forge` script to prevent key reuse across the fleet.
-# =============================================================================
+# Purpose: Manages SSH capabilities and key rotation monitor.
+# Scope: Inbound and outbound SSH configuration.
+# Invariants:
+# - Keys must be generated uniquely per host using ssh-forge script.
+# - Strictly consumes routing rules and authorized keys from external data bus.
 _: {
   flake.nixosModules.programs-ssh =
     {

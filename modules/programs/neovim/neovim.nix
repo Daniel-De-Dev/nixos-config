@@ -1,6 +1,5 @@
-# =============================================================================
-# Configures Neovim as the default system editor.
-# =============================================================================
+# Purpose: Configures Neovim as default system editor.
+# Scope: User-space terminal editor configuration.
 _: {
   flake.nixosModules.programs-nvim =
     {

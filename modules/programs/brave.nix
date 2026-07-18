@@ -1,5 +1,5 @@
 _: {
-  flake.nixosModules.brave =
+  flake.nixosModules.programs-brave =
     {
       config,
       lib,
@@ -7,6 +7,7 @@ _: {
       ...
     }:
     let
+      # TODO: Seperate from hyprland? need to reconsider dependencices, add assert to hypeland instead?
       cfg = config.my.desktop.hyprland;
       inherit (cfg) palette;
       protonPass = "ghmbeldphafepmbegfdlkpapadhbakde";
@@ -24,6 +25,8 @@ _: {
             ];
           })
         ];
+
+        # TODO: look into programs.chromium option
 
         environment.etc."brave/policies/managed/default.json".text = builtins.toJSON {
           BrowserThemeColor = "#${palette.bg}";

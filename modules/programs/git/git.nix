@@ -1,6 +1,5 @@
-# =============================================================================
-# Configures the Git version control system and injects signing identities.
-# =============================================================================
+# Purpose: Configures Git version control and injects signing identities.
+# Scope: User-space Git CLI and SSH signing configuration.
 _: {
   flake.nixosModules.programs-git =
     {
@@ -66,7 +65,6 @@ _: {
       # TODO: Fix that typing pass for signing doenst allow for re-attempt or lose commit message
 
       config = lib.mkIf config.my.programs.git.enable {
-        environment.systemPackages = [ pkgs.git ];
         users.users.${opUsername}.packages = [ wm-eval.config.wrappers.git.wrapped ];
 
         warnings = lib.mkIf (opEmail == "operator@localhost") [

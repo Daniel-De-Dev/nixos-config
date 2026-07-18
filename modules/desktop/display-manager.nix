@@ -1,10 +1,8 @@
-# =============================================================================
-# Manages the graphical login manager
-#
-# DESIGN CONSTRAINTS:
-# 1. Enforces a minimal, terminal-based aesthetic via the Ly display manager.
-# 2. Integrates natively with the system's displayManager domain.
-# =============================================================================
+# Purpose: Manages the graphical login manager.
+# Scope: Desktop environment login and session routing.
+# Invariants:
+# - Enforces a minimal, terminal-based aesthetic via Ly.
+# - Integrates natively with the system's displayManager domain.
 _: {
   flake.nixosModules.desktop-display-manager =
     {
@@ -14,13 +12,13 @@ _: {
       ...
     }:
     let
-      cfg = config.my.desktops.ly;
+      cfg = config.my.desktop.ly;
 
       power = config.my.hardware.power;
       hibernate = config.my.hardware.hibernation;
     in
     {
-      options.my.desktops.ly.enable = lib.mkEnableOption "Ly display manager";
+      options.my.desktop.ly.enable = lib.mkEnableOption "Ly display manager";
 
       config = lib.mkIf cfg.enable {
         services.displayManager.ly = {

@@ -19,6 +19,8 @@
       self.nixosModules.core-security
       self.nixosModules.core-console
       self.nixosModules.core-fonts
+      self.nixosModules.core-palette
+      self.nixosModules.hardware-audio
       self.nixosModules.hardware-secure-boot
       self.nixosModules.hardware-hibernation
       self.nixosModules.hardware-power
@@ -32,6 +34,7 @@
       self.nixosModules.programs-ssh
       self.nixosModules.programs-fish
       self.nixosModules.programs-nvim
+      self.nixosModules.programs-brave
     ];
   };
 }

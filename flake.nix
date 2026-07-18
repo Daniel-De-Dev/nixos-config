@@ -45,4 +45,10 @@
         (inputs.import-tree ./modules)
       ];
     };
+
+  # TODO: decide if moving the configs as extenal repos makes sense and just
+  # referenced as a dir
+
+  # TODO: decide if needed to add documentation for the program configs to also
+  # establish spec and where the docs should live
 }
