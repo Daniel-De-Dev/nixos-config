@@ -34,9 +34,19 @@ _: {
       # remote disk module
 
       # TODO: Make the config file encrypted or password protected
+      # There was an password option in config maybe use that and share the file
+      # via sops?
 
       config = lib.mkIf cfg.enable {
+        # TODO: see if needed
+        # boot.kernelModules = [ "fuse" ];
+
         environment.systemPackages = [ pkgs.rclone ];
+
+        programs.fuse = {
+          enable = true;
+          userAllowOther = true;
+        };
 
         systemd.user.services.google-drive-mount = {
           description = "Mount Google Drive via rclone";
@@ -45,7 +55,10 @@ _: {
           after = [ "network-online.target" ];
 
           serviceConfig = {
-            ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.mountPoint}";
+            ExecStartPre = [
+              "-/run/wrappers/bin/fusermount3 -u -q -z ${cfg.mountPoint}"
+              "${pkgs.coreutils}/bin/mkdir -p ${cfg.mountPoint}"
+            ];
             ExecStart = ''
               ${pkgs.rclone}/bin/rclone mount ${cfg.remoteName}: ${cfg.mountPoint} \
                 --vfs-cache-mode full \
@@ -58,7 +71,7 @@ _: {
                 --poll-interval 10s \
                 --log-level INFO
             '';
-            ExecStop = "/run/wrappers/bin/fusermount -u ${cfg.mountPoint}";
+            ExecStop = "-/run/wrappers/bin/fusermount3 -u -q -z ${cfg.mountPoint}";
             Restart = "on-failure";
             RestartSec = "10s";
             Environment = [ "PATH=/run/wrappers/bin/:$PATH" ];
