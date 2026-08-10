@@ -16,6 +16,8 @@ _: {
 
         users.groups.${cfg.username} = { };
 
+        users.groups.fel = { };
+
         users.users.${cfg.username} = {
           isNormalUser = true;
           description = "Primary System Operator";
@@ -30,7 +32,8 @@ _: {
             "render"
             "input"
             "systemd-journal"
-            "dialout"
+            "dialout" # TODO: Move to spesific configurations where this is needed
+            "fel" # TODO: Move to spesific configurations where this is needed
           ];
 
           openssh.authorizedKeys.keys = config.my.host.ssh.authorizedKeys;

@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "PDF Dark",
+  "version": "1.0.0",
+
+  "mime_types_handler": {
+    "application/pdf": {
+      "handler_url": "viewer.html",
+      "can_embed": false
+    }
+  }
+}

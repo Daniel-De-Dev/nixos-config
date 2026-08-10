@@ -8,6 +8,8 @@ applies_to:
 last_updated: 2026-06-20
 ---
 
+<!-- TODO: Clean up documentation to render better and be more readable -->
+
 > [!summary]
 > Entrypoint for NixOS configuration repository. Defines map and retrieval routes.
 

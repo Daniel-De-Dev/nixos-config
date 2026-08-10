@@ -11,6 +11,8 @@ _: {
       cfg = config.my.desktop.hyprland;
       inherit (cfg) palette;
       protonPass = "ghmbeldphafepmbegfdlkpapadhbakde";
+      removeYTShorts = "mgngbgbhliflggkamjnpdmegbkidiapm";
+      pdfDark = ./brave/pdf-dark;
     in
     {
       config = lib.mkIf cfg.enable {
@@ -20,6 +22,7 @@ _: {
             commandLineArgs = [
               "--force-dark-mode"
               "--enable-features=WebUIDarkMode"
+              "--load-extension=${pdfDark}"
               "--ozone-platform-hint=auto"
               "--enable-wayland-ime"
             ];
@@ -27,6 +30,8 @@ _: {
         ];
 
         # TODO: look into programs.chromium option
+
+        # TODO: Move file to be under ./brave/?
 
         environment.etc."brave/policies/managed/default.json".text = builtins.toJSON {
           BrowserThemeColor = "#${palette.bg}";
@@ -68,6 +73,7 @@ _: {
 
           ExtensionInstallForcelist = [
             "${protonPass};https://clients2.google.com/service/update2/crx"
+            "${removeYTShorts};https://clients2.google.com/service/update2/crx"
           ];
 
           ExtensionSettings = {
