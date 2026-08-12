@@ -27,6 +27,8 @@ _: {
         astro-language-server
         csharp-ls
         clang-tools
+        tinymist
+        harper
 
         fzf
         ripgrep

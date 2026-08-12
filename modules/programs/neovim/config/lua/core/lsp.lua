@@ -78,6 +78,8 @@ local servers = {
   css_variables = 'css-variables-language-server',
   csharp_ls = 'csharp-ls',
   clangd = 'clangd',
+  tinymist = 'tinymist',
+  harper = 'harper-ls',
 }
 
 local activation_group =
