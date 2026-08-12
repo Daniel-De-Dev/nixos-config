@@ -35,6 +35,9 @@ _: {
         fd
         wl-clipboard
         xclip
+
+        curl
+        websocat
       ];
 
       darkvoid-nvim = pkgs.vimUtils.buildVimPlugin {
@@ -62,6 +65,7 @@ _: {
         todo-comments-nvim
         harpoon2
         plenary-nvim
+        typst-preview-nvim
       ];
 
       pluginPack = pkgs.runCommand "nvim-packpath" { } ''

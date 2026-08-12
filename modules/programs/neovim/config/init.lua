@@ -18,5 +18,6 @@ require('plugins.lazydev')
 require('plugins.lualine')
 require('plugins.todo-comments')
 require('plugins.harpoon')
+require('plugins.typst-preview')
 
 require('core.lsp')
