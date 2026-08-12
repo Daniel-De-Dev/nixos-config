@@ -61,7 +61,6 @@
 
 [core]
   pager = @delta@
-  editor = @nvim@
   untrackedCache = true
   fsmonitor = true
 

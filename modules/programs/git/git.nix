@@ -42,7 +42,6 @@ _: {
         # INFO: `ssh-forge.sh` ensures to generate this when generating `sign`
         # scoped key
         allowedSignersPath = "~/.ssh/allowed_signers";
-        nvim = "${pkgs.neovim}/bin/nvim";
         delta = "${myDelta}/bin/delta";
         difft = "${pkgs.difftastic}/bin/difft";
       };
