@@ -24,6 +24,8 @@
       };
     };
 
+    # TODO: add gh actions based of flake-base template
+
     privacy = {
       # TODO: Switch to the remote repo
       url = "path:///home/zeus/repos/nixos-privacy";
