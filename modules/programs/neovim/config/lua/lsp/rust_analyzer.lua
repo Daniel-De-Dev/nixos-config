@@ -17,7 +17,12 @@ end
 return {
   cmd = { 'rust-analyzer' },
   filetypes = { 'rust' },
-  root_markers = { 'Cargo.toml', 'rust-project.json', '.git' },
+  root_markers = {
+    'rust-analyzer.toml',
+    'rust-project.json',
+    'Cargo.toml',
+    '.git',
+  },
 
   -- rust-analyzer requires settings to be passed here during the initial handshake
   ---@type table
