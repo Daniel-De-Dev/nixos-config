@@ -5,6 +5,8 @@ opt.mouse = '' -- Disable mouse support
 
 opt.clipboard = vim.env.SSH_TTY and '' or 'unnamedplus'
 
+opt.exrc = true
+
 -- UI & Appearance
 opt.number = true
 opt.relativenumber = true

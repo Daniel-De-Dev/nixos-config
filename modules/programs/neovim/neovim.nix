@@ -84,10 +84,9 @@ _: {
               pathAdd = nvimDeps;
 
               env.HYPRLAND_STUBS.value = "${pkgs.hyprland}/share/hypr/stubs";
+              env.VIMINIT.value = "lua dofile([[${./config}/init.lua]])";
 
               prependFlags = [
-                "-u"
-                "${./config}/init.lua"
                 "--cmd"
                 "set packpath^=${pluginPack}"
                 "--cmd"
