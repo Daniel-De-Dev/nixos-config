@@ -21,7 +21,11 @@
     my.services.google-drive.enable = true;
     my.services.google-drive.remoteName = "secret-drive";
 
-    programs.direnv.enable = true;
+    programs.direnv = {
+      enable = true;
+      silent = true;
+      nix-direnv.enable = true;
+    };
 
     # Bootloader specific to this machine's motherboard
     boot.loader.systemd-boot.enable = true;
@@ -68,9 +72,16 @@
     #   }
     # ];
 
-    # Fixes ACPI instant-wake loop from suspend
     services.udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1483", ATTR{power/wakeup}="disabled"
+      # ======== INFO: MANGOPI FEL PERMSISSION FIX ========
+
+      # Allwinner FEL USB device
+      SUBSYSTEM=="usb", ATTR{idVendor}=="1f3a", ATTR{idProduct}=="efe8", GROUP="fel", MODE="0660"
+
+      # Prevent USB autosuspend during FEL transfers
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1f3a", ATTR{idProduct}=="efe8", TEST=="power/autosuspend", ATTR{power/autosuspend}="-1"
+
+      # ========= END OF MANGOPI FEL =========
     '';
 
     system.stateVersion = "24.11";
