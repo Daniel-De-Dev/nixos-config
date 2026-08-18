@@ -43,6 +43,11 @@
       my.services.google-drive.enable = true;
       my.services.google-drive.remoteName = "secret-drive";
 
+      my.services.vpn = {
+        enable = true;
+        uit.enable = true;
+      };
+
       # Bootloader specific to this machine's motherboard
       boot.loader.systemd-boot.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;

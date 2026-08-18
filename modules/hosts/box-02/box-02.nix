@@ -27,6 +27,7 @@
       self.nixosModules.hardware-gpu
       self.nixosModules.hardware-monitors
       self.nixosModules.services-google-drive
+      self.nixosModules.services-vpn
       self.nixosModules.hyprland
       self.nixosModules.desktop-display-manager
       self.nixosModules.programs-cli-essentials
