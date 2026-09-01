@@ -68,6 +68,8 @@ _: {
                 protocol = "anyconnect";
                 useragent = "AnyConnect";
 
+                cookie-flags = "2";
+
                 mtu = "1200";
               };
 
