@@ -38,11 +38,12 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
     end, { desc = 'Git: Last Hunk (Bottom)' })
 
     -- Hunk actions
+    map('n', '<leader>gs', gs.stage_hunk, { desc = 'Git: Toggle Stage Hunk' })
     map(
-      { 'n', 'v' },
+      'v',
       '<leader>gs',
-      gs.stage_hunk,
-      { desc = 'Git: Toggle Stage Hunk' }
+      function() gs.stage_hunk({ vim.fn.line('.'), vim.fn.line('v') }) end,
+      { desc = 'Git: Stage Selected Lines' }
     )
     map(
       'n',
@@ -50,11 +51,12 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
       gs.stage_buffer,
       { desc = 'Git: Stage Buffer (All)' }
     )
+    map('n', '<leader>gr', gs.reset_hunk, { desc = 'Git: Reset Hunk (Undo)' })
     map(
-      { 'n', 'v' },
+      'v',
       '<leader>gr',
-      gs.reset_hunk,
-      { desc = 'Git: Reset Hunk (Undo)' }
+      function() gs.reset_hunk({ vim.fn.line('.'), vim.fn.line('v') }) end,
+      { desc = 'Git: Reset Selected Lines (Undo)' }
     )
     map(
       'n',
