@@ -22,9 +22,11 @@ _: {
         marksman
         basedpyright
         ruff
+        nodejs # Runtime for project-local JS/TS language server scripts.
         typescript-language-server
         vscode-langservers-extracted
         astro-language-server
+        svelte-language-server
         csharp-ls
         clang-tools
         tinymist

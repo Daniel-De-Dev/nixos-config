@@ -1,12 +1,15 @@
--- Synchronously resolve the local compiler binary if it exists
-local local_cmd = vim.fn.getcwd()
-  .. '/node_modules/.bin/typescript-language-server'
-local executable = vim.uv.fs_stat(local_cmd) and local_cmd
-  or 'typescript-language-server'
-
 ---@type vim.lsp.Config
 return {
-  cmd = { executable, '--stdio' },
+  -- Resolve against the attached project, even when Neovim starts at repo root.
+  cmd = function(dispatchers, config)
+    local executable = 'typescript-language-server'
+    if config.root_dir then
+      local local_cmd = config.root_dir
+        .. '/node_modules/.bin/typescript-language-server'
+      if vim.fn.executable(local_cmd) == 1 then executable = local_cmd end
+    end
+    return vim.lsp.rpc.start({ executable, '--stdio' }, dispatchers)
+  end,
   filetypes = {
     'javascript',
     'javascriptreact',
@@ -15,29 +18,33 @@ return {
   },
   init_options = { hostInfo = 'neovim' },
 
-  -- Native synchronous root resolution with Deno exclusion
+  -- Native root callback with Deno exclusion.
   -- This prevents ts_ls from crashing into denols if you ever open a Deno project.
-  ---@type fun(fname: string, bufnr: integer): string|nil
-  root_dir = function(fname)
+  root_dir = function(bufnr, on_dir)
+    local fname = vim.api.nvim_buf_get_name(bufnr)
     ---@type string|nil
     local deno_root =
       vim.fs.root(fname, { 'deno.json', 'deno.jsonc', 'deno.lock' })
 
     ---@type string|nil
     local project_root = vim.fs.root(fname, {
-      'package-lock.json',
-      'yarn.lock',
-      'pnpm-lock.yaml',
-      'package.json',
+      {
+        'package-lock.json',
+        'yarn.lock',
+        'pnpm-lock.yaml',
+        'bun.lock',
+        'bun.lockb',
+        'package.json',
+      },
       '.git',
     })
 
     -- If a Deno configuration is closer to the current file than a package.json, abort attachment.
     if deno_root and (not project_root or #deno_root >= #project_root) then
-      return nil
+      return
     end
 
-    return project_root or vim.fn.getcwd()
+    on_dir(project_root or vim.fn.getcwd())
   end,
 
   -- Strict Inlay Hints Integration

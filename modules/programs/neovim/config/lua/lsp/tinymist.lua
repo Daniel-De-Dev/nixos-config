@@ -6,5 +6,6 @@ return {
 
   settings = {
     formatterMode = 'typstyle',
+    projectResolution = 'lockDatabase',
   },
 }

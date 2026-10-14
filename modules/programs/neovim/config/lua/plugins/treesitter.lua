@@ -12,6 +12,7 @@ local supported_filetypes = {
   css = true,
   html = true,
   astro = true,
+  svelte = true,
   python = true,
   c_sharp = true,
 }
