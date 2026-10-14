@@ -70,9 +70,16 @@ _: {
         typst-preview-nvim
       ];
 
+      withDependencies =
+        plugins:
+        lib.concatMap (
+          plugin: [ plugin ] ++ withDependencies (plugin.dependencies or [ ])
+        ) plugins;
+      allPlugins = lib.unique (withDependencies myPlugins);
+
       pluginPack = pkgs.runCommand "nvim-packpath" { } ''
         mkdir -p $out/pack/nix/start
-        for plugin in ${builtins.concatStringsSep " " myPlugins}; do
+        for plugin in ${builtins.concatStringsSep " " allPlugins}; do
           ln -s "$plugin" "$out/pack/nix/start/$(basename "$plugin")"
         done
       '';

@@ -24,7 +24,14 @@ vim.api.nvim_create_autocmd({ 'FileType', 'BufWinEnter' }, {
     local ft = vim.bo[args.buf].filetype
     if not supported_filetypes[ft] then return end
 
-    if args.event == 'FileType' then pcall(vim.treesitter.start, args.buf) end
+    -- Retry when entering a buffer if its parser was unavailable at FileType.
+    if not vim.treesitter.highlighter.active[args.buf] then
+      local ok, err = pcall(vim.treesitter.start, args.buf)
+      if not ok then
+        vim.notify_once('Tree-sitter: ' .. tostring(err), vim.log.levels.WARN)
+        return
+      end
+    end
 
     vim.bo[args.buf].indentexpr =
       'v:lua.require\'nvim-treesitter\'.indentexpr()'
