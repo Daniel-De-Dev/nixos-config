@@ -68,13 +68,13 @@ fi
 if [[ $1 == "area" ]]; then
   AREA=$(slurp -b "#00000080" -c "#888888ff" -w 1)
   [[ -z ${AREA} ]] && exit 0
-  wf-recorder -g "${AREA}" "${AUDIO_FLAGS[@]}" -c h264_nvenc -x yuv420p -f "${FILE}" >"${LOG}" 2>&1 &
+  wf-recorder -g "${AREA}" "${AUDIO_FLAGS[@]}" -c "@recordingCodec@" -x yuv420p -f "${FILE}" >"${LOG}" 2>&1 &
 else
   MONITOR=$(hyprctl -j activeworkspace | jq -r '.monitor' 2>/dev/null || true)
   if [[ -z ${MONITOR} || ${MONITOR} == "null" ]]; then
     MONITOR=$(hyprctl -j monitors | jq -r '.[0].name' 2>/dev/null || true)
   fi
-  wf-recorder -o "${MONITOR}" "${AUDIO_FLAGS[@]}" -c h264_nvenc -x yuv420p -f "${FILE}" >"${LOG}" 2>&1 &
+  wf-recorder -o "${MONITOR}" "${AUDIO_FLAGS[@]}" -c "@recordingCodec@" -x yuv420p -f "${FILE}" >"${LOG}" 2>&1 &
 fi
 
 PID=$!

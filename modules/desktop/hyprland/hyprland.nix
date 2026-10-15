@@ -13,6 +13,9 @@ _: {
       cfg = config.my.desktop.hyprland;
       inherit (cfg) palette;
 
+      recordingCodec =
+        if config.my.hardware.gpu.vendor == "nvidia" then "h264_nvenc" else "libx264";
+
       cursorTheme = "Posy_Cursor_Black";
       cursorSize = "24";
 
@@ -45,7 +48,9 @@ _: {
           procps
           davinci-resolve
         ];
-        text = builtins.readFile ./src/scripts/screenrecording.sh;
+        text = builtins.replaceStrings [ "@recordingCodec@" ] [ recordingCodec ] (
+          builtins.readFile ./src/scripts/screenrecording.sh
+        );
       };
 
       scScript = pkgs.writeShellApplication {
