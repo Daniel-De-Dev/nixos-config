@@ -73,6 +73,10 @@
         + lib.concatStringsSep "\n" cfg.extraBindings
       );
 
+      layerRulesLua = pkgs.writeText "layer-rules.lua" (
+        lib.concatStringsSep "\n" cfg.extraLayerRules
+      );
+
       # TODO: Fix or add a way to specify where workspace 1 and 2 intilize to
       # Generate the Lua monitor configurations
       monitorStrings =
@@ -98,6 +102,7 @@
         layoutConfPath = ./src/layout.lua;
         miscConfPath = ./src/misc.lua;
         bindsConfPath = bindsLua;
+        layerRulesConfPath = layerRulesLua;
         monitorsConfPath = monitorsLua;
       };
 
@@ -178,6 +183,11 @@
           type = lib.types.listOf lib.types.str;
           default = [ ];
           description = "Lua bindings appended to the compositor's keybinding configuration.";
+        };
+        extraLayerRules = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Lua layer rules added by desktop integrations.";
         };
       };
 

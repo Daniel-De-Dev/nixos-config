@@ -89,6 +89,10 @@
   background-color: @theme_surfaceActive;
 }
 
+.shell-action-row:disabled {
+  background-color: @theme_background;
+}
+
 .shell-item-icon {
   min-width: 24px;
   margin-right: @spacing-md@;

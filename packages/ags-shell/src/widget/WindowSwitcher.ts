@@ -6,10 +6,6 @@ import ActionRow from "../components/ActionRow";
 import ShellWindow from "../components/ShellWindow";
 import { fuzzyRank } from "../lib/search";
 
-const CONFIG = {
-  window: { width: 560, height: 320 },
-};
-
 function getIcon(cls: string) {
   if (!cls) return "image-x-generic";
   return Gtk.IconTheme.get_default().has_icon(cls) ? cls : "image-x-generic";
@@ -54,9 +50,6 @@ export default function WindowSwitcher() {
     className: "shell-search window-switcher-search",
     placeholderText: "Search open windows...",
     onChanged: (self) => query.set(self.text),
-    onMap: (self) => {
-      self.text = "";
-    },
     onActivate: () => {
       const first = matches.get()[0];
 
@@ -68,8 +61,8 @@ export default function WindowSwitcher() {
 
   const ClientList = new Widget.Scrollable({
     className: "shell-scrollable",
-    widthRequest: CONFIG.window.width,
-    heightRequest: CONFIG.window.height,
+    hexpand: true,
+    vexpand: true,
     child: new Widget.Box({
       vertical: true,
       className: "window-switcher-list",
@@ -90,6 +83,11 @@ export default function WindowSwitcher() {
     subtitle: "Fuzzy search by title or application",
     hint: "Enter to switch · Esc to close",
     initialFocus: SearchInput,
+    onClose: () => {
+      SearchInput.text = "";
+      query.set("");
+      ClientList.get_vadjustment().set_value(0);
+    },
     content: new Widget.Box({
       vertical: true,
       children: [SearchInput, ClientList],

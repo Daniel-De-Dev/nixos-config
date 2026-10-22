@@ -1,5 +1,7 @@
 import { App, Astal, Gdk, Gtk, Widget } from "astal/gtk3";
 
+const PANEL_SIZE = { width: 640, height: 520 };
+
 type ShellWindowProps = {
   name: string;
   title: string;
@@ -7,16 +9,125 @@ type ShellWindowProps = {
   content: Gtk.Widget;
   hint: string;
   initialFocus?: Gtk.Widget;
+  onClose?: () => void;
 };
 
 export default function ShellWindow(props: ShellWindowProps) {
-  return new Widget.Window({
+  props.content.hexpand = true;
+  props.content.vexpand = true;
+
+  const anchor =
+    Astal.WindowAnchor.TOP |
+    Astal.WindowAnchor.BOTTOM |
+    Astal.WindowAnchor.LEFT |
+    Astal.WindowAnchor.RIGHT;
+  const display = Gdk.Display.get_default();
+  let backdrops: Widget.Window[] = [];
+
+  function dismissArea(vertical = false) {
+    return new Widget.EventBox({
+      hexpand: true,
+      vexpand: vertical,
+      visibleWindow: false,
+      events: Gdk.EventMask.BUTTON_PRESS_MASK,
+      onButtonPressEvent: () => {
+        window.hide();
+        return true;
+      },
+    });
+  }
+
+  function clearBackdrops() {
+    for (const backdrop of backdrops) backdrop.destroy();
+    backdrops = [];
+  }
+
+  function syncBackdrops() {
+    clearBackdrops();
+    if (!window.visible || !display) return;
+    const current = window.get_current_monitor();
+    for (let i = 0; i < display.get_n_monitors(); i++) {
+      const monitor = display.get_monitor(i);
+      if (!monitor || monitor === current) continue;
+      backdrops.push(
+        new Widget.Window({
+          name: `${props.name}-backdrop-${i}`,
+          namespace: "nixos-shell",
+          application: App,
+          className: "shell-window",
+          visible: true,
+          gdkmonitor: monitor,
+          anchor,
+          layer: Astal.Layer.OVERLAY,
+          exclusivity: Astal.Exclusivity.IGNORE,
+          keymode: Astal.Keymode.NONE,
+          child: dismissArea(true),
+        }),
+      );
+    }
+  }
+
+  const panel = new Widget.Box({
+    vertical: true,
+    widthRequest: PANEL_SIZE.width,
+    heightRequest: PANEL_SIZE.height,
+    hexpand: false,
+    vexpand: false,
+    halign: Gtk.Align.CENTER,
+    valign: Gtk.Align.CENTER,
+    className: "shell-panel",
+    children: [
+      new Widget.Box({
+        vertical: true,
+        className: "shell-header",
+        children: [
+          new Widget.Label({
+            label: props.title,
+            truncate: true,
+            xalign: 0,
+            className: "shell-heading",
+          }),
+          new Widget.Label({
+            label: props.subtitle,
+            truncate: true,
+            xalign: 0,
+            className: "shell-subtitle",
+          }),
+        ],
+      }),
+      props.content,
+      new Widget.Box({
+        className: "shell-footer",
+        children: [
+          new Widget.Label({
+            label: props.hint,
+            truncate: true,
+            xalign: 0,
+            className: "shell-hint",
+          }),
+        ],
+      }),
+    ],
+  });
+
+  const window = new Widget.Window({
     name: props.name,
+    namespace: "nixos-shell",
     application: App,
     className: "shell-window",
     visible: false,
+    anchor,
+    layer: Astal.Layer.OVERLAY,
+    exclusivity: Astal.Exclusivity.IGNORE,
     keymode: Astal.Keymode.EXCLUSIVE,
-    onMap: () => props.initialFocus?.grab_focus(),
+    onMap: () => {
+      syncBackdrops();
+      props.initialFocus?.grab_focus();
+    },
+    onUnmap: () => {
+      clearBackdrops();
+      props.onClose?.();
+    },
     onKeyPressEvent: (self, event) => {
       if (event.get_keyval()[1] === Gdk.KEY_Escape) {
         self.hide();
@@ -26,36 +137,22 @@ export default function ShellWindow(props: ShellWindowProps) {
     },
     child: new Widget.Box({
       vertical: true,
-      className: "shell-panel",
       children: [
+        dismissArea(true),
         new Widget.Box({
-          vertical: true,
-          className: "shell-header",
-          children: [
-            new Widget.Label({
-              label: props.title,
-              xalign: 0,
-              className: "shell-heading",
-            }),
-            new Widget.Label({
-              label: props.subtitle,
-              xalign: 0,
-              className: "shell-subtitle",
-            }),
-          ],
+          children: [dismissArea(), panel, dismissArea()],
         }),
-        props.content,
-        new Widget.Box({
-          className: "shell-footer",
-          children: [
-            new Widget.Label({
-              label: props.hint,
-              xalign: 0,
-              className: "shell-hint",
-            }),
-          ],
-        }),
+        dismissArea(true),
       ],
     }),
   });
+
+  const added = display?.connect("monitor-added", syncBackdrops);
+  const removed = display?.connect("monitor-removed", syncBackdrops);
+  window.connect("destroy", () => {
+    clearBackdrops();
+    if (added) display?.disconnect(added);
+    if (removed) display?.disconnect(removed);
+  });
+  return window;
 }

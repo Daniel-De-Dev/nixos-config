@@ -5,6 +5,7 @@ dofile('@themeConfPath@')
 dofile('@layoutConfPath@')
 dofile('@miscConfPath@')
 dofile('@bindsConfPath@')
+dofile('@layerRulesConfPath@')
 dofile('@monitorsConfPath@')
 -- dofile("rulesConfPath")
 

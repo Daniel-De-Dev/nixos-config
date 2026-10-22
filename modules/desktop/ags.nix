@@ -67,10 +67,17 @@
     let
       cfg = config.my.desktop.ags;
       # Resolve the installed helper at runtime to keep bundle changes out of Lua.
-      requestCommand = lib.escapeShellArgs [
-        "/run/current-system/sw/bin/ags-shell-request"
-        "window-switcher"
-      ];
+      shellBinding =
+        keys: request: description:
+        let
+          requestCommand = lib.escapeShellArgs [
+            "/run/current-system/sw/bin/ags-shell-request"
+            request
+          ];
+        in
+        "nixos_shortcuts.bind(${builtins.toJSON keys}, hl.dsp.exec_cmd(${builtins.toJSON requestCommand}), ${builtins.toJSON description}, nil, ${
+          lib.boolToString (request != "keybinding-search")
+        })";
     in
     {
       imports = [ self.nixosModules.desktop-ags ];
@@ -81,17 +88,30 @@
         description = "Hyprland key combination, or null to omit the shell binding.";
       };
 
-      config =
-        lib.mkIf
-          (
-            cfg.enable
-            && config.my.desktop.hyprland.enable
-            && cfg.hyprland.keybinding != null
+      options.my.desktop.ags.hyprland.keybindingSearch = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = "SUPER + CTRL + K";
+        description = "Hyprland key combination for shortcut search, or null to omit it.";
+      };
+
+      config = lib.mkIf (cfg.enable && config.my.desktop.hyprland.enable) {
+        my.desktop.hyprland.extraLayerRules = [
+          ''
+            hl.layer_rule({
+              name = "nixos-shell-no-animation",
+              match = { namespace = "^nixos-shell$" },
+              no_anim = true,
+            })
+          ''
+        ];
+        my.desktop.hyprland.extraBindings =
+          lib.optional (cfg.hyprland.keybinding != null) (
+            shellBinding cfg.hyprland.keybinding "window-switcher" "Windows: Switch window"
           )
-          {
-            my.desktop.hyprland.extraBindings = [
-              "hl.bind(${builtins.toJSON cfg.hyprland.keybinding}, hl.dsp.exec_cmd(${builtins.toJSON requestCommand}))"
-            ];
-          };
+          ++ lib.optional (cfg.hyprland.keybindingSearch != null) (
+            shellBinding cfg.hyprland.keybindingSearch "keybinding-search"
+              "Help: Search keyboard shortcuts"
+          );
+      };
     };
 }
