@@ -53,6 +53,7 @@ _: {
           wantedBy = [ "default.target" ];
           wants = [ "network-online.target" ];
           after = [ "network-online.target" ];
+          path = [ "/run/wrappers" ];
 
           serviceConfig = {
             ExecStartPre = [
@@ -74,7 +75,6 @@ _: {
             ExecStop = "-/run/wrappers/bin/fusermount3 -u -q -z ${cfg.mountPoint}";
             Restart = "on-failure";
             RestartSec = "10s";
-            Environment = [ "PATH=/run/wrappers/bin/:$PATH" ];
           };
         };
       };

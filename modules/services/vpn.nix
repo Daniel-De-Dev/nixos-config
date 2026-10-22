@@ -64,7 +64,7 @@ _: {
               vpn = {
                 service-type = "org.freedesktop.NetworkManager.openconnect";
 
-                gateway = "vpn.uit.no/employee";
+                gateway = "vpn.uit.no/student";
                 protocol = "anyconnect";
                 useragent = "AnyConnect";
 

@@ -5,8 +5,7 @@ EDITOR="gimp"
 mkdir -p "${DIR}"
 
 # $1 will be "screen", "area", or "active"
-MODE=$1
-[[ -z ${MODE} ]] && MODE="screen"
+MODE="${1:-screen}"
 
 OUT_FILE=$(grimblast --freeze save "${MODE}" "${DIR}/${FILE}")
 

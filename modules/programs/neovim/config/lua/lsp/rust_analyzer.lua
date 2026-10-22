@@ -26,7 +26,7 @@ return {
 
   -- rust-analyzer requires settings to be passed here during the initial handshake
   ---@type table
-  initializationOptions = {
+  init_options = {
     lens = {
       debug = { enable = true },
       enable = true,

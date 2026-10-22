@@ -12,6 +12,7 @@ _: {
       inherit (cfg) palette;
       protonPass = "ghmbeldphafepmbegfdlkpapadhbakde";
       removeYTShorts = "mgngbgbhliflggkamjnpdmegbkidiapm";
+      metamask = "nkbihfbeogaeaoehlefnkodbefgpgknn";
       pdfDark = ./brave/pdf-dark;
     in
     {
@@ -74,6 +75,7 @@ _: {
           ExtensionInstallForcelist = [
             "${protonPass};https://clients2.google.com/service/update2/crx"
             "${removeYTShorts};https://clients2.google.com/service/update2/crx"
+            "${metamask};https://clients2.google.com/service/update2/crx"
           ];
 
           ExtensionSettings = {

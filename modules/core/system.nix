@@ -47,11 +47,7 @@ _: {
           Type = "oneshot";
           IOSchedulingClass = "idle";
           CPUSchedulingPolicy = "idle";
-          ExecStart = [
-            "${pkgs.nix}/bin/nix-store"
-            "--verify"
-            "--check-contents"
-          ];
+          ExecStart = "${pkgs.nix}/bin/nix-store --verify --check-contents";
         };
       };
 

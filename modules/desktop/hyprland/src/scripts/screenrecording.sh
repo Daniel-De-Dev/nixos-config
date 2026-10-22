@@ -4,7 +4,7 @@ INFO="${HOME}/.cache/screenrecording.info"
 VIDEO_EDITOR="davinci-resolve"
 LOG="/tmp/screenrecording.log"
 
-mkdir -p "${DIR}"
+mkdir -p "${DIR}" "${HOME}/.cache"
 
 # Stop existing recording if lock file exists
 if [[ -f ${LOCK} ]]; then
@@ -65,8 +65,10 @@ else
   AUDIO_FLAGS=()
 fi
 
-if [[ $1 == "area" ]]; then
-  AREA=$(slurp -b "#00000080" -c "#888888ff" -w 1)
+if [[ ${1:-screen} == "area" ]]; then
+  if ! AREA=$(slurp -b "#00000080" -c "#888888ff" -w 1); then
+    exit 0
+  fi
   [[ -z ${AREA} ]] && exit 0
   wf-recorder -g "${AREA}" "${AUDIO_FLAGS[@]}" -c "@recordingCodec@" -x yuv420p -f "${FILE}" >"${LOG}" 2>&1 &
 else

@@ -1,7 +1,7 @@
 local supported_filetypes = {
   lua = true,
   nix = true,
-  bash = true,
+  sh = true,
   markdown = true,
   gitconfig = true,
   diff = true,
@@ -14,7 +14,7 @@ local supported_filetypes = {
   astro = true,
   svelte = true,
   python = true,
-  c_sharp = true,
+  cs = true,
 }
 
 vim.api.nvim_create_autocmd({ 'FileType', 'BufWinEnter' }, {

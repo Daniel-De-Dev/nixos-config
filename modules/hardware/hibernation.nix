@@ -33,9 +33,9 @@ _: {
 
         # Power & Sleep Behavior
         services.logind.settings.Login = {
-          handleLidSwitch = "suspend-then-hibernate";
-          idleAction = "suspend-then-hibernate";
-          idleActionSec = "30m";
+          HandleLidSwitch = "suspend-then-hibernate";
+          IdleAction = "suspend-then-hibernate";
+          IdleActionSec = "30m";
         };
         systemd.sleep.settings.Sleep = {
           HibernateDelaySec = "30m";

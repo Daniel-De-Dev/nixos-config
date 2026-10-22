@@ -1,30 +1,22 @@
--- Dynamically swaps the Python executable path and restarts the analysis tree
+---@param client vim.lsp.Client
+---@param path string
+local function configure_python(client, path)
+  client.settings.python = client.settings.python or {}
+  client.settings.python.pythonPath = path
+  client:notify('workspace/didChangeConfiguration', {
+    settings = client.settings,
+  })
+end
+
 ---@param command { args: string }
 local function set_python_path(command)
-  local path = command.args
-
-  ---@type vim.lsp.Client[]
   local clients = vim.lsp.get_clients({
     bufnr = vim.api.nvim_get_current_buf(),
     name = 'basedpyright',
   })
 
   for _, client in ipairs(clients) do
-    if client.settings then
-      ---@diagnostic disable-next-line: param-type-mismatch
-      client.settings.basedpyright = vim.tbl_deep_extend(
-        'force',
-        client.settings.basedpyright or {},
-        { pythonPath = path }
-      )
-    else
-      client.config.settings = vim.tbl_deep_extend(
-        'force',
-        client.config.settings,
-        { basedpyright = { pythonPath = path } }
-      )
-    end
-    client:notify('workspace/didChangeConfiguration', { settings = nil })
+    configure_python(client, command.args)
   end
 end
 
@@ -50,16 +42,19 @@ return {
     },
   },
   on_init = function(client)
-    local venv_path = vim.fn.getcwd() .. '/.venv/bin/python'
-    if vim.uv.fs_stat(venv_path) then
-      local current_settings = client.config.settings.basedpyright or {}
-      ---@cast current_settings table
-      current_settings.pythonPath = venv_path
-      client.config.settings.basedpyright = current_settings
+    if client.settings.python and client.settings.python.pythonPath then
+      return
+    end
+
+    local root = client.root_dir or client.config.root_dir
+    if not root then return end
+
+    local venv_path = root .. '/.venv/bin/python'
+    if vim.fn.executable(venv_path) == 1 then
+      configure_python(client, venv_path)
     end
   end,
   on_attach = function(_, bufnr)
-    -- Provides the runtime command to point the LSP at a specific /nix/store/ python binary
     vim.api.nvim_buf_create_user_command(
       bufnr,
       'LspPyrightSetPythonPath',
