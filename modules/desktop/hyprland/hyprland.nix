@@ -69,6 +69,8 @@ _: {
           [ "@scScriptPath@" "@recScriptPath@" ]
           [ "${scScript}/bin/screenshot" "${recScript}/bin/screenrecording" ]
           (builtins.readFile ./src/binds.lua)
+        + "\n"
+        + lib.concatStringsSep "\n" cfg.extraBindings
       );
 
       # TODO: Fix or add a way to specify where workspace 1 and 2 intilize to
@@ -98,12 +100,6 @@ _: {
         bindsConfPath = bindsLua;
         monitorsConfPath = monitorsLua;
       };
-
-      # TODO: Implement the AGS config (figure out if to keep it here to seperate it)
-      agsConfig = pkgs.runCommand "ags-config" { } ''
-        mkdir -p $out
-        # cp -r {./src/ags}/* $out/
-      '';
 
       # TODO: Fix hyprlock
 
@@ -174,8 +170,14 @@ _: {
       wrappedHyprland = lib.makeOverridable wrapperFnWithArgs { };
     in
     {
-      options.my.desktop.hyprland.enable =
-        lib.mkEnableOption "Hyprland Desktop Environment";
+      options.my.desktop.hyprland = {
+        enable = lib.mkEnableOption "Hyprland Desktop Environment";
+        extraBindings = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Lua bindings appended to the compositor's keybinding configuration.";
+        };
+      };
 
       config = lib.mkIf cfg.enable {
         programs.hyprland = {
@@ -191,6 +193,9 @@ _: {
           "posy-cursors"
           "davinci-resolve"
         ];
+        # TODO: Remove user apps to debloat hyprland and move to programs instead?
+        # Then move to a interface where pkgs for browser terminal ect can be provided
+        # dynamically and then substituted into the config.
         environment.systemPackages = with pkgs; [
           posy-cursors
           awww # TODO: FIX that it starts
@@ -232,10 +237,6 @@ _: {
           gpu-screen-recorder-gtk
 
           proton-vpn # TODO: Integrate this to start up automatically
-
-          ags
-          bun # TODO: Look into not having bun installed system wide
-          dart-sass
         ];
 
         environment.sessionVariables = {
@@ -284,16 +285,6 @@ _: {
               Restart = "on-failure";
               RestartSec = 1;
               TimeoutStopSec = 10;
-            };
-          };
-
-          ags = {
-            description = "Aylur's Gtk Shell";
-            partOf = [ "graphical-session.target" ];
-            wantedBy = [ "graphical-session.target" ];
-            serviceConfig = {
-              ExecStart = "${pkgs.ags}/bin/ags -c ${agsConfig}/config.js";
-              Restart = "on-failure";
             };
           };
         };

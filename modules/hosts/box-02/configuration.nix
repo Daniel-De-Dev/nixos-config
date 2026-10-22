@@ -35,6 +35,7 @@
 
     my.desktop.ly.enable = true;
     my.desktop.hyprland.enable = true;
+    my.desktop.ags.enable = true;
 
     # my.hardware.hibernation = {
     #   enable = true;

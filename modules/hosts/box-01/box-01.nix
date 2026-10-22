@@ -29,6 +29,7 @@
       self.nixosModules.services-google-drive
       self.nixosModules.services-vpn
       self.nixosModules.hyprland
+      self.nixosModules.desktop-ags-hyprland
       self.nixosModules.desktop-display-manager
       self.nixosModules.programs-cli-essentials
       self.nixosModules.programs-git

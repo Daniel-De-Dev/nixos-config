@@ -1,0 +1,29 @@
+.window-switcher-container {
+  padding: 24px;
+  background-color: #1e1e2e;
+  border: 2px solid #89b4fa;
+  border-radius: 16px;
+}
+
+.window-switcher-search {
+  min-height: 40px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  padding: 0 12px;
+  border-radius: 8px;
+}
+
+.window-switcher-item {
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.window-switcher-icon {
+  font-size: 24px;
+}
+
+.window-switcher-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #cdd6f4;
+}

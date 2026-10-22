@@ -1,6 +1,7 @@
 # Purpose: Configures Fish shell. Sets default interactive environment.
 # Scope: User-space shell configuration.
 # TODO: Fix tty error on launch
+# TODO: Fix ` ~ ect work on fish shells
 _: {
   flake.nixosModules.programs-fish =
     {
@@ -60,7 +61,7 @@ _: {
               ];
 
               # Lock the Starship configuration globally
-              env.STARSHIP_CONFIG.value = toString ./starship.toml;
+              env.STARSHIP_CONFIG.value = "${./starship.toml}";
 
               # Pass a single, clean instruction to bypass bash array issues
               prependFlags = [

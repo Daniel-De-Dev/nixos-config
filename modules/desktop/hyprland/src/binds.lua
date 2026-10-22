@@ -10,18 +10,12 @@ hl.bind(
 hl.bind(mainMod .. ' + CTRL + E', hl.dsp.exec_cmd('bemoji -t -n -c'))
 hl.bind(mainMod .. ' + CTRL + C', hl.dsp.exec_cmd('qalculate-qt'))
 
--- Dynamic Fuzzy Navigation
--- Open the fuzzy window tracker to search/type keywords for open applications
-hl.bind(mainMod .. ' + Tab', hl.dsp.exec_cmd('ags -t \'window-switcher\''))
--- Open the standard application launcher
-hl.bind(
-  mainMod .. ' + CTRL + RETURN',
-  hl.dsp.exec_cmd('ags -t \'app-launcher\'')
-)
--- Open a unified clipboard manager menu inside AGS
-hl.bind(mainMod .. ' + V', hl.dsp.exec_cmd('ags -t \'clipboard-manager\''))
+-- Planned AGS navigation bindings
+-- TODO: SUPER + CTRL + RETURN: open the application launcher.
+-- TODO: SUPER + V: open the clipboard manager.
+
 -- TODO: Add fuzzy navigation for keybind search for hyprland keybinds
--- SUPER + S + K
+-- SUPER + S + K (MAYBE COULD USE COMMENT FIELD TO PROGRMATICALLY COLLECT ALL INFO?)
 
 -- Window State Management
 hl.bind(mainMod .. ' + Q', hl.dsp.window.close(hl.get_active_window()))
@@ -160,8 +154,9 @@ hl.bind('XF86ScreenSaver', hl.dsp.exec_cmd('loginctl lock-session'))
 -- Utilities, Scripts & Visuals
 hl.bind(mainMod .. ' + CTRL + L', hl.dsp.exec_cmd('loginctl lock-session'))
 
-hl.bind(mainMod .. ' + CTRL + Q', hl.dsp.exec_cmd('ags -t \'powermenu\''))
-hl.bind(mainMod .. ' + SHIFT + B', hl.dsp.exec_cmd('killall -SIGUSR2 ags'))
+-- Planned AGS utility bindings
+-- TODO: SUPER + CTRL + Q: open the power menu.
+-- TODO: SUPER + SHIFT + B: reload or restart the shell.
 
 hl.bind(mainMod .. ' + SHIFT + W', hl.dsp.exec_cmd('awww random'))
 hl.bind(mainMod .. ' + CTRL + W', hl.dsp.exec_cmd('awww select'))
@@ -217,15 +212,5 @@ hl.bind(
   end
 )
 
--- Show keyboard layout on key press
-hl.bind(
-  mainMod .. ' + I',
-  hl.dsp.exec_cmd('ags -r "App.openWindow(\'layout-preview\')"')
-)
-
--- Hide keyboard layout on key release
-hl.bind(
-  mainMod .. ' + I',
-  hl.dsp.exec_cmd('ags -r "App.closeWindow(\'layout-preview\')"'),
-  { release = true }
-)
+-- Planned AGS keyboard preview binding
+-- TODO: SUPER + I: show the layout preview on press and hide it on release.
