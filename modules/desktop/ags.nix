@@ -3,6 +3,15 @@
   perSystem = { config, pkgs, ... }: {
     packages.ags-shell = pkgs.callPackage ../../packages/ags-shell { };
     checks.ags-shell = config.packages.ags-shell;
+    checks.ags-search =
+      pkgs.runCommand "ags-search-tests" { nativeBuildInputs = [ pkgs.nodejs_24 ]; }
+        ''
+          mkdir -p src
+          cp -R ${../../packages/ags-shell/src/lib} src/lib
+          cp -R ${../../packages/ags-shell/tests} tests
+          node --experimental-strip-types --test tests/*.test.mjs
+          touch "$out"
+        '';
   };
 
   flake.nixosModules.desktop-ags =

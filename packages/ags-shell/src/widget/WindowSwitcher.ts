@@ -4,6 +4,7 @@ import GLib from "gi://GLib?version=2.0";
 import { Variable, bind } from "astal";
 import ActionRow from "../components/ActionRow";
 import ShellWindow from "../components/ShellWindow";
+import { fuzzyRank } from "../lib/search";
 
 const CONFIG = {
   window: { width: 560, height: 320 },
@@ -32,14 +33,11 @@ function focusClient(client: Hyprland.Client) {
   });
 }
 
-function ClientItem(client: Hyprland.Client, query: Variable<string>) {
+function ClientItem(client: Hyprland.Client) {
   return ActionRow({
     title: client.title || client.class,
     description: client.class,
     icon: getIcon(client.class),
-    visible: bind(query).as((q) =>
-      (client.title + client.class).toLowerCase().includes(q.toLowerCase()),
-    ),
     onActivate: () => focusClient(client),
   });
 }
@@ -47,16 +45,20 @@ function ClientItem(client: Hyprland.Client, query: Variable<string>) {
 export default function WindowSwitcher() {
   const hypr = Hyprland.get_default();
   const query = Variable("");
+  const matches = Variable.derive(
+    [bind(hypr, "clients"), query],
+    (clients, q) => fuzzyRank(clients, q, (c) => `${c.title} ${c.class}`),
+  );
 
   const SearchInput = new Widget.Entry({
     className: "shell-search window-switcher-search",
     placeholderText: "Search open windows...",
     onChanged: (self) => query.set(self.text),
+    onMap: (self) => {
+      self.text = "";
+    },
     onActivate: () => {
-      const q = query.get().toLowerCase();
-      const first = hypr
-        .get_clients()
-        .find((c) => (c.title + c.class).toLowerCase().includes(q));
+      const first = matches.get()[0];
 
       if (first) {
         focusClient(first);
@@ -71,28 +73,21 @@ export default function WindowSwitcher() {
     child: new Widget.Box({
       vertical: true,
       className: "window-switcher-list",
-      children: bind(hypr, "clients").as((clients) => [
-        ...clients.map((client) => ClientItem(client, query)),
+      children: bind(matches).as((clients) => [
+        ...clients.map(ClientItem),
         new Widget.Label({
           label: "No matching windows",
           className: "window-switcher-empty",
-          visible: bind(query).as(
-            (q) =>
-              !clients.some((client) =>
-                (client.title + client.class)
-                  .toLowerCase()
-                  .includes(q.toLowerCase()),
-              ),
-          ),
+          visible: clients.length === 0,
         }),
       ]),
     }),
   });
 
-  return ShellWindow({
+  const window = ShellWindow({
     name: "window-switcher",
     title: "Open windows",
-    subtitle: "Search by title or application",
+    subtitle: "Fuzzy search by title or application",
     hint: "Enter to switch · Esc to close",
     initialFocus: SearchInput,
     content: new Widget.Box({
@@ -100,4 +95,9 @@ export default function WindowSwitcher() {
       children: [SearchInput, ClientList],
     }),
   });
+  window.connect("destroy", () => {
+    matches.drop();
+    query.drop();
+  });
+  return window;
 }
