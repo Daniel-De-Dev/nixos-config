@@ -5,7 +5,7 @@ topic: repository_index
 status: active
 applies_to:
   - /**
-last_updated: 2026-06-20
+last_updated: 2026-10-22
 ---
 
 <!-- TODO: Clean up documentation to render better and be more readable -->
@@ -22,7 +22,7 @@ Governs global NixOS configuration. Applies to entire repository.
 - Architecture: [Overview](architecture/ARCH-001-system_architecture.md)
 - Rules: `docs/rules/`
 - Decisions: `docs/decisions/`
-- Runbooks: `docs/runbooks/`
+- Guides: [Identity data and public evaluation](guides/privacy.md)
 
 # 3. Reading Order
 
