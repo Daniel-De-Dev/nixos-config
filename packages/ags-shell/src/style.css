@@ -1,29 +1,127 @@
-.window-switcher-container {
-  padding: 24px;
-  background-color: #1e1e2e;
-  border: 2px solid #89b4fa;
-  border-radius: 16px;
+/* Shared shell primitives. Geometry placeholders are rendered by Nix. */
+.shell-window {
+  background-color: transparent;
+  box-shadow: none;
 }
 
-.window-switcher-search {
+.shell-panel {
+  padding: @spacing-xl@;
+  color: @theme_text;
+  background-color: @theme_background;
+  border: 1px solid @theme_border;
+  border-radius: 0;
+  font-family: @fontSans@, sans-serif;
+  font-size: @fontSize-body@;
+}
+
+.shell-header {
+  margin-bottom: @spacing-lg@;
+}
+
+.shell-heading {
+  color: @theme_text;
+  font-size: @fontSize-heading@;
+  font-weight: 600;
+}
+
+.shell-subtitle,
+.shell-item-description,
+.shell-hint {
+  color: @theme_textMuted;
+  font-size: @fontSize-small@;
+  font-weight: normal;
+}
+
+.shell-subtitle,
+.shell-item-description {
+  margin-top: @spacing-xs@;
+}
+
+.shell-search {
   min-height: 40px;
-  font-size: 16px;
-  margin-bottom: 16px;
-  padding: 0 12px;
-  border-radius: 8px;
+  padding: 0 @spacing-md@;
+  color: @theme_text;
+  background-color: @theme_surface;
+  background-image: none;
+  border: 0;
+  border-bottom: 1px solid @theme_borderStrong;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: @fontSize-body@;
+  outline-style: none;
 }
 
-.window-switcher-item {
-  padding: 12px;
-  border-radius: 8px;
+.shell-search:focus {
+  border-color: @theme_focus;
+  box-shadow: inset 0 0 0 1px @theme_focus;
 }
 
-.window-switcher-icon {
+.shell-search selection {
+  color: @theme_text;
+  background-color: @theme_surfaceSelected;
+}
+
+.shell-action-row {
+  min-height: 48px;
+  padding: @spacing-sm@ @spacing-md@;
+  color: @theme_text;
+  background-color: @theme_surface;
+  background-image: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+  outline-style: none;
+}
+
+.shell-action-row:hover {
+  background-color: @theme_surfaceHover;
+}
+
+.shell-action-row:focus {
+  background-color: @theme_surfaceSelected;
+  border-left-color: @theme_accent;
+  box-shadow: inset 0 0 0 1px @theme_focus;
+}
+
+.shell-action-row:active {
+  background-color: @theme_surfaceActive;
+}
+
+.shell-item-icon {
+  min-width: 24px;
+  margin-right: @spacing-md@;
+  color: @theme_text;
   font-size: 24px;
 }
 
-.window-switcher-label {
-  font-size: 14px;
-  font-weight: bold;
-  color: #cdd6f4;
+.shell-item-title {
+  color: @theme_text;
+  font-size: @fontSize-body@;
+  font-weight: 600;
+}
+
+.shell-footer {
+  margin-top: @spacing-lg@;
+  padding-top: @spacing-md@;
+  border-top: 1px solid @theme_border;
+}
+
+.shell-scrollable,
+.shell-scrollable viewport {
+  background-color: transparent;
+  border: 0;
+}
+
+.shell-scrollable scrollbar {
+  background-color: transparent;
+}
+
+.shell-scrollable scrollbar slider {
+  min-width: 4px;
+  min-height: 24px;
+  background-color: @theme_borderStrong;
+  border: 0;
+  border-radius: 0;
 }

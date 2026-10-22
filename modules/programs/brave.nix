@@ -1,4 +1,4 @@
-_: {
+{ self, ... }: {
   flake.nixosModules.programs-brave =
     {
       config,
@@ -9,13 +9,15 @@ _: {
     let
       # TODO: Seperate from hyprland? need to reconsider dependencices, add assert to hypeland instead?
       cfg = config.my.desktop.hyprland;
-      inherit (cfg) palette;
+      colors = config.my.theme.colors;
       protonPass = "ghmbeldphafepmbegfdlkpapadhbakde";
       removeYTShorts = "mgngbgbhliflggkamjnpdmegbkidiapm";
       metamask = "nkbihfbeogaeaoehlefnkodbefgpgknn";
       pdfDark = ./brave/pdf-dark;
     in
     {
+      imports = [ self.nixosModules.core-palette ];
+
       config = lib.mkIf cfg.enable {
 
         environment.systemPackages = with pkgs; [
@@ -35,7 +37,7 @@ _: {
         # TODO: Move file to be under ./brave/?
 
         environment.etc."brave/policies/managed/default.json".text = builtins.toJSON {
-          BrowserThemeColor = "#${palette.bg}";
+          BrowserThemeColor = colors.background;
 
           DeveloperToolsAvailability = 1;
 

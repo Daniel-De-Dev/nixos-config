@@ -16,11 +16,15 @@
       cfg = config.my.desktop.ags;
     in
     {
+      imports = [ self.nixosModules.core-palette ];
+
       options.my.desktop.ags = {
         enable = lib.mkEnableOption "the AGS desktop shell";
         package = lib.mkOption {
           type = lib.types.package;
-          default = self.packages.${pkgs.stdenv.hostPlatform.system}.ags-shell;
+          default = self.packages.${pkgs.stdenv.hostPlatform.system}.ags-shell.override {
+            theme = config.my.theme;
+          };
           description = "Shell package providing ags-shell and ags-shell-request.";
         };
       };
@@ -34,6 +38,7 @@
         ];
 
         environment.systemPackages = [ cfg.package ];
+        fonts.packages = config.my.theme.fonts.packages;
 
         systemd.user.services.ags = {
           description = "AGS desktop shell";

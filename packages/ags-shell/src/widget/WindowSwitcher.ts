@@ -1,12 +1,12 @@
-import { App, Astal, Gdk, Gtk, Widget } from "astal/gtk3";
+import { App, Gtk, Widget } from "astal/gtk3";
 import Hyprland from "gi://AstalHyprland";
 import GLib from "gi://GLib?version=2.0";
 import { Variable, bind } from "astal";
+import ActionRow from "../components/ActionRow";
+import ShellWindow from "../components/ShellWindow";
 
 const CONFIG = {
-  window: { width: 600, height: 400 },
-  list: { spacing: 8 },
-  item: { spacing: 12 },
+  window: { width: 560, height: 320 },
 };
 
 function getIcon(cls: string) {
@@ -33,27 +33,14 @@ function focusClient(client: Hyprland.Client) {
 }
 
 function ClientItem(client: Hyprland.Client, query: Variable<string>) {
-  return new Widget.Button({
-    className: "window-switcher-item",
+  return ActionRow({
+    title: client.title || client.class,
+    description: client.class,
+    icon: getIcon(client.class),
     visible: bind(query).as((q) =>
       (client.title + client.class).toLowerCase().includes(q.toLowerCase()),
     ),
-    onClicked: () => focusClient(client),
-    child: new Widget.Box({
-      spacing: CONFIG.item.spacing,
-      children: [
-        new Widget.Icon({
-          icon: getIcon(client.class),
-          className: "window-switcher-icon",
-        }),
-        new Widget.Label({
-          label: `${client.class} - ${client.title}`,
-          truncate: true,
-          xalign: 0,
-          className: "window-switcher-label",
-        }),
-      ],
-    }),
+    onActivate: () => focusClient(client),
   });
 }
 
@@ -62,8 +49,8 @@ export default function WindowSwitcher() {
   const query = Variable("");
 
   const SearchInput = new Widget.Entry({
-    className: "window-switcher-search",
-    placeholderText: "Search applications...",
+    className: "shell-search window-switcher-search",
+    placeholderText: "Search open windows...",
     onChanged: (self) => query.set(self.text),
     onActivate: () => {
       const q = query.get().toLowerCase();
@@ -78,30 +65,38 @@ export default function WindowSwitcher() {
   });
 
   const ClientList = new Widget.Scrollable({
+    className: "shell-scrollable",
     widthRequest: CONFIG.window.width,
     heightRequest: CONFIG.window.height,
     child: new Widget.Box({
       vertical: true,
-      spacing: CONFIG.list.spacing,
-      children: bind(hypr, "clients").as((clients) =>
-        clients.map((client) => ClientItem(client, query)),
-      ),
+      className: "window-switcher-list",
+      children: bind(hypr, "clients").as((clients) => [
+        ...clients.map((client) => ClientItem(client, query)),
+        new Widget.Label({
+          label: "No matching windows",
+          className: "window-switcher-empty",
+          visible: bind(query).as(
+            (q) =>
+              !clients.some((client) =>
+                (client.title + client.class)
+                  .toLowerCase()
+                  .includes(q.toLowerCase()),
+              ),
+          ),
+        }),
+      ]),
     }),
   });
 
-  return new Widget.Window({
+  return ShellWindow({
     name: "window-switcher",
-    application: App,
-    visible: false,
-    keymode: Astal.Keymode.EXCLUSIVE,
-    onKeyPressEvent: (self, event) => {
-      if (event.get_keyval()[1] === Gdk.KEY_Escape) {
-        self.hide();
-      }
-    },
-    child: new Widget.Box({
+    title: "Open windows",
+    subtitle: "Search by title or application",
+    hint: "Enter to switch · Esc to close",
+    initialFocus: SearchInput,
+    content: new Widget.Box({
       vertical: true,
-      className: "window-switcher-container",
       children: [SearchInput, ClientList],
     }),
   });

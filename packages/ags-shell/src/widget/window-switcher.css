@@ -1,0 +1,12 @@
+.window-switcher-search {
+  margin-bottom: @spacing-md@;
+}
+
+.window-switcher-list .shell-action-row {
+  margin-bottom: @spacing-xs@;
+}
+
+.window-switcher-empty {
+  padding: @spacing-xl@;
+  color: @theme_textMuted;
+}

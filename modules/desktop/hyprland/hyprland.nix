@@ -1,6 +1,6 @@
 # Purpose: Configures the Hyprland desktop environment and core Wayland compositor utilities.
 # Scope: GUI environment initialization and visual appearance.
-_: {
+{ self, ... }: {
   flake.nixosModules.hyprland =
     {
       config,
@@ -11,7 +11,7 @@ _: {
     }:
     let
       cfg = config.my.desktop.hyprland;
-      inherit (cfg) palette;
+      colors = config.my.theme.colors;
 
       recordingCodec =
         if config.my.hardware.gpu.vendor == "nvidia" then "h264_nvenc" else "libx264";
@@ -29,8 +29,8 @@ _: {
       };
 
       themeLua = pkgs.replaceVars ./src/theme.lua {
-        activeColor = "0xff${palette.active_border}";
-        inactiveColor = "0xff${palette.inactive_border}";
+        activeColor = "0xff${lib.removePrefix "#" colors.focus}";
+        inactiveColor = "0xff${lib.removePrefix "#" colors.border}";
       };
 
       recScript = pkgs.writeShellApplication {
@@ -170,6 +170,8 @@ _: {
       wrappedHyprland = lib.makeOverridable wrapperFnWithArgs { };
     in
     {
+      imports = [ self.nixosModules.core-palette ];
+
       options.my.desktop.hyprland = {
         enable = lib.mkEnableOption "Hyprland Desktop Environment";
         extraBindings = lib.mkOption {
