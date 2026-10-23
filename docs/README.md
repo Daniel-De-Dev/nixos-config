@@ -22,7 +22,8 @@ Governs global NixOS configuration. Applies to entire repository.
 - Architecture: [Overview](architecture/ARCH-001-system_architecture.md)
 - Rules: `docs/rules/`
 - Decisions: `docs/decisions/`
-- Guides: [Identity data and public evaluation](guides/privacy.md)
+- Guides:
+  - [Identity data and public evaluation](guides/privacy.md)
 
 # 3. Reading Order
 

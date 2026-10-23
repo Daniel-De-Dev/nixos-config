@@ -1,11 +1,46 @@
-# Purpose: Configures Neovim as default system editor.
+# Purpose: Expose the shared Neovim wrapper as a standalone app and system editor.
 # Scope: User-space terminal editor configuration.
-_: {
+{ inputs, ... }: {
+  perSystem = { config, pkgs, ... }: {
+    packages.nvim = pkgs.callPackage ../../../packages/neovim {
+      inherit (inputs) wrapper-manager;
+      appName = "nixos-config-nvim";
+    };
+
+    apps.nvim = {
+      type = "app";
+      meta.description = "Run Neovim with this repository's configuration";
+      program = "${config.packages.nvim}/bin/nvim";
+    };
+
+    checks.nvim = pkgs.runCommand "nvim-startup-check" { } ''
+      export HOME="$TMPDIR/home"
+      export XDG_CONFIG_HOME="$HOME/.config"
+      export XDG_DATA_HOME="$HOME/.local/share"
+      export XDG_STATE_HOME="$HOME/.local/state"
+      export XDG_CACHE_HOME="$HOME/.cache"
+
+      # Catch accidental loading of the recipient's configuration or plugins.
+      mkdir -p "$XDG_CONFIG_HOME/nvim" \
+        "$XDG_DATA_HOME/nvim/site/pack/test/start/unexpected/plugin"
+      echo 'error("unexpected user init.lua")' > "$XDG_CONFIG_HOME/nvim/init.lua"
+      echo 'vim.g.unexpected_user_plugin = true' \
+        > "$XDG_DATA_HOME/nvim/site/pack/test/start/unexpected/plugin/init.lua"
+      export NVIM_APPNAME=nvim
+      export VIMINIT='lua error("unexpected VIMINIT")'
+
+      # Use a loopback RPC server where the build environment restricts Unix sockets.
+      ${config.packages.nvim}/bin/nvim --headless -n -i NONE \
+        --cmd "lua vim.g.fzf_lua_server = vim.fn.serverstart('127.0.0.1:0')" \
+        -c "lua dofile('${../../../tests/neovim.lua}')"
+      touch "$out"
+    '';
+  };
+
   flake.nixosModules.programs-nvim =
     {
       pkgs,
       config,
-      inputs,
       lib,
       machine,
       ...
@@ -13,101 +48,9 @@ _: {
     let
       cfg = config.my.programs.nvim;
       opUsername = config.my.operator.username;
-
-      nvimDeps = with pkgs; [
-        lua-language-server
-        nixd
-        bash-language-server
-        fish-lsp
-        marksman
-        basedpyright
-        ruff
-        nodejs # Runtime for project-local JS/TS language server scripts.
-        typescript-language-server
-        vscode-langservers-extracted
-        astro-language-server
-        svelte-language-server
-        csharp-ls
-        clang-tools
-        tinymist
-        harper
-
-        fzf
-        ripgrep
-        fd
-        wl-clipboard
-        xclip
-
-        curl
-        websocat
-      ];
-
-      darkvoid-nvim = pkgs.vimUtils.buildVimPlugin {
-        name = "darkvoid.nvim";
-        src = pkgs.fetchFromGitHub {
-          owner = "darkvoid-theme";
-          repo = "darkvoid.nvim";
-          rev = "45be993a5617e05811b6b293c05e6aded7003cc9";
-          hash = "sha256-JiNuv1TAIHVL9tGNDYC0RdRPnI9l4zn+ZCU9B4wQ5Io=";
-        };
+      wrappedNvim = pkgs.callPackage ../../../packages/neovim {
+        inherit (inputs) wrapper-manager;
       };
-
-      myPlugins = with pkgs.vimPlugins; [
-        gitsigns-nvim
-        darkvoid-nvim
-        nvim-treesitter.withAllGrammars
-        mini-nvim
-        fzf-lua
-        blink-cmp
-        oil-nvim
-        fidget-nvim
-        lazydev-nvim
-        lualine-nvim
-        nvim-web-devicons
-        todo-comments-nvim
-        harpoon2
-        plenary-nvim
-        typst-preview-nvim
-      ];
-
-      withDependencies =
-        plugins:
-        lib.concatMap (
-          plugin: [ plugin ] ++ withDependencies (plugin.dependencies or [ ])
-        ) plugins;
-      allPlugins = lib.unique (withDependencies myPlugins);
-
-      pluginPack = pkgs.runCommand "nvim-packpath" { } ''
-        mkdir -p $out/pack/nix/start
-        for plugin in ${builtins.concatStringsSep " " allPlugins}; do
-          ln -s "$plugin" "$out/pack/nix/start/$(basename "$plugin")"
-        done
-      '';
-
-      wm-eval = inputs.wrapper-manager.lib {
-        inherit pkgs;
-        modules = [
-          {
-            wrappers.nvim = {
-              basePackage = pkgs.neovim-unwrapped;
-              pathAdd = nvimDeps;
-
-              env.HYPRLAND_STUBS.value = "${pkgs.hyprland}/share/hypr/stubs";
-              env.VIMINIT.value = "lua dofile([[${./config}/init.lua]])";
-
-              prependFlags = [
-                "--cmd"
-                "set packpath^=${pluginPack}"
-                "--cmd"
-                "set rtp^=${./config}"
-              ];
-            };
-          }
-        ];
-      };
-
-      wrappedNvim = wm-eval.config.wrappers.nvim.wrapped;
-
     in
     {
       options.my.programs.nvim.enable = lib.mkEnableOption "Neovim";
