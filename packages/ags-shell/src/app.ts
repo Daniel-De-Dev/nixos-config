@@ -2,8 +2,13 @@ import { App } from "astal/gtk3";
 import GLib from "gi://GLib?version=2.0";
 import WindowSwitcher from "./widget/WindowSwitcher";
 import KeybindingSearch from "./widget/KeybindingSearch";
+import ApplicationLauncher from "./widget/ApplicationLauncher";
 
-const windows = ["window-switcher", "keybinding-search"];
+const windows = [
+  "window-switcher",
+  "keybinding-search",
+  "application-launcher",
+];
 
 App.start({
   instanceName: "nixos-shell",
@@ -24,5 +29,6 @@ App.start({
   main() {
     WindowSwitcher();
     KeybindingSearch();
+    ApplicationLauncher();
   },
 });

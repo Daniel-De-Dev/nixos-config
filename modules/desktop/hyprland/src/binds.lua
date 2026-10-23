@@ -1,3 +1,4 @@
+-- TODO: Fix lsp to work on lua files here (via a repo specific .nvim file?)
 local mainMod = 'SUPER'
 
 -- Expose supported actions to shortcut search alongside their keyboard bindings.
@@ -65,6 +66,7 @@ bind(
   hl.dsp.exec_cmd('ghostty --class=\'yazi-files\' -e yazi'),
   'Applications: Open file manager'
 )
+-- TODO: Fix "No suitable picker tool found."
 bind(
   mainMod .. ' + CTRL + E',
   hl.dsp.exec_cmd('bemoji -t -n -c'),
@@ -77,7 +79,6 @@ bind(
 )
 
 -- Planned AGS navigation bindings
--- TODO: SUPER + CTRL + RETURN: open the application launcher.
 -- TODO: SUPER + V: open the clipboard manager.
 
 -- Window State Management

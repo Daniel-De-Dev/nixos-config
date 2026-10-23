@@ -23,6 +23,12 @@
     }:
     let
       cfg = config.my.desktop.ags;
+      profileBinDirs = lib.concatMapStringsSep ":" (
+        profile: "${profile}/bin"
+      ) config.environment.profiles;
+      profileDataDirs = lib.concatMapStringsSep ":" (
+        profile: "${profile}/share"
+      ) config.environment.profiles;
     in
     {
       imports = [ self.nixosModules.core-palette ];
@@ -54,8 +60,16 @@
           partOf = [ "graphical-session.target" ];
           wantedBy = [ "graphical-session.target" ];
           after = [ "graphical-session.target" ];
+          # User services do not source the NixOS shell environment.
+          # GIO needs profile binaries for Exec/TryExec and terminal discovery.
+          # Expand profile variables before GIO caches its application search paths.
+          script = ''
+            XDG_STATE_HOME="''${XDG_STATE_HOME:-$HOME/.local/state}"
+            export PATH="${profileBinDirs}:$PATH"
+            export XDG_DATA_DIRS="${profileDataDirs}:''${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+            exec ${lib.getExe cfg.package}
+          '';
           serviceConfig = {
-            ExecStart = lib.getExe cfg.package;
             Restart = "on-failure";
           };
         };
@@ -94,6 +108,12 @@
         description = "Hyprland key combination for shortcut search, or null to omit it.";
       };
 
+      options.my.desktop.ags.hyprland.applicationLauncher = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = "SUPER + CTRL + Return";
+        description = "Hyprland key combination for the application launcher, or null to omit it.";
+      };
+
       config = lib.mkIf (cfg.enable && config.my.desktop.hyprland.enable) {
         my.desktop.hyprland.extraLayerRules = [
           ''
@@ -111,6 +131,10 @@
           ++ lib.optional (cfg.hyprland.keybindingSearch != null) (
             shellBinding cfg.hyprland.keybindingSearch "keybinding-search"
               "Help: Search keyboard shortcuts"
+          )
+          ++ lib.optional (cfg.hyprland.applicationLauncher != null) (
+            shellBinding cfg.hyprland.applicationLauncher "application-launcher"
+              "Applications: Open application launcher"
           );
       };
     };

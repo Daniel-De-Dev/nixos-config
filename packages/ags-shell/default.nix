@@ -4,7 +4,9 @@
   astal,
   makeWrapper,
   symlinkJoin,
+  uwsm,
   writeText,
+  xdg-terminal-exec,
   theme ? import ../../themes/carbon-dark.nix,
 }:
 let
@@ -29,7 +31,7 @@ let
     '';
 
     meta = {
-      description = "AGS desktop shell with a Hyprland window switcher";
+      description = "AGS desktop shell with window, shortcut, and application search";
       mainProgram = "ags-shell";
       platforms = lib.platforms.linux;
     };
@@ -40,7 +42,14 @@ symlinkJoin {
   paths = [ bundle ];
   nativeBuildInputs = [ makeWrapper ];
   postBuild = ''
-    wrapProgram "$out/bin/ags-shell" --set AGS_SHELL_STYLE ${stylesheet}
+    wrapProgram "$out/bin/ags-shell" \
+      --set AGS_SHELL_STYLE ${stylesheet} \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          uwsm
+          xdg-terminal-exec
+        ]
+      }
   '';
   passthru = { inherit bundle stylesheet; };
   inherit (bundle) meta;

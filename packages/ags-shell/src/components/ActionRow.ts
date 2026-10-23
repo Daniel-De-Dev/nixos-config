@@ -1,10 +1,11 @@
 import { Widget } from "astal/gtk3";
 import { type Binding } from "astal";
+import type Gio from "gi://Gio?version=2.0";
 
 type ActionRowProps = {
   title: string;
   description: string;
-  icon: string;
+  icon: string | Gio.Icon;
   visible?: boolean | Binding<boolean>;
   onActivate: () => void;
 };
@@ -17,7 +18,9 @@ export default function ActionRow(props: ActionRowProps) {
     child: new Widget.Box({
       children: [
         new Widget.Icon({
-          icon: props.icon,
+          ...(typeof props.icon === "string"
+            ? { icon: props.icon }
+            : { gicon: props.icon }),
           className: "shell-item-icon",
         }),
         new Widget.Box({
