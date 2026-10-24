@@ -1,5 +1,7 @@
 -- TODO: Fix lsp to work on lua files here (via a repo specific .nvim file?)
 local mainMod = 'SUPER'
+local nested = '@nested@' == 'true'
+local applications = dofile('@applicationsPath@')
 
 -- Expose supported actions to shortcut search alongside their keyboard bindings.
 local actions = {}
@@ -30,6 +32,9 @@ end
 
 -- Keep the complete key specification in native descriptions, including keycodes.
 local function bind(keys, action, description, flags, launchable)
+  if nested then
+    keys = keys:gsub('SUPER', os.getenv('NIXOS_HYPRLAND_MOD') or 'SUPER')
+  end
   flags = flags or {}
   flags.description = description .. ' [' .. keys .. ']'
   local binding = hl.bind(keys, action, flags)
@@ -54,27 +59,35 @@ end
 
 nixos_shortcuts.bind = bind
 
+-- Hardware/session controls belong to the installed desktop.
+local function host_bind(...)
+  if not nested then return bind(...) end
+end
+
 -- Core Applications
 bind(
   mainMod .. ' + RETURN',
-  hl.dsp.exec_cmd('ghostty'),
+  hl.dsp.exec_cmd(applications.terminal),
   'Applications: Open terminal'
 )
-bind(mainMod .. ' + B', hl.dsp.exec_cmd('brave'), 'Applications: Open browser')
+bind(
+  mainMod .. ' + B',
+  hl.dsp.exec_cmd(applications.browser),
+  'Applications: Open browser'
+)
 bind(
   mainMod .. ' + E',
-  hl.dsp.exec_cmd('ghostty --class=\'yazi-files\' -e yazi'),
+  hl.dsp.exec_cmd(applications.fileManager),
   'Applications: Open file manager'
 )
--- TODO: Fix "No suitable picker tool found."
 bind(
   mainMod .. ' + CTRL + E',
-  hl.dsp.exec_cmd('bemoji -t -n -c'),
+  hl.dsp.exec_cmd(applications.emojiPicker),
   'Applications: Open emoji picker'
 )
 bind(
   mainMod .. ' + CTRL + C',
-  hl.dsp.exec_cmd('qalculate-qt'),
+  hl.dsp.exec_cmd(applications.calculator),
   'Applications: Open calculator'
 )
 
@@ -249,50 +262,54 @@ bind(
 
 -- System & Media Controls (Function Keys)
 -- Volume
-bind(
+host_bind(
   'XF86AudioRaiseVolume',
   hl.dsp.exec_cmd('wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+'),
   'Audio: Raise volume',
   { repeating = true }
 )
-bind(
+host_bind(
   'XF86AudioLowerVolume',
   hl.dsp.exec_cmd('wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-'),
   'Audio: Lower volume',
   { repeating = true }
 )
-bind(
+host_bind(
   'XF86AudioMute',
   hl.dsp.exec_cmd('wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle'),
   'Audio: Toggle output mute'
 )
-bind(
+host_bind(
   'XF86AudioMicMute',
   hl.dsp.exec_cmd('wpctl set-mute @DEFAULT_SOURCE@ toggle'),
   'Audio: Toggle microphone mute'
 )
 
 -- Media Control
-bind(
+host_bind(
   'XF86AudioPlay',
   hl.dsp.exec_cmd('playerctl play-pause'),
   'Media: Play or pause'
 )
-bind('XF86AudioPause', hl.dsp.exec_cmd('playerctl pause'), 'Media: Pause')
-bind('XF86AudioNext', hl.dsp.exec_cmd('playerctl next'), 'Media: Next track')
-bind(
+host_bind('XF86AudioPause', hl.dsp.exec_cmd('playerctl pause'), 'Media: Pause')
+host_bind(
+  'XF86AudioNext',
+  hl.dsp.exec_cmd('playerctl next'),
+  'Media: Next track'
+)
+host_bind(
   'XF86AudioPrev',
   hl.dsp.exec_cmd('playerctl previous'),
   'Media: Previous track'
 )
 
 -- Brightness
-bind(
+host_bind(
   'XF86MonBrightnessUp',
   hl.dsp.exec_cmd('brightnessctl -q s +10%'),
   'Display: Increase brightness'
 )
-bind(
+host_bind(
   'XF86MonBrightnessDown',
   hl.dsp.exec_cmd('brightnessctl -q s 10%-'),
   'Display: Decrease brightness'
@@ -301,17 +318,17 @@ bind(
 -- Misc
 bind(
   'XF86Calculator',
-  hl.dsp.exec_cmd('qalculate-qt'),
+  hl.dsp.exec_cmd(applications.calculator),
   'Applications: Open calculator'
 )
-bind(
+host_bind(
   'XF86ScreenSaver',
   hl.dsp.exec_cmd('loginctl lock-session'),
   'Session: Lock screen'
 )
 
 -- Utilities, Scripts & Visuals
-bind(
+host_bind(
   mainMod .. ' + CTRL + L',
   hl.dsp.exec_cmd('loginctl lock-session'),
   'Session: Lock screen'
@@ -353,12 +370,12 @@ bind(
 )
 
 -- Screen Recording
-bind(
+host_bind(
   mainMod .. ' + ALT + R',
   hl.dsp.exec_cmd(rec_script .. ' screen'),
   'Capture: Record screen or stop recording'
 )
-bind(
+host_bind(
   mainMod .. ' + SHIFT + R',
   hl.dsp.exec_cmd(rec_script .. ' area'),
   'Capture: Record area or stop recording'

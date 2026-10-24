@@ -10,6 +10,10 @@ import { fuzzyRank } from "../lib/search";
 const MAX_RESULTS = 50;
 
 export default function ApplicationLauncher() {
+  const directLaunch = GLib.getenv("AGS_SHELL_LAUNCH_MODE") === "direct";
+  const logHint = directLaunch
+    ? "See the terminal that started the preview."
+    : "See the AGS service journal.";
   const query = Variable("");
   const applications = Variable<Application<Gio.AppInfo>[]>([]);
   const error = Variable("");
@@ -24,9 +28,7 @@ export default function ApplicationLauncher() {
       error.set("");
     } catch (err) {
       applications.set([]);
-      error.set(
-        "Cannot read installed applications. See the AGS service journal.",
-      );
+      error.set(`Cannot read installed applications. ${logHint}`);
       console.error(`Cannot read installed applications: ${err}`);
     }
   }
@@ -41,17 +43,28 @@ export default function ApplicationLauncher() {
         display?.sync();
         if (!application.id)
           throw new Error("Application has no desktop entry ID");
-        // Give the application its own unit instead of inheriting ags.service.
-        // UWSM also honors Terminal=true and the desktop entry's Exec fields.
-        await execAsync(["uwsm", "app", "-t", "service", "--", application.id]);
+        if (directLaunch) {
+          // Keep the nested display and private bus; GIO handles desktop entries.
+          const context = display?.get_app_launch_context() ?? null;
+          if (!application.info.launch([], context))
+            throw new Error("The desktop entry could not be launched");
+        } else {
+          // Installed sessions keep applications independent of ags.service.
+          await execAsync([
+            "uwsm",
+            "app",
+            "-t",
+            "service",
+            "--",
+            application.id,
+          ]);
+        }
       } catch (err) {
         console.error(
           `Cannot launch ${application.id || application.name}: ${err}`,
         );
         window.show();
-        error.set(
-          `Cannot start ${application.name}. See the AGS service journal.`,
-        );
+        error.set(`Cannot start ${application.name}. ${logHint}`);
       } finally {
         launching = false;
       }

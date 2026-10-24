@@ -4,6 +4,7 @@
       config,
       lib,
       pkgs,
+      inputs,
       ...
     }:
     let
@@ -13,24 +14,17 @@
       protonPass = "ghmbeldphafepmbegfdlkpapadhbakde";
       removeYTShorts = "mgngbgbhliflggkamjnpdmegbkidiapm";
       metamask = "nkbihfbeogaeaoehlefnkodbefgpgknn";
-      pdfDark = ./brave/pdf-dark;
+      desktop = import ../../packages/hyprland/desktop.nix {
+        inherit lib pkgs;
+        inherit (inputs) wrapper-manager;
+      };
     in
     {
       imports = [ self.nixosModules.core-palette ];
 
       config = lib.mkIf cfg.enable {
 
-        environment.systemPackages = with pkgs; [
-          (brave.override {
-            commandLineArgs = [
-              "--force-dark-mode"
-              "--enable-features=WebUIDarkMode"
-              "--load-extension=${pdfDark}"
-              "--ozone-platform-hint=auto"
-              "--enable-wayland-ime"
-            ];
-          })
-        ];
+        environment.systemPackages = [ desktop.applications.browser ];
 
         # TODO: look into programs.chromium option
 

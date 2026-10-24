@@ -80,62 +80,19 @@
     { config, lib, ... }:
     let
       cfg = config.my.desktop.ags;
-      # Resolve the installed helper at runtime to keep bundle changes out of Lua.
-      shellBinding =
-        keys: request: description:
-        let
-          requestCommand = lib.escapeShellArgs [
-            "/run/current-system/sw/bin/ags-shell-request"
-            request
-          ];
-        in
-        "nixos_shortcuts.bind(${builtins.toJSON keys}, hl.dsp.exec_cmd(${builtins.toJSON requestCommand}), ${builtins.toJSON description}, nil, ${
-          lib.boolToString (request != "keybinding-search")
-        })";
+      integration = import ../../packages/ags-shell/hyprland.nix { inherit lib; };
     in
     {
       imports = [ self.nixosModules.desktop-ags ];
 
-      options.my.desktop.ags.hyprland.keybinding = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = "SUPER + Tab";
-        description = "Hyprland key combination, or null to omit the shell binding.";
-      };
-
-      options.my.desktop.ags.hyprland.keybindingSearch = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = "SUPER + CTRL + K";
-        description = "Hyprland key combination for shortcut search, or null to omit it.";
-      };
-
-      options.my.desktop.ags.hyprland.applicationLauncher = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = "SUPER + CTRL + Return";
-        description = "Hyprland key combination for the application launcher, or null to omit it.";
-      };
+      options.my.desktop.ags.hyprland = integration.options;
 
       config = lib.mkIf (cfg.enable && config.my.desktop.hyprland.enable) {
-        my.desktop.hyprland.extraLayerRules = [
-          ''
-            hl.layer_rule({
-              name = "nixos-shell-no-animation",
-              match = { namespace = "^nixos-shell$" },
-              no_anim = true,
-            })
-          ''
-        ];
-        my.desktop.hyprland.extraBindings =
-          lib.optional (cfg.hyprland.keybinding != null) (
-            shellBinding cfg.hyprland.keybinding "window-switcher" "Windows: Switch window"
-          )
-          ++ lib.optional (cfg.hyprland.keybindingSearch != null) (
-            shellBinding cfg.hyprland.keybindingSearch "keybinding-search"
-              "Help: Search keyboard shortcuts"
-          )
-          ++ lib.optional (cfg.hyprland.applicationLauncher != null) (
-            shellBinding cfg.hyprland.applicationLauncher "application-launcher"
-              "Applications: Open application launcher"
-          );
+        my.desktop.hyprland = integration.render {
+          # Keep style/bundle changes out of the installed compositor's Lua.
+          command = "/run/current-system/sw/bin/ags-shell-request";
+          bindings = cfg.hyprland;
+        };
       };
     };
 }

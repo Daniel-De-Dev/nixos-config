@@ -1,6 +1,48 @@
 # Purpose: Configures the Hyprland desktop environment and core Wayland compositor utilities.
 # Scope: GUI environment initialization and visual appearance.
-{ self, ... }: {
+{ self, inputs, ... }: {
+  perSystem =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    let
+      defaults = import ../../../packages/hyprland/desktop.nix {
+        inherit lib pkgs;
+        inherit (inputs) wrapper-manager;
+      };
+      desktopPkgs = import inputs.nixpkgs {
+        inherit (pkgs.stdenv.hostPlatform) system;
+        config.allowUnfreePredicate =
+          pkg: builtins.elem (lib.getName pkg) defaults.unfree;
+      };
+    in
+    {
+      packages.hyprland = desktopPkgs.callPackage ../../../packages/hyprland {
+        inherit (inputs) wrapper-manager;
+        agsShell = config.packages.ags-shell;
+      };
+      apps.hyprland = {
+        type = "app";
+        meta.description = "Test the desktop configuration inside a Wayland window on NixOS";
+        program = "${config.packages.hyprland}/bin/hyprland-preview";
+      };
+      checks.hyprland = config.packages.hyprland;
+      checks.hyprland-config = pkgs.runCommand "hyprland-preview-config-check" { } ''
+        export XDG_RUNTIME_DIR="$TMPDIR"
+        for modifier in SUPER ALT; do
+          export NIXOS_HYPRLAND_MOD="$modifier"
+          ${pkgs.hyprland}/bin/Hyprland --i-am-really-stupid --verify-config \
+            -c ${config.packages.hyprland.config}
+          ${pkgs.luajit}/bin/luajit ${../../../tests/hyprland-preview.lua} \
+            ${config.packages.hyprland.config} "$modifier"
+        done
+        touch "$out"
+      '';
+    };
+
   flake.nixosModules.hyprland =
     {
       config,
@@ -12,25 +54,20 @@
     let
       cfg = config.my.desktop.hyprland;
       colors = config.my.theme.colors;
+      desktop = import ../../../packages/hyprland/desktop.nix {
+        inherit lib pkgs;
+        inherit (inputs) wrapper-manager;
+      };
 
       recordingCodec =
         if config.my.hardware.gpu.vendor == "nvidia" then "h264_nvenc" else "libx264";
 
-      cursorTheme = "Posy_Cursor_Black";
-      cursorSize = "24";
-
-      inputConf = pkgs.replaceVars ./src/input.lua {
-        kbLayout = config.services.xserver.xkb.layout;
-      };
+      cursorTheme = desktop.cursor.name;
+      cursorSize = toString desktop.cursor.size;
 
       autostartConf = pkgs.replaceVars ./src/autostart.lua {
         inherit cursorTheme;
         inherit cursorSize;
-      };
-
-      themeLua = pkgs.replaceVars ./src/theme.lua {
-        activeColor = "0xff${lib.removePrefix "#" colors.focus}";
-        inactiveColor = "0xff${lib.removePrefix "#" colors.border}";
       };
 
       recScript = pkgs.writeShellApplication {
@@ -53,30 +90,6 @@
         );
       };
 
-      scScript = pkgs.writeShellApplication {
-        name = "screenshot";
-        runtimeInputs = with pkgs; [
-          gimp
-          grimblast
-          wl-clipboard
-          libnotify
-        ];
-        text = builtins.readFile ./src/scripts/screenshot.sh;
-      };
-
-      bindsLua = pkgs.writeText "binds.lua" (
-        builtins.replaceStrings
-          [ "@scScriptPath@" "@recScriptPath@" ]
-          [ "${scScript}/bin/screenshot" "${recScript}/bin/screenrecording" ]
-          (builtins.readFile ./src/binds.lua)
-        + "\n"
-        + lib.concatStringsSep "\n" cfg.extraBindings
-      );
-
-      layerRulesLua = pkgs.writeText "layer-rules.lua" (
-        lib.concatStringsSep "\n" cfg.extraLayerRules
-      );
-
       # TODO: Fix or add a way to specify where workspace 1 and 2 intilize to
       # Generate the Lua monitor configurations
       monitorStrings =
@@ -90,25 +103,34 @@
             "hl.monitor({ output = \"\", mode = \"preferred\", position = \"auto\", scale = 1 })"
           ];
 
-      # Write the generated Lua config to the store
-      monitorsLua = pkgs.writeText "monitors.lua" ''
-        ${builtins.concatStringsSep "\n" monitorStrings}
-      '';
-
-      hyprlandConf = pkgs.replaceVars ./src/hyprland.lua {
-        inputConfPath = inputConf;
-        autostartConfPath = autostartConf;
-        themeConfPath = themeLua;
-        layoutConfPath = ./src/layout.lua;
-        miscConfPath = ./src/misc.lua;
-        bindsConfPath = bindsLua;
-        layerRulesConfPath = layerRulesLua;
-        monitorsConfPath = monitorsLua;
+      hyprlandConf = import ../../../packages/hyprland/config.nix {
+        inherit
+          lib
+          pkgs
+          desktop
+          colors
+          autostartConf
+          ;
+        kbLayout = config.services.xserver.xkb.layout;
+        recScriptPath = "${recScript}/bin/screenrecording";
+        monitorRules = monitorStrings;
+        inherit (cfg) extraBindings extraLayerRules;
       };
 
       # TODO: Fix hyprlock
 
       # TODO: Add keyboard layout short cut and add keybind shortcut for hyprland
+
+      sessionEnv = lib.mapAttrs (_: value: { inherit value; }) (
+        desktop.environment
+        // {
+          XDG_CURRENT_DESKTOP = "Hyprland";
+          XDG_SESSION_TYPE = "wayland";
+          XDG_SESSION_DESKTOP = "Hyprland";
+          QT_QPA_PLATFORM = "wayland;xcb";
+          GDK_BACKEND = "wayland,x11,*";
+        }
+      );
 
       # NixOS needs to apply custom overrides
       wrapperFn =
@@ -124,17 +146,7 @@
                   basePackage = base;
 
                   programs.Hyprland = {
-                    env = {
-                      XDG_CURRENT_DESKTOP.value = "Hyprland";
-                      XDG_SESSION_TYPE.value = "wayland";
-                      XDG_SESSION_DESKTOP.value = "Hyprland";
-                      QT_QPA_PLATFORM.value = "wayland;xcb";
-                      GDK_BACKEND.value = "wayland,x11,*";
-
-                      # Cursor
-                      XCURSOR_THEME.value = cursorTheme;
-                      XCURSOR_SIZE.value = cursorSize;
-                    };
+                    env = sessionEnv;
                     prependFlags = [
                       "-c"
                       "${hyprlandConf}"
@@ -142,17 +154,7 @@
                   };
 
                   programs.start-hyprland = {
-                    env = {
-                      XDG_CURRENT_DESKTOP.value = "Hyprland";
-                      XDG_SESSION_TYPE.value = "wayland";
-                      XDG_SESSION_DESKTOP.value = "Hyprland";
-                      QT_QPA_PLATFORM.value = "wayland;xcb";
-                      GDK_BACKEND.value = "wayland,x11,*";
-
-                      # Cursor
-                      XCURSOR_THEME.value = cursorTheme;
-                      XCURSOR_SIZE.value = cursorSize;
-                    };
+                    env = sessionEnv;
                     prependFlags = [
                       "-c"
                       "${hyprlandConf}"
@@ -201,59 +203,27 @@
 
         security.polkit.enable = true;
 
-        my.allowedUnfree = [
-          "posy-cursors"
-          "davinci-resolve"
-        ];
-        # TODO: Remove user apps to debloat hyprland and move to programs instead?
-        # Then move to a interface where pkgs for browser terminal ect can be provided
-        # dynamically and then substituted into the config.
-        environment.systemPackages = with pkgs; [
-          posy-cursors
-          awww # TODO: FIX that it starts
-          hyprpolkitagent
-          ghostty
-          yazi
-          bemoji
-          wtype
-          qalculate-qt
+        my.allowedUnfree = desktop.unfree ++ [ "davinci-resolve" ];
+        environment.systemPackages =
+          desktop.packages
+          ++ (with pkgs; [
+            hyprpolkitagent
+            brightnessctl
+            grimblast
+            slurp
+            wl-clipboard
+            wl-screenrec
+            libnotify
+            gimp
+            davinci-resolve
 
-          (pkgs.makeDesktopItem {
-            name = "yazi-ghostty";
-            desktopName = "Yazi File Manager";
+            gpu-screen-recorder-gtk
 
-            exec = "ghostty --class=yazi-files -e yazi %U";
+            proton-vpn # TODO: Integrate this to start up automatically
+          ]);
 
-            icon = "system-file-manager";
-            terminal = false;
-            mimeTypes = [ "inode/directory" ];
-
-            categories = [
-              "System"
-              "FileTools"
-              "FileManager"
-              "Utility"
-              "Core"
-            ];
-          })
-
-          brightnessctl
-          grimblast
-          slurp
-          wl-clipboard
-          wl-screenrec
-          libnotify
-          gimp
-          davinci-resolve
-
-          gpu-screen-recorder-gtk
-
-          proton-vpn # TODO: Integrate this to start up automatically
-        ];
-
-        environment.sessionVariables = {
+        environment.sessionVariables = desktop.environment // {
           WLR_NO_HARDWARE_CURSORS = "1";
-          NIXOS_OZONE_WL = "1";
         };
 
         services.xserver.xkb.extraLayouts.real-prog-dvorak = {
@@ -264,42 +234,34 @@
 
         services.hypridle.enable = true;
 
-        systemd.user.services = {
-          awww = {
-            description = "awww wallpaper daemon";
+        systemd.user.services =
+          lib.mapAttrs (name: service: {
+            description = "Hyprland ${name}";
             partOf = [ "graphical-session.target" ];
             wantedBy = [ "graphical-session.target" ];
             serviceConfig = {
-              ExecStart = "${pkgs.awww}/bin/awww-daemon";
-              ExecStartPost = "${pkgs.awww}/bin/awww img ${./src/wallpaper.jpg}";
+              ExecStart = service.command;
               Restart = "on-failure";
+            }
+            // lib.optionalAttrs (service ? afterStart) {
+              ExecStartPost = service.afterStart;
+            };
+          }) desktop.services
+          // {
+            hyprpolkitagent = {
+              description = "Hyprland Polkit Authentication Agent";
+              wantedBy = [ "graphical-session.target" ];
+              wants = [ "graphical-session.target" ];
+              after = [ "graphical-session.target" ];
+              serviceConfig = {
+                Type = "simple";
+                ExecStart = "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent";
+                Restart = "on-failure";
+                RestartSec = 1;
+                TimeoutStopSec = 10;
+              };
             };
           };
-
-          cliphist = {
-            description = "Clipboard history manager";
-            partOf = [ "graphical-session.target" ];
-            wantedBy = [ "graphical-session.target" ];
-            serviceConfig = {
-              ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
-              Restart = "always";
-            };
-          };
-
-          hyprpolkitagent = {
-            description = "Hyprland Polkit Authentication Agent";
-            wantedBy = [ "graphical-session.target" ];
-            wants = [ "graphical-session.target" ];
-            after = [ "graphical-session.target" ];
-            serviceConfig = {
-              Type = "simple";
-              ExecStart = "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent";
-              Restart = "on-failure";
-              RestartSec = 1;
-              TimeoutStopSec = 10;
-            };
-          };
-        };
 
         # Enable dconf to manage system-level preferences
         programs.dconf.enable = true;
@@ -314,32 +276,23 @@
           }
         ];
 
-        environment.sessionVariables = {
-          GTK_THEME = "Adwaita:dark";
-        };
-
         xdg.mime.defaultApplications = {
           # route all folder requests to yazi
-          "inode/directory" = "yazi-ghostty.desktop";
-          "application/x-directory" = "yazi-ghostty.desktop";
+          "inode/directory" = desktop.fileManagerDesktopId;
+          "application/x-directory" = desktop.fileManagerDesktopId;
 
           # Route PDFs to Brave
-          "application/pdf" = "brave-browser.desktop";
+          "application/pdf" = desktop.browserDesktop;
 
           # Route common image formats to Brave
-          "image/jpeg" = "brave-browser.desktop";
-          "image/png" = "brave-browser.desktop";
-          "image/gif" = "brave-browser.desktop";
-          "image/webp" = "brave-browser.desktop";
-          "image/svg+xml" = "brave-browser.desktop";
+          "image/jpeg" = desktop.browserDesktop;
+          "image/png" = desktop.browserDesktop;
+          "image/gif" = desktop.browserDesktop;
+          "image/webp" = desktop.browserDesktop;
+          "image/svg+xml" = desktop.browserDesktop;
 
           # Route MP4 Video to Brave
-          "video/mp4" = "brave-browser.desktop";
-        };
-
-        environment.variables = {
-          TERMINAL = "ghostty";
-          FILEMANAGER = "yazi";
+          "video/mp4" = desktop.browserDesktop;
         };
 
         programs.hyprlock.enable = true;
