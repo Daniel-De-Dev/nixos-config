@@ -25,6 +25,7 @@
     };
 
     # TODO: add gh actions based of flake-base template
+    # TODO: look into switching to structure similar to rust. {module}.nix ./{module}/ rather than {module}/default.nix
 
     privacy = {
       # TODO: Switch to the remote repo

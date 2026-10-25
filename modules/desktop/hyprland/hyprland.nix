@@ -43,6 +43,7 @@
       '';
     };
 
+  # TODO: after reboot SUPER + enter to open terminal has a huge delay, investigate
   flake.nixosModules.hyprland =
     {
       config,
@@ -91,17 +92,10 @@
       };
 
       # TODO: Fix or add a way to specify where workspace 1 and 2 intilize to
-      # Generate the Lua monitor configurations
-      monitorStrings =
-        if (builtins.length config.my.hardware.monitors > 0) then
-          map (
-            m:
-            "hl.monitor({ output = \"${m.name}\", mode = \"${toString m.width}x${toString m.height}@${toString m.refreshRate}\", position = \"${toString m.x}x${toString m.y}\", scale = ${m.scale} })"
-          ) config.my.hardware.monitors
-        else
-          [
-            "hl.monitor({ output = \"\", mode = \"preferred\", position = \"auto\", scale = 1 })"
-          ];
+      monitorStrings = import ../../../packages/hyprland/monitors.nix {
+        inherit lib;
+        monitors = config.my.hardware.monitors;
+      };
 
       hyprlandConf = import ../../../packages/hyprland/config.nix {
         inherit

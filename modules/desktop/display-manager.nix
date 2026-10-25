@@ -1,4 +1,4 @@
-# Purpose: Manages the graphical login manager.
+# Purpose: Manages the text-console login manager.
 # Scope: Desktop environment login and session routing.
 # Invariants:
 # - Enforces a minimal, terminal-based aesthetic via Ly.
@@ -21,6 +21,15 @@ _: {
       options.my.desktop.ly.enable = lib.mkEnableOption "Ly display manager";
 
       config = lib.mkIf cfg.enable {
+        # Initialise NVIDIA's DRM console early for the text login screen.
+        boot.initrd.kernelModules =
+          lib.optionals (config.my.hardware.gpu.vendor == "nvidia")
+            [
+              "nvidia"
+              "nvidia_modeset"
+              "nvidia_drm"
+            ];
+
         services.displayManager.ly = {
           enable = true;
           settings = {

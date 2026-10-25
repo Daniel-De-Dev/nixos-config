@@ -72,26 +72,41 @@
       ];
 
       my.hardware.gpu.vendor = "nvidia";
-      my.hardware.gpu.multiGpu = true;
+      my.hardware.gpu.multiGpu = false;
 
       my.hardware.monitors = [
         {
-          name = "DP-4";
+          description = "Acer Technologies VG272U V 3107181734201";
+
+          connector = "DP-1";
+          ttyWidth = 1920;
+          ttyHeight = 1080;
+          ttyRefreshRate = 60;
+
           width = 2560;
           height = 1440;
           refreshRate = 170.07;
+
           x = 0;
           y = 0;
-          scale = "1";
+          scale = 1;
         }
+
         {
-          name = "HDMI-A-3";
+          description = "Lenovo Group Limited D24-45 URHMRD5L";
+
+          connector = "HDMI-A-2";
+          ttyWidth = 1920;
+          ttyHeight = 1080;
+          ttyRefreshRate = 60;
+
           width = 1920;
           height = 1080;
           refreshRate = 75;
+
           x = 2560;
-          y = 360;
-          scale = "1";
+          y = 180; # (1440 - 1080) / 2: vertically centred beside the Acer.
+          scale = 1;
         }
       ];
 

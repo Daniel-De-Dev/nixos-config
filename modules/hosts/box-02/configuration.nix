@@ -52,27 +52,6 @@
 
     my.hardware.gpu.vendor = "none";
 
-    # my.hardware.monitors = [
-    #   {
-    #     name = "DP-4";
-    #     width = 2560;
-    #     height = 1440;
-    #     refreshRate = 170.07;
-    #     x = 0;
-    #     y = 0;
-    #     scale = "1";
-    #   }
-    #   {
-    #     name = "HDMI-A-2";
-    #     width = 1920;
-    #     height = 1080;
-    #     refreshRate = 75;
-    #     x = 2560;
-    #     y = 360;
-    #     scale = "1";
-    #   }
-    # ];
-
     services.udev.extraRules = ''
       # ======== INFO: MANGOPI FEL PERMSISSION FIX ========
 

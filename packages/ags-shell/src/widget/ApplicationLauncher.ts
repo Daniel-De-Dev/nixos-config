@@ -9,6 +9,8 @@ import { fuzzyRank } from "../lib/search";
 
 const MAX_RESULTS = 50;
 
+// TODO: Fix that steam games returned "Invalid Desktop Entry ID [name].desktop"
+
 export default function ApplicationLauncher() {
   const directLaunch = GLib.getenv("AGS_SHELL_LAUNCH_MODE") === "direct";
   const logHint = directLaunch

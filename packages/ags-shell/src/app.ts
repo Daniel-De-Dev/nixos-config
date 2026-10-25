@@ -4,6 +4,8 @@ import WindowSwitcher from "./widget/WindowSwitcher";
 import KeybindingSearch from "./widget/KeybindingSearch";
 import ApplicationLauncher from "./widget/ApplicationLauncher";
 
+// TODO: Fix LSP to work (introduce .nvim.lua? and also linting for types that is checked (do it for all lua, ts, css ect files in repo & md files)?)
+
 const windows = [
   "window-switcher",
   "keybinding-search",

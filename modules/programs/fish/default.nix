@@ -2,6 +2,7 @@
 # Scope: User-space shell configuration.
 # TODO: Fix tty error on launch
 # TODO: Fix ` ~ ect work on fish shells
+# TODO: starship times out "Executing command "/etc/profiles/per-user/zeus/bin/git" timed out."
 _: {
   flake.nixosModules.programs-fish =
     {

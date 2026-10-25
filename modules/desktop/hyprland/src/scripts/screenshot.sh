@@ -22,6 +22,7 @@ if [[ -f ${OUT_FILE} ]]; then
     --action="open=Open in GIMP" \
     --wait)
 
+  # TODO: Fix that the action actually works
   if [[ ${ACTION} == "open" ]]; then
     ${EDITOR} "${OUT_FILE}" &
   fi

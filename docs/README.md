@@ -24,6 +24,7 @@ Governs global NixOS configuration. Applies to entire repository.
 - Decisions: `docs/decisions/`
 - Guides:
   - [Identity data and public evaluation](guides/privacy.md)
+  - [Host monitor configuration](guides/monitors.md)
 
 # 3. Reading Order
 
