@@ -14,13 +14,37 @@ let
 
   root = requireAttrs "root" data;
   globalData = requireAttrs "global" (root.global or { });
+  profiles = requireAttrs "profiles" (root.profiles or { });
   hosts = requireAttrs "hosts" (root.hosts or { });
   hostData =
     if machine != null && machine != "" then
       requireAttrs "hosts.${machine}" (hosts.${machine} or { })
     else
       { };
-  merged = lib.recursiveUpdate globalData hostData;
+  selectedProfiles = hostData.profiles or [ ];
+  profileNames =
+    if
+      builtins.isList selectedProfiles
+      && lib.all (name: builtins.isString name && name != "") selectedProfiles
+    then
+      selectedProfiles
+    else
+      throw "privacy data: hosts.${toString machine}.profiles must be a list of non-empty profile names";
+  profileData =
+    name:
+    if builtins.hasAttr name profiles then
+      requireAttrs "profiles.${name}" profiles.${name}
+    else
+      throw "privacy data: hosts.${toString machine}.profiles references unknown profile '${name}'";
+
+  # Flat, ordered overlays: global -> selected profiles -> host.
+  # Attribute sets merge recursively; later scalars and lists replace earlier ones.
+  merged = builtins.seq profiles (
+    lib.foldl' lib.recursiveUpdate globalData (
+      map profileData profileNames
+      ++ [ (builtins.removeAttrs hostData [ "profiles" ]) ]
+    )
+  );
 
   operator = requireAttrs "operator" (merged.operator or { });
   locale = requireAttrs "locale" (merged.locale or { });

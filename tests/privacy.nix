@@ -5,6 +5,38 @@ let
   operatorModule =
     (import ../modules/core/operator.nix { }).flake.nixosModules.core-operator;
 
+  profileFixture = {
+    global = {
+      operator.email = "global@example.invalid";
+      keyMap = "us";
+      ssh = {
+        authorizedKeys = [ "global-key" ];
+        matchBlocks."github.com".identityFile = "~/.ssh/id_ed25519_git";
+      };
+    };
+    profiles = {
+      university = {
+        operator.email = "university@example.invalid";
+        keyMap = "no";
+        ssh = {
+          authorizedKeys = [ "university-key" ];
+          matchBlocks.cluster.hostname = "cluster.example.invalid";
+        };
+      };
+      travel = {
+        operator.email = "travel@example.invalid";
+        ssh.authorizedKeys = [ "travel-key" ];
+      };
+    };
+    hosts.box-01 = {
+      profiles = [
+        "university"
+        "travel"
+      ];
+      hostName = "profile-host";
+    };
+  };
+
   schema = lib.evalModules {
     class = "nixos";
     modules = [ modules.core-identity ];
@@ -213,6 +245,151 @@ lib.runTests (
       expected = [ "host-key" ];
     };
 
+    testSelectedProfilesApplyInListedOrder = {
+      expr =
+        let
+          my = evaluate { data = profileFixture; };
+        in
+        {
+          inherit (my.operator) email;
+          inherit (my.host) name keyMap;
+          inherit (my.host.ssh) authorizedKeys;
+        };
+      expected = {
+        email = "travel@example.invalid";
+        name = "profile-host";
+        keyMap = "no";
+        authorizedKeys = [ "travel-key" ];
+      };
+    };
+
+    testReversingProfileOrderChangesPrecedence = {
+      expr =
+        (evaluate {
+          data = lib.recursiveUpdate profileFixture {
+            hosts.box-01.profiles = [
+              "travel"
+              "university"
+            ];
+          };
+        }).operator.email;
+      expected = "university@example.invalid";
+    };
+
+    testProfilesRecursivelyPreserveGlobalSshRoutes = {
+      expr = (evaluate { data = profileFixture; }).host.ssh.matchBlocks;
+      expected = {
+        "github.com".identityFile = "~/.ssh/id_ed25519_git";
+        cluster.hostname = "cluster.example.invalid";
+      };
+    };
+
+    testHostWinsOverSelectedProfiles = {
+      expr =
+        let
+          my = evaluate {
+            data = lib.recursiveUpdate profileFixture {
+              hosts.box-01 = {
+                operator.email = "host@example.invalid";
+                ssh.authorizedKeys = [ ];
+              };
+            };
+          };
+        in
+        {
+          inherit (my.operator) email;
+          inherit (my.host.ssh) authorizedKeys;
+        };
+      expected = {
+        email = "host@example.invalid";
+        authorizedKeys = [ ];
+      };
+    };
+
+    testHostWithoutProfileSelectionUsesOnlyGlobalData = {
+      expr =
+        let
+          my = evaluate {
+            data = profileFixture;
+            machine = "box-02";
+          };
+        in
+        {
+          inherit (my.operator) email;
+          inherit (my.host.ssh) authorizedKeys;
+        };
+      expected = {
+        email = "global@example.invalid";
+        authorizedKeys = [ "global-key" ];
+      };
+    };
+
+    testExplicitConfigurationOverridesProfileDefault = {
+      expr =
+        (evaluate {
+          data = profileFixture;
+          overrides.operator.email = "configured@example.invalid";
+        }).operator.email;
+      expected = "configured@example.invalid";
+    };
+
+    testProfileSelectionDoesNotEnterTypedApi = {
+      expr = (evaluate { data = profileFixture; }).host ? profiles;
+      expected = false;
+    };
+
+    testUnknownProfileIsRejected = {
+      expr = fails (evaluate {
+        data.hosts.box-01.profiles = [ "missing" ];
+      });
+      expected = true;
+    };
+
+    testProfileSelectionMustBeAListOfNames = {
+      expr =
+        map
+          (
+            selection:
+            fails (evaluate {
+              data.hosts.box-01.profiles = selection;
+            })
+          )
+          [
+            "university"
+            null
+            [ 42 ]
+            [ "" ]
+          ];
+      expected = lib.replicate 4 true;
+    };
+
+    testProfilesMustBeAnAttributeSet = {
+      expr = fails (evaluate {
+        data.profiles = [ ];
+      });
+      expected = true;
+    };
+
+    testSelectedProfileMustBeAnAttributeSet = {
+      expr = fails (evaluate {
+        data = {
+          profiles.broken = "invalid";
+          hosts.box-01.profiles = [ "broken" ];
+        };
+      });
+      expected = true;
+    };
+
+    testSelectedProfileValuesUseTheExistingSchema = {
+      expr = fails (evaluate {
+        data = {
+          profiles.broken.ssh.authorizedKeys = "invalid";
+          hosts.box-01.profiles = [ "broken" ];
+        };
+      });
+      expected = true;
+    };
+
     testHostConfigurationOverridesPrivateDefault = {
       expr =
         (evaluate {
@@ -380,7 +557,7 @@ lib.runTests (
 
     testMissingPasswordFailsOperatorAssertion = {
       expr = operatorAccepts (evaluate {
-        data.global.ssh.authorizedKeys = fixture.global.ssh.authorizedKeys;
+        data.global.ssh.authorizedKeys = fixture.profiles.evaluation.ssh.authorizedKeys;
       });
       expected = false;
     };

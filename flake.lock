@@ -167,14 +167,18 @@
     "privacy": {
       "flake": false,
       "locked": {
-        "lastModified": 1780749090,
-        "narHash": "sha256-bkufSKQKqKJrj3iSIbiEU4YHzCo84BRohKiJqoI/Gnc=",
-        "path": "/home/zeus/repos/nixos-privacy",
-        "type": "path"
+        "lastModified": 1792903993,
+        "narHash": "sha256-97sgcQuHsXDwLobJhOlT8sP9Szju3FXSK28sYkKvBS4=",
+        "ref": "main",
+        "rev": "fdcce33c943da7791f8678f11a78a290d7c267d2",
+        "revCount": 8,
+        "type": "git",
+        "url": "ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git"
       },
       "original": {
-        "path": "/home/zeus/repos/nixos-privacy",
-        "type": "path"
+        "ref": "main",
+        "type": "git",
+        "url": "ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git"
       }
     },
     "root": {

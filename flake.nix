@@ -28,8 +28,7 @@
     # TODO: look into switching to structure similar to rust. {module}.nix ./{module}/ rather than {module}/default.nix
 
     privacy = {
-      # TODO: Switch to the remote repo
-      url = "path:///home/zeus/repos/nixos-privacy";
+      url = "git+ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git?ref=main";
       flake = false;
     };
 
