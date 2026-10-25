@@ -26,6 +26,8 @@
 
     # TODO: add gh actions based of flake-base template
     # TODO: look into switching to structure similar to rust. {module}.nix ./{module}/ rather than {module}/default.nix
+    # TODO: Review the general project structure and if things might need reorganizing
+    # TODO: refine the documentation for the project (per file and docs/)
 
     privacy = {
       url = "git+ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git?ref=main";
