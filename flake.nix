@@ -28,6 +28,7 @@
     # TODO: look into switching to structure similar to rust. {module}.nix ./{module}/ rather than {module}/default.nix
     # TODO: Review the general project structure and if things might need reorganizing
     # TODO: refine the documentation for the project (per file and docs/)
+    # TODO: Update flake inputs and get the build working (deal with fixing module signing)
 
     privacy = {
       url = "git+ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git?ref=main";

@@ -25,6 +25,8 @@ The SSH configuration generated from private data cannot bootstrap its own
 fetch. If the existing client setup does not already select the right key,
 add this temporary block to `~/.ssh/config`:
 
+<!-- TODO: Look into a nix run .#... or dev shell could be defined that defines this for you, and it makes sense-->
+
 ```sshconfig
 Host github.com
   User git
