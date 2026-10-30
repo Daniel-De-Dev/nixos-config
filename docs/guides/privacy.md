@@ -10,6 +10,11 @@ The [adapter](../../modules/core/privacy-integration.nix) reads `data.nix` from
 [mapper](../../lib/privacy.nix) converts that data to the typed options. Consumers
 use those options.
 
+Private VPN gateways, connection IDs and internal DNS domains are mapped from
+`network.vpnProfiles` to `my.host.network.vpnProfiles`. See the
+[VPN guide](vpn.md) for the profile fields and migration steps. Authentication
+passwords, MFA tokens and session cookies must not be put in this input.
+
 ## Remote Input and Bootstrap
 
 The deployment input is set to a private repository.

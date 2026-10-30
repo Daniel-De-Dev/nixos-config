@@ -469,7 +469,10 @@ lib.runTests (
           id = "1234abcd";
           timeZone = "Europe/Oslo";
           keyMap = "no";
-          network.macRandomize = true;
+          network = {
+            macRandomize = true;
+            vpnProfiles = { };
+          };
           ssh = {
             authorizedKeys = [ "host-key" ];
             matchBlocks.example.hostname = "example.invalid";
@@ -487,6 +490,53 @@ lib.runTests (
       expr =
         (evaluate { data.global.extraMetadata = "ignored"; }).host ? extraMetadata;
       expected = false;
+    };
+
+    testVpnProfilesDefaultToEmpty = {
+      expr = (evaluate { }).host.network.vpnProfiles;
+      expected = { };
+    };
+
+    testVpnProfileFromPrivateInput = {
+      expr =
+        (evaluateInput { inputs.privacy = ./fixtures/privacy; })
+        .host.network.vpnProfiles.example-vpn;
+      expected = {
+        gateway = "vpn.example.invalid/private";
+        protocol = "anyconnect";
+        authGroup = "private";
+        userAgent = "AnyConnect";
+        mtu = 1200;
+        dnsSearch = [ "~example.invalid" ];
+      };
+    };
+
+    testHostVpnOverridePreservesProfileFields = {
+      expr =
+        let
+          my = evaluate {
+            data = lib.recursiveUpdate fixture {
+              hosts.box-01.network.vpnProfiles.example-vpn.gateway = "other.example.invalid";
+            };
+          };
+        in
+        {
+          inherit (my.host.network.vpnProfiles.example-vpn) gateway mtu;
+        };
+      expected = {
+        gateway = "other.example.invalid";
+        mtu = 1200;
+      };
+    };
+
+    testVpnRejectsInvalidMtu = {
+      expr = fails (evaluate {
+        data.global.network.vpnProfiles.invalid = {
+          gateway = "vpn.example.invalid";
+          mtu = "1200";
+        };
+      });
+      expected = true;
     };
 
     testRootMustBeAnAttributeSet = {

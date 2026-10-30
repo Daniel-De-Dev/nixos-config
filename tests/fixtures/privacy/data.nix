@@ -11,6 +11,13 @@
   profiles.evaluation.ssh.authorizedKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlhT3BujklPoJn9Oc3o3gdbtdYIFcymJEUBOWWAYF45 evaluation-fixture"
   ];
+  profiles.evaluation.network.vpnProfiles.example-vpn = {
+    gateway = "vpn.example.invalid/private";
+    authGroup = "private";
+    userAgent = "AnyConnect";
+    mtu = 1200;
+    dnsSearch = [ "~example.invalid" ];
+  };
   hosts = {
     box-01 = {
       profiles = [ "evaluation" ];

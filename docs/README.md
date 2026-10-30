@@ -26,6 +26,7 @@ Governs global NixOS configuration. Applies to entire repository.
   - [Identity data and public evaluation](guides/privacy.md)
   - [Secure Boot and encrypted hibernation](guides/secure-boot-hibernation.md)
   - [Host monitor configuration](guides/monitors.md)
+  - [OpenConnect VPN](guides/vpn.md)
 
 # 3. Reading Order
 

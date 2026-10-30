@@ -58,10 +58,55 @@ _: {
           default = "00000000";
           description = "The 32-bit host ID as eight hexadecimal characters.";
         };
-        network.macRandomize = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = "Enable MAC address randomization for Wi-Fi.";
+        network = {
+          macRandomize = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Enable MAC address randomization for Wi-Fi.";
+          };
+          vpnProfiles = lib.mkOption {
+            type = lib.types.attrsOf (
+              lib.types.submodule {
+                options = {
+                  gateway = lib.mkOption {
+                    type = lib.types.strMatching ".+";
+                    description = "OpenConnect gateway, including any login path.";
+                  };
+                  protocol = lib.mkOption {
+                    type = lib.types.str;
+                    default = "anyconnect";
+                    description = "VPN protocol understood by OpenConnect.";
+                  };
+                  authGroup = lib.mkOption {
+                    type = lib.types.nullOr (lib.types.strMatching ".+");
+                    default = null;
+                    description = "Optional AnyConnect group value for the main login form.";
+                  };
+                  userAgent = lib.mkOption {
+                    type = lib.types.nullOr lib.types.str;
+                    default = null;
+                    description = "Optional user agent required by the gateway.";
+                  };
+                  mtu = lib.mkOption {
+                    type = lib.types.nullOr (lib.types.ints.between 576 65535);
+                    default = null;
+                    description = "Optional tunnel MTU in bytes.";
+                  };
+                  dnsSearch = lib.mkOption {
+                    type = lib.types.listOf lib.types.str;
+                    default = [ ];
+                    description = "DNS search or routing domains, such as ~example.invalid.";
+                  };
+                };
+              }
+            );
+            default = { };
+            description = ''
+              OpenConnect profiles supplied by private data. Attribute names are
+              connection IDs and must contain no spaces or path separators.
+              Passwords, session cookies and MFA tokens do not belong here.
+            '';
+          };
         };
         timeZone = lib.mkOption {
           type = lib.types.str;

@@ -74,7 +74,7 @@ in
   host =
     defaultsFor [ "timeZone" "keyMap" ] merged
     // {
-      network = defaultsFor [ "macRandomize" ] network;
+      network = defaultsFor [ "macRandomize" "vpnProfiles" ] network;
       ssh = defaultsFor [ "authorizedKeys" "matchBlocks" ] ssh;
       security = defaultsFor [ "usbguard" "strictKernel" "kernelLockdown" ] security;
     }

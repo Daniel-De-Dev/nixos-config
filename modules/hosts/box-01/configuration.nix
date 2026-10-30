@@ -43,10 +43,7 @@
       my.services.google-drive.enable = true;
       my.services.google-drive.remoteName = "secret-drive";
 
-      my.services.vpn = {
-        enable = true;
-        uit.enable = true;
-      };
+      my.services.vpn.enable = true;
 
       # Bootloader specific to this machine's motherboard
       boot.loader.systemd-boot.enable = true;
@@ -133,7 +130,6 @@
       environment.systemPackages = with pkgs; [
         obsidian
         orca-slicer-pkg
-        networkmanagerapplet
         pandoc
         pulseaudio
         inkscape
