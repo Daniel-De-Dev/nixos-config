@@ -41,8 +41,7 @@ let
   # Attribute sets merge recursively; later scalars and lists replace earlier ones.
   merged = builtins.seq profiles (
     lib.foldl' lib.recursiveUpdate globalData (
-      map profileData profileNames
-      ++ [ (builtins.removeAttrs hostData [ "profiles" ]) ]
+      map profileData profileNames ++ [ (removeAttrs hostData [ "profiles" ]) ]
     )
   );
 
@@ -77,7 +76,7 @@ in
     // {
       network = defaultsFor [ "macRandomize" ] network;
       ssh = defaultsFor [ "authorizedKeys" "matchBlocks" ] ssh;
-      security = defaultsFor [ "usbguard" "strictKernel" ] security;
+      security = defaultsFor [ "usbguard" "strictKernel" "kernelLockdown" ] security;
     }
     // lib.optionalAttrs (merged ? hostId) { id = lib.mkDefault merged.hostId; }
     // (

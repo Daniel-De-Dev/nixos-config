@@ -94,7 +94,21 @@ _: {
           strictKernel = lib.mkOption {
             type = lib.types.bool;
             default = true;
-            description = "Enable kernel lockdown and allocator hardening.";
+            description = "Enable allocator, memory, and DMA hardening boot parameters.";
+          };
+          kernelLockdown = lib.mkOption {
+            type = lib.types.enum [
+              "none"
+              "integrity"
+              "confidentiality"
+            ];
+            default = "none";
+            description = ''
+              Kernel lockdown policy, independent of strictKernel and UEFI Secure Boot.
+              Enabling it requires trusted module signatures and blocks ordinary
+              hibernation unless the explicit custom-kernel exception is active. "none"
+              omits the lockdown parameter; it cannot undo a kernel-enforced policy.
+            '';
           };
         };
       };

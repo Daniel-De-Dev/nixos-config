@@ -33,6 +33,12 @@ _: {
         (lib.mkIf (cfg.vendor == "nvidia") {
           services.xserver.videoDrivers = [ "nvidia" ];
 
+          boot.kernelModules = [
+            "nvidia"
+            "nvidia_modeset"
+            "nvidia_drm"
+          ];
+
           my.allowedUnfree = [
             "nvidia-x11"
             "nvidia-settings"
@@ -43,9 +49,10 @@ _: {
             modesetting.enable = true;
             videoAcceleration = true;
             branch = "latest";
-            open = false;
+            open = true;
             nvidiaSettings = true;
             powerManagement.enable = true;
+            powerManagement.kernelSuspendNotifier = true;
             nvidiaPersistenced = cfg.multiGpu;
           };
 

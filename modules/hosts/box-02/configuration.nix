@@ -32,6 +32,7 @@
     boot.loader.efi.canTouchEfiVariables = true;
 
     my.host.security.strictKernel = true;
+    my.host.security.kernelLockdown = "integrity";
 
     my.desktop.ly.enable = true;
     my.desktop.hyprland.enable = true;

@@ -21,6 +21,8 @@ _: {
       boot.kernelModules = [ ];
       boot.extraModulePackages = [ ];
 
+      # TODO: Wire up the new disk
+
       fileSystems."/" = {
         device = "/dev/mapper/cryptroot";
         fsType = "btrfs";
@@ -49,7 +51,7 @@ _: {
       };
 
       fileSystems."/boot" = {
-        device = "/dev/disk/by-uuid/E78E-16BD";
+        device = "/dev/disk/by-uuid/4F39-9ACC";
         fsType = "vfat";
         options = [
           "fmask=0077"

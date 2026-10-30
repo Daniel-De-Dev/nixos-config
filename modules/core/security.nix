@@ -11,6 +11,7 @@ _: {
     let
       hostUsbGuard = config.my.host.security.usbguard;
       hostStrictKernel = config.my.host.security.strictKernel;
+      hostKernelLockdown = config.my.host.security.kernelLockdown;
     in
     {
 
@@ -23,29 +24,31 @@ _: {
       security = {
         protectKernelImage = lib.mkDefault true;
         lockKernelModules = false;
+        lsm =
+          lib.optionals (hostStrictKernel || hostKernelLockdown != "none") [ "lockdown" ]
+          ++ lib.optional hostStrictKernel "integrity";
       };
 
-      boot.kernelParams = lib.mkIf hostStrictKernel [
-        "lsm=landlock,lockdown,yama,integrity,apparmor,bpf"
-        "lockdown=integrity"
+      boot.kernelParams =
+        lib.optionals hostStrictKernel [
+          # Memory Safety & Allocator Hardening
+          "slab_nomerge"
+          "init_on_alloc=1"
+          "init_on_free=1"
+          "page_poison=1"
+          "page_alloc.shuffle=1"
+          "pti=on"
+          "randomize_kstack_offset=on"
+          "vsyscall=none"
+          "debugfs=off"
+          "oops=panic"
 
-        # Memory Safety & Allocator Hardening
-        "slab_nomerge"
-        "init_on_alloc=1"
-        "init_on_free=1"
-        "page_poison=1"
-        "page_alloc.shuffle=1"
-        "pti=on"
-        "randomize_kstack_offset=on"
-        "vsyscall=none"
-        "debugfs=off"
-        "oops=panic"
-
-        # IOMMU & DMA
-        "iommu=force"
-        "intel_iommu=on"
-        "amd_iommu=force_isolation"
-      ];
+          # IOMMU & DMA
+          "iommu=force"
+          "intel_iommu=on"
+          "amd_iommu=force_isolation"
+        ]
+        ++ lib.optional (hostKernelLockdown != "none") "lockdown=${hostKernelLockdown}";
 
       security.apparmor = {
         enable = true;

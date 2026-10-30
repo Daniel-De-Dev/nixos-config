@@ -447,6 +447,7 @@ lib.runTests (
           security = {
             usbguard = true;
             strictKernel = false;
+            kernelLockdown = "confidentiality";
           };
         };
       };
@@ -476,6 +477,7 @@ lib.runTests (
           security = {
             usbguard = true;
             strictKernel = false;
+            kernelLockdown = "confidentiality";
           };
         };
       };
@@ -518,6 +520,18 @@ lib.runTests (
     testTypedBooleanRejectsString = {
       expr = fails (evaluate {
         data.global.network.macRandomize = "yes";
+      });
+      expected = true;
+    };
+
+    testKernelLockdownDefaultsToNone = {
+      expr = (evaluate { }).host.security.kernelLockdown;
+      expected = "none";
+    };
+
+    testKernelLockdownRejectsUnknownMode = {
+      expr = fails (evaluate {
+        data.global.security.kernelLockdown = "off";
       });
       expected = true;
     };

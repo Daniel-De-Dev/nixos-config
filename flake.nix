@@ -7,7 +7,7 @@
 
     import-tree.url = "github:denful/import-tree";
 
-    wrapper-manager.url = "github:viperML/wrapper-manager";
+    wrapper-manager.url = "git+https://codeberg.org/viperML/wrapper-manager";
 
     standards = {
       url = "github:Daniel-De-Dev/nixos-standards";
@@ -28,7 +28,7 @@
     # TODO: look into switching to structure similar to rust. {module}.nix ./{module}/ rather than {module}/default.nix
     # TODO: Review the general project structure and if things might need reorganizing
     # TODO: refine the documentation for the project (per file and docs/)
-    # TODO: Update flake inputs and get the build working (deal with fixing module signing)
+    # TODO: Replace the hibernation lockdown exception with authenticated resume when upstream supports it.
 
     privacy = {
       url = "git+ssh://git@github.com/Daniel-De-Dev/nixos-privacy.git?ref=main";
@@ -36,7 +36,7 @@
     };
 
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/v1.1.0";
+      url = "github:nix-community/lanzaboote/v1.2.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

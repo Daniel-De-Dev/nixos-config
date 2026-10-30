@@ -75,9 +75,9 @@ _: {
     };
 
     # Prevent Log Bloat
-    services.journald.extraConfig = ''
-      SystemMaxUse=250M
-      SystemMaxFileSize=50M
-    '';
+    services.journald.settings.Journal = {
+      SystemMaxUse = "250M";
+      SystemMaxFileSize = "50M";
+    };
   };
 }

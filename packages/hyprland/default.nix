@@ -63,15 +63,18 @@ let
       pkgs.coreutils
       pkgs.systemd
     ];
-    text = builtins.readFile (
-      pkgs.replaceVars ./launch.sh {
-        hyprland = "${pkgs.hyprland}/bin/Hyprland";
-        startHyprland = "${pkgs.hyprland}/bin/start-hyprland";
-        dbusRunSession = "${pkgs.dbus}/bin/dbus-run-session";
-        bash = "${pkgs.bashInteractive}/bin/bash";
-        inherit config;
-      }
-    );
+    # Keep evaluation independent of a generated file in the Nix store.
+    text =
+      builtins.replaceStrings
+        [ "@hyprland@" "@startHyprland@" "@dbusRunSession@" "@bash@" "@config@" ]
+        [
+          "${pkgs.hyprland}/bin/Hyprland"
+          "${pkgs.hyprland}/bin/start-hyprland"
+          "${pkgs.dbus}/bin/dbus-run-session"
+          "${pkgs.bashInteractive}/bin/bash"
+          "${config}"
+        ]
+        (builtins.readFile ./launch.sh);
   };
   wrapped = wrapper-manager.lib {
     inherit pkgs;

@@ -53,6 +53,7 @@
       boot.loader.efi.canTouchEfiVariables = true;
 
       my.host.security.strictKernel = true;
+      my.host.security.kernelLockdown = "integrity";
 
       my.desktop.ly.enable = true;
       my.desktop.hyprland.enable = true;
@@ -60,6 +61,7 @@
 
       my.hardware.hibernation = {
         enable = true;
+        lockdownOverride.enable = true;
         resumeDevice = "/dev/mapper/cryptroot";
         resumeOffset = 91848876;
       };

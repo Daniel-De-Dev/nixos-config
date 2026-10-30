@@ -42,6 +42,8 @@
         touch "$out"
       '';
     };
+  # TODO: Fix that "suspend-then-hibernate" works when desktop is left on
+  # atm only suspends.
 
   # TODO: after reboot SUPER + enter to open terminal has a huge delay, investigate
   flake.nixosModules.hyprland =

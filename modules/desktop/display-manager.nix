@@ -21,15 +21,6 @@ _: {
       options.my.desktop.ly.enable = lib.mkEnableOption "Ly display manager";
 
       config = lib.mkIf cfg.enable {
-        # Initialise NVIDIA's DRM console early for the text login screen.
-        boot.initrd.kernelModules =
-          lib.optionals (config.my.hardware.gpu.vendor == "nvidia")
-            [
-              "nvidia"
-              "nvidia_modeset"
-              "nvidia_drm"
-            ];
-
         services.displayManager.ly = {
           enable = true;
           settings = {
