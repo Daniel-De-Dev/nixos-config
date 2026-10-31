@@ -41,11 +41,15 @@
         done
         touch "$out"
       '';
+      checks.hyprland-autostart = pkgs.runCommand "hyprland-autostart-check" { } ''
+        ${pkgs.luajit}/bin/luajit ${../../../tests/hyprland-autostart.lua} \
+          ${./src/autostart.lua}
+        touch "$out"
+      '';
     };
   # TODO: Fix that "suspend-then-hibernate" works when desktop is left on
   # atm only suspends.
 
-  # TODO: after reboot SUPER + enter to open terminal has a huge delay, investigate
   flake.nixosModules.hyprland =
     {
       config,
@@ -71,6 +75,8 @@
       autostartConf = pkgs.replaceVars ./src/autostart.lua {
         inherit cursorTheme;
         inherit cursorSize;
+        uwsm = lib.getExe config.programs.uwsm.package;
+        hyprctl = lib.getExe' pkgs.hyprland "hyprctl";
       };
 
       recScript = pkgs.writeShellApplication {
@@ -152,6 +158,7 @@
                   programs.start-hyprland = {
                     env = sessionEnv;
                     prependFlags = [
+                      "--"
                       "-c"
                       "${hyprlandConf}"
                     ];
@@ -209,7 +216,7 @@
             slurp
             wl-clipboard
             wl-screenrec
-            libnotify
+            libnotify # TODO: Stylize notification to look nice and consistent with ags styling
             gimp
             davinci-resolve
 
@@ -235,6 +242,8 @@
             description = "Hyprland ${name}";
             partOf = [ "graphical-session.target" ];
             wantedBy = [ "graphical-session.target" ];
+            # UWSM publishes the compositor environment before reaching this target.
+            after = [ "graphical-session.target" ];
             serviceConfig = {
               ExecStart = service.command;
               Restart = "on-failure";

@@ -1,10 +1,8 @@
--- Force GTK applications to prefer the dark theme variant
-hl.dsp.exec_cmd(
-  'gsettings set org.gnome.desktop.interface color-scheme \'prefer-dark\''
-)
+-- Run once the compositor is ready.
+hl.on('hyprland.start', function()
+  hl.exec_cmd('@uwsm@ finalize QT_QPA_PLATFORM GDK_BACKEND')
+  hl.exec_cmd('@hyprctl@ setcursor @cursorTheme@ @cursorSize@')
+end)
 
--- Cursor Configuration
-hl.dsp.exec_cmd('hyprctl setcursor @cursorTheme@ @cursorSize@')
-
--- Application Autostart
-hl.dsp.exec_cmd('[workspace special silent] protonvpn-app')
+-- TODO: Manage Proton VPN startup separately. The old dispatcher-only call
+-- never launched it.
