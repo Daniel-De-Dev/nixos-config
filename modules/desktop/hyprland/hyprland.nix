@@ -50,6 +50,9 @@
   # TODO: Fix that "suspend-then-hibernate" works when desktop is left on
   # atm only suspends.
 
+  # TODO: Add a top bar that shows various icons and information ect
+  # (time, icons, vpn, wifi, battery, date, calendar (sync with personal?)...)
+
   flake.nixosModules.hyprland =
     {
       config,

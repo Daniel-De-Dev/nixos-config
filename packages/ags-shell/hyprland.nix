@@ -2,9 +2,8 @@
 { lib }:
 let
   actions = {
-    # TODO: Resolve the keybind conflict of "next window on monitor" bind
     keybinding = {
-      keys = "SUPER + Tab";
+      keys = "SUPER + CTRL + Tab";
       request = "window-switcher";
       description = "Windows: Switch window";
     };
