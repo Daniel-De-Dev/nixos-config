@@ -7,6 +7,13 @@
         inherit lib;
         configurations = self.nixosConfigurations;
       };
+      exceptionKernels = lib.unique (
+        map (host: host.config.boot.kernelPackages.kernel) (
+          lib.filter (host: host.config.my.hardware.hibernation.lockdownOverride.active) (
+            lib.attrValues self.nixosConfigurations
+          )
+        )
+      );
     in
     {
       checks = {
@@ -17,9 +24,14 @@
           pkgs.runCommand "boot-security-tests" { } ''
             touch "$out"
           '';
-        hibernation-kernel = import ../../tests/hibernation-kernel.nix {
-          kernel = self.nixosConfigurations.box-01.config.boot.kernelPackages.kernel;
-        };
+      }
+      // lib.optionalAttrs (exceptionKernels != [ ]) {
+        hibernation-kernel = pkgs.linkFarm "hibernation-kernel-tests" (
+          lib.imap0 (index: kernel: {
+            name = toString index;
+            path = import ../../tests/hibernation-kernel.nix { inherit kernel; };
+          }) exceptionKernels
+        );
       };
     };
 }

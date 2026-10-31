@@ -1,20 +1,44 @@
-# Exercise the assembled hosts and the explicit hibernation exception policy.
+# Check boot security and feature-dependent policies.
 { lib, configurations }:
 let
-  desktop = configurations.box-01.config;
-  laptop = configurations.box-02.config;
-  hosts = map (host: host.config) (lib.attrValues configurations);
-  extendDesktop =
-    module: (configurations.box-01.extendModules { modules = [ module ]; }).config;
+  systems = lib.attrValues configurations;
+  hosts = map (host: host.config) systems;
+  hibernatingHosts = lib.filter (
+    config: config.my.hardware.hibernation.enable
+  ) hosts;
+  exceptionHosts = lib.filter (
+    config: config.my.hardware.hibernation.lockdownOverride.enable
+  ) hibernatingHosts;
+  nvidiaHosts = lib.filter (
+    config: config.my.hardware.gpu.vendor == "nvidia"
+  ) hosts;
+  fixtureValue = lib.mkOverride 75;
+  fixture = (lib.head systems).extendModules {
+    modules = [
+      {
+        my.host.security.kernelLockdown = fixtureValue "integrity";
+        my.hardware.hibernation = {
+          enable = fixtureValue true;
+          lockdownOverride.enable = fixtureValue true;
+          resumeDevice = fixtureValue "/dev/mapper/boot-security-test";
+          resumeOffset = fixtureValue 0;
+        };
+        boot.initrd.luks.devices.boot-security-test.device =
+          "/dev/disk/by-label/boot-security-test";
+      }
+    ];
+  };
+  extendFixture =
+    module: (fixture.extendModules { modules = [ module ]; }).config;
   rejects =
     message: config:
     lib.any (
       item: !item.assertion && lib.hasInfix message item.message
     ) config.assertions;
-  withoutOverride = extendDesktop {
+  withoutOverride = extendFixture {
     my.hardware.hibernation.lockdownOverride.enable = lib.mkForce false;
   };
-  withoutLockdown = extendDesktop {
+  withoutLockdown = extendFixture {
     my.host.security.kernelLockdown = lib.mkForce "none";
     my.hardware.hibernation.lockdownOverride.enable = lib.mkForce false;
   };
@@ -57,22 +81,25 @@ lib.runTests {
   };
   testCertificatesCoverTheCompleteModuleTree = {
     expr =
-      let
-        nvidia = desktop.hardware.nvidia;
-        nvidiaModule = if nvidia.open then nvidia.package.open else nvidia.package.mod;
-      in
       lib.all (
         config:
         config.system.build.verifiedKernel.moduleCertificates
         == "${config.system.modulesTree}/lib/modules/${config.boot.kernelPackages.kernel.modDirVersion}/modules.cer"
       ) hosts
-      && lib.elem nvidiaModule desktop.boot.extraModulePackages;
+      && lib.all (
+        config:
+        let
+          nvidia = config.hardware.nvidia;
+          nvidiaModule = if nvidia.open then nvidia.package.open else nvidia.package.mod;
+        in
+        lib.elem nvidiaModule config.boot.extraModulePackages
+      ) nvidiaHosts;
     expected = true;
   };
   testLockdownRejectsDisablingModuleVerification = {
     expr =
       rejects "requires my.hardware.secure-boot.verifyKernelModules"
-        (extendDesktop {
+        (extendFixture {
           my.hardware.secure-boot.verifyKernelModules = lib.mkForce false;
         });
     expected = true;
@@ -99,49 +126,54 @@ lib.runTests {
     ) hosts;
     expected = true;
   };
-  testDesktopResumeUsesTheEncryptedRootAndSwapDevice = {
-    expr =
-      desktop.boot.resumeDevice == desktop.fileSystems."/swap".device
-      && desktop.boot.resumeDevice == desktop.fileSystems."/".device
-      && lib.hasPrefix "/dev/mapper/" desktop.boot.resumeDevice
-      && builtins.hasAttr (lib.removePrefix "/dev/mapper/" desktop.boot.resumeDevice) desktop.boot.initrd.luks.devices;
+  testEnabledExceptionsUseDeclaredLuksResumeDevice = {
+    expr = lib.all (
+      config:
+      lib.hasPrefix "/dev/mapper/" config.boot.resumeDevice
+      && builtins.hasAttr (lib.removePrefix "/dev/mapper/" config.boot.resumeDevice) config.boot.initrd.luks.devices
+    ) exceptionHosts;
     expected = true;
   };
-  testDesktopKeepsHibernationAndResumeParameters = {
-    expr =
-      desktop.my.hardware.hibernation.enable
-      && !desktop.security.protectKernelImage
-      && !lib.elem "nohibernate" desktop.boot.kernelParams
-      && lib.elem "resume=${desktop.my.hardware.hibernation.resumeDevice}" desktop.boot.kernelParams
-      && lib.elem "resume_offset=${toString desktop.my.hardware.hibernation.resumeOffset}" desktop.boot.kernelParams
-      && desktop.boot.kernel.sysctl."kernel.kexec_load_disabled" == 1;
+  testHibernatingHostsKeepResumeParameters = {
+    expr = lib.all (
+      config:
+      config.boot.resumeDevice == config.my.hardware.hibernation.resumeDevice
+      && !config.security.protectKernelImage
+      && !lib.elem "nohibernate" config.boot.kernelParams
+      && lib.elem "resume=${config.my.hardware.hibernation.resumeDevice}" config.boot.kernelParams
+      && lib.elem "resume_offset=${toString config.my.hardware.hibernation.resumeOffset}" config.boot.kernelParams
+      && config.boot.kernel.sysctl."kernel.kexec_load_disabled" == 1
+    ) hibernatingHosts;
     expected = true;
   };
-  testDesktopKeepsNvidiaHibernationSupport = {
-    expr =
-      desktop.hardware.nvidia.powerManagement.enable
-      && lib.elem "nvidia.NVreg_PreserveVideoMemoryAllocations=1" desktop.boot.kernelParams;
+  testNvidiaHostsKeepHibernationSupport = {
+    expr = lib.all (
+      config:
+      config.hardware.nvidia.powerManagement.enable
+      && lib.elem "nvidia.NVreg_PreserveVideoMemoryAllocations=1" config.boot.kernelParams
+    ) nvidiaHosts;
     expected = true;
   };
-  testDesktopExceptionIncludesPatchAndBootOptIn = {
-    expr =
-      desktop.my.hardware.hibernation.lockdownOverride.active
-      && hasPatch desktop
-      && lib.elem overrideFlag desktop.boot.kernelParams;
+  testConfiguredExceptionsIncludePatchAndBootOptIn = {
+    expr = lib.all (
+      config:
+      config.my.hardware.hibernation.lockdownOverride.active
+      && hasPatch config
+      && lib.elem overrideFlag config.boot.kernelParams
+    ) exceptionHosts;
     expected = true;
   };
-  testLaptopHasNoHibernationException = {
+  testExplicitExceptionIncludesPatchAndBootOptIn = {
     expr =
-      !laptop.my.hardware.hibernation.enable
-      && !laptop.my.hardware.hibernation.lockdownOverride.active
-      && !hasPatch laptop
-      && !lib.elem overrideFlag laptop.boot.kernelParams;
+      fixture.config.my.hardware.hibernation.lockdownOverride.active
+      && hasPatch fixture.config
+      && lib.elem overrideFlag fixture.config.boot.kernelParams;
     expected = true;
   };
   testExceptionIsInactiveWhenHibernationIsDisabled = {
     expr =
       let
-        config = extendDesktop { my.hardware.hibernation.enable = lib.mkForce false; };
+        config = extendFixture { my.hardware.hibernation.enable = lib.mkForce false; };
       in
       !config.my.hardware.hibernation.lockdownOverride.active
       && !hasPatch config
@@ -149,14 +181,15 @@ lib.runTests {
     expected = true;
   };
   testActiveStatusIsReadOnly = {
-    expr =
-      configurations.box-01.options.my.hardware.hibernation.lockdownOverride.active.readOnly;
+    expr = lib.all (
+      host: host.options.my.hardware.hibernation.lockdownOverride.active.readOnly
+    ) systems;
     expected = true;
   };
   testRemovingThePatchMakesExceptionInactiveAndFailsPolicy = {
     expr =
       let
-        config = extendDesktop { boot.kernelPatches = lib.mkForce [ ]; };
+        config = extendFixture { boot.kernelPatches = lib.mkForce [ ]; };
       in
       !config.my.hardware.hibernation.lockdownOverride.active
       && rejects "Hibernation under lockdown requires" config;
@@ -165,7 +198,7 @@ lib.runTests {
   testRemovingTheFlagMakesExceptionInactiveAndFailsPolicy = {
     expr =
       let
-        config = extendDesktop {
+        config = extendFixture {
           boot.kernelParams = lib.mkForce [ "lockdown=integrity" ];
         };
       in
@@ -178,7 +211,7 @@ lib.runTests {
     expected = true;
   };
   testManualLockdownAlsoRequiresException = {
-    expr = rejects "Hibernation under lockdown requires" (extendDesktop {
+    expr = rejects "Hibernation under lockdown requires" (extendFixture {
       my.host.security.kernelLockdown = lib.mkForce "none";
       my.hardware.hibernation.lockdownOverride.enable = lib.mkForce false;
       boot.kernelParams = [ "lockdown=confidentiality" ];
@@ -194,7 +227,7 @@ lib.runTests {
     expected = true;
   };
   testExceptionDoesNotOverrideNohibernate = {
-    expr = rejects "Hibernation conflicts with the nohibernate" (extendDesktop {
+    expr = rejects "Hibernation conflicts with the nohibernate" (extendFixture {
       boot.kernelParams = [ "nohibernate" ];
     });
     expected = true;
@@ -202,7 +235,7 @@ lib.runTests {
   testBootFlagAloneCannotClaimAnException = {
     expr =
       rejects "a boot parameter alone does not patch the kernel"
-        (extendDesktop {
+        (extendFixture {
           my.hardware.hibernation.lockdownOverride.enable = lib.mkForce false;
           boot.kernelParams = [ overrideFlag ];
         });
@@ -211,15 +244,15 @@ lib.runTests {
   testExceptionRequiresDeclaredLuksResumeDevice = {
     expr =
       rejects "requires resumeDevice to name a decrypted LUKS mapper"
-        (extendDesktop {
+        (extendFixture {
           my.hardware.hibernation.resumeDevice = lib.mkForce "/dev/sda2";
         });
     expected = true;
   };
   testChangingKernelSeriesRequiresPatchReview = {
-    expr = rejects "reviewed for Linux 7.3.x only" (extendDesktop {
+    expr = rejects "reviewed for Linux 7.3.x only" (extendFixture {
       boot.kernelPackages = lib.mkForce (
-        desktop.boot.kernelPackages.extend (
+        fixture.config.boot.kernelPackages.extend (
           _: previous: {
             kernel = previous.kernel.override { argsOverride.version = "7.4"; };
           }
@@ -229,9 +262,9 @@ lib.runTests {
     expected = true;
   };
   testRemovedInitrdToggleHasNoDefinitions = {
-    expr = lib.all (host: !host.options.boot.initrd.systemd.enable.isDefined) (
-      lib.attrValues configurations
-    );
+    expr = lib.all (
+      host: !host.options.boot.initrd.systemd.enable.isDefined
+    ) systems;
     expected = true;
   };
 }

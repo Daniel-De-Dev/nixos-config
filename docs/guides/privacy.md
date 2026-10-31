@@ -116,9 +116,9 @@ list, then supplies its own overrides alongside that list:
   hosts = {
     box-01 = {
       profiles = [ "university" ];
-      hostName = "workstation";
+      hostName = "node-a";
     };
-    box-02.hostName = "laptop";
+    box-02.hostName = "node-b";
   };
 }
 ```

@@ -84,14 +84,15 @@ nix build .#checks.x86_64-linux.boot-security \
   --override-input privacy path:./tests/fixtures/privacy --no-write-lock-file
 ```
 
-Build on the real host with the real private input. Install for the next boot
-and retain the previous working generation in the boot menu:
+Build on the real host with the real private input. Replace `HOST` with the
+selected configuration key. Install for the next boot and retain the previous
+working generation in the boot menu:
 
 ```sh
-nixos-rebuild build --flake .#box-01
+nixos-rebuild build --flake .#HOST
 readlink -f result/kernel
 jq -r '."org.nixos.bootspec.v1".kernel' result/boot.json
-nixos-rebuild boot --flake .#box-01 --sudo
+nixos-rebuild boot --flake .#HOST --sudo
 sudo sbctl status
 sudo sbctl verify
 ```
