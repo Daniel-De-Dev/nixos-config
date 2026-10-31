@@ -11,6 +11,7 @@
     }).config.my.theme,
 }:
 let
+  # TODO: Set up wallpaper with the logic
   # TODO: Make the keyboard layout selectable trough options similarly to super
   desktop = import ./desktop.nix { inherit lib pkgs wrapper-manager; };
   shell = agsShell.override { inherit theme; };

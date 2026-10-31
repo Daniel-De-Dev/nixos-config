@@ -10,6 +10,14 @@
     my.core.fonts.enable = true;
 
     my.hardware.audio.enable = true;
+    my.hardware.fingerprint = {
+      enable = true;
+      driver = pkgs.libfprint-2-tod1-broadcom-cv3plus;
+      pamServices = [
+        "login"
+        "sudo"
+      ];
+    };
     my.hardware.secure-boot.enable = true;
     my.programs.git.enable = true;
     my.programs.ssh.enable = true;
@@ -38,11 +46,14 @@
     my.desktop.hyprland.enable = true;
     my.desktop.ags.enable = true;
 
-    # my.hardware.hibernation = {
-    #   enable = true;
-    #   resumeDevice = "/dev/mapper/cryptroot";
-    #   resumeOffset = 91848876;
-    # };
+    my.services.vpn.enable = true;
+
+    my.hardware.hibernation = {
+      enable = true;
+      lockdownOverride.enable = true;
+      resumeDevice = "/dev/mapper/cryptroot";
+      resumeOffset = 20751616;
+    };
 
     swapDevices = [
       {

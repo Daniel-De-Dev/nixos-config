@@ -286,14 +286,14 @@
         ];
 
         xdg.mime.defaultApplications = {
-          # route all folder requests to yazi
+          # route all folder requests to file manager
           "inode/directory" = desktop.fileManagerDesktopId;
           "application/x-directory" = desktop.fileManagerDesktopId;
 
-          # Route PDFs to Brave
+          # Route PDFs to browser
           "application/pdf" = desktop.browserDesktop;
 
-          # Route common image formats to Brave
+          # Route common image formats to browser
           "image/jpeg" = desktop.browserDesktop;
           "image/png" = desktop.browserDesktop;
           "image/gif" = desktop.browserDesktop;
@@ -305,6 +305,24 @@
         };
 
         programs.hyprlock.enable = true;
+        # TODO: Set up hyprlock and make it look nice (integrate the finger print
+        # config to be dynamic based on the enabled option)
+        #
+        # Keep the packaged lock screen and use native fingerprint auth in
+        # parallel with password entry, without a second PAM fingerprint client.
+        environment.etc."xdg/hypr/hyprlock.conf" =
+          lib.mkIf config.services.fprintd.enable
+            {
+              text = ''
+                source = ${config.programs.hyprlock.package}/share/hypr/hyprlock.conf
+
+                auth {
+                    fingerprint {
+                        enabled = true
+                    }
+                }
+              '';
+            };
         programs.gpu-screen-recorder.enable = true;
       };
     };

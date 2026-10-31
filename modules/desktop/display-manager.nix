@@ -25,7 +25,11 @@ _: {
           enable = true;
           settings = {
             # Authentication & Input
-            allow_empty_password = false;
+            # An empty submission starts the fingerprint prompt. PAM still
+            # requires an enrolled fingerprint or a valid password.
+            allow_empty_password =
+              config.security.pam.services.login.fprintAuth
+              && !config.security.pam.services.login.allowNullPassword;
             clear_password = true;
             default_input = "password";
 

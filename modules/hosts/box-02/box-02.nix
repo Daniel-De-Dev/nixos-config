@@ -21,6 +21,7 @@
       self.nixosModules.core-fonts
       self.nixosModules.core-palette
       self.nixosModules.hardware-audio
+      self.nixosModules.hardware-fingerprint
       self.nixosModules.hardware-secure-boot
       self.nixosModules.hardware-hibernation
       self.nixosModules.hardware-power
