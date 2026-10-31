@@ -1,5 +1,6 @@
 import { Gdk, Widget } from "astal/gtk3";
 import Gio from "gi://Gio?version=2.0";
+import GioUnix from "gi://GioUnix?version=2.0";
 import GLib from "gi://GLib?version=2.0";
 import { Variable, bind, execAsync } from "astal";
 import ActionRow from "../components/ActionRow";
@@ -8,8 +9,6 @@ import { indexApplications, type Application } from "../lib/applications";
 import { fuzzyRank } from "../lib/search";
 
 const MAX_RESULTS = 50;
-
-// TODO: Fix that steam games returned "Invalid Desktop Entry ID [name].desktop"
 
 export default function ApplicationLauncher() {
   const directLaunch = GLib.getenv("AGS_SHELL_LAUNCH_MODE") === "direct";
@@ -51,14 +50,22 @@ export default function ApplicationLauncher() {
           if (!application.info.launch([], context))
             throw new Error("The desktop entry could not be launched");
         } else {
-          // Installed sessions keep applications independent of ags.service.
+          const filename =
+            application.info instanceof GioUnix.DesktopAppInfo
+              ? application.info.get_filename()
+              : null;
+          if (!filename) throw new Error("Desktop entry has no file path");
+          const gio = GLib.find_program_in_path("gio");
+          if (!gio) throw new Error("GIO launcher is unavailable");
           await execAsync([
             "uwsm",
             "app",
             "-t",
             "service",
             "--",
-            application.id,
+            gio,
+            "launch",
+            filename,
           ]);
         }
       } catch (err) {

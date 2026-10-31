@@ -2,7 +2,6 @@
 { lib }:
 let
   actions = {
-    # TODO: Make it so ags windows disappear once clicked on a different monitor too (only disappears on same monitor)
     # TODO: Resolve the keybind conflict of "next window on monitor" bind
     keybinding = {
       keys = "SUPER + Tab";

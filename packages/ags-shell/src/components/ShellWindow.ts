@@ -1,4 +1,5 @@
 import { App, Astal, Gdk, Gtk, Widget } from "astal/gtk3";
+import GLib from "gi://GLib?version=2.0";
 
 const PANEL_SIZE = { width: 640, height: 520 };
 
@@ -23,6 +24,7 @@ export default function ShellWindow(props: ShellWindowProps) {
     Astal.WindowAnchor.RIGHT;
   const display = Gdk.Display.get_default();
   let backdrops: Widget.Window[] = [];
+  let backdropSync = 0;
 
   function dismissArea(vertical = false) {
     return new Widget.EventBox({
@@ -38,6 +40,10 @@ export default function ShellWindow(props: ShellWindowProps) {
   }
 
   function clearBackdrops() {
+    if (backdropSync) {
+      GLib.source_remove(backdropSync);
+      backdropSync = 0;
+    }
     for (const backdrop of backdrops) backdrop.destroy();
     backdrops = [];
   }
@@ -49,22 +55,32 @@ export default function ShellWindow(props: ShellWindowProps) {
     for (let i = 0; i < display.get_n_monitors(); i++) {
       const monitor = display.get_monitor(i);
       if (!monitor || monitor === current) continue;
-      backdrops.push(
-        new Widget.Window({
-          name: `${props.name}-backdrop-${i}`,
-          namespace: "nixos-shell",
-          application: App,
-          className: "shell-window",
-          visible: true,
-          gdkmonitor: monitor,
-          anchor,
-          layer: Astal.Layer.OVERLAY,
-          exclusivity: Astal.Exclusivity.IGNORE,
-          keymode: Astal.Keymode.NONE,
-          child: dismissArea(true),
-        }),
-      );
+      const backdrop = new Widget.Window({
+        name: `${props.name}-backdrop-${i}`,
+        namespace: "nixos-shell",
+        application: App,
+        className: "shell-window",
+        visible: false,
+        gdkmonitor: monitor,
+        anchor,
+        layer: Astal.Layer.OVERLAY,
+        exclusivity: Astal.Exclusivity.IGNORE,
+        keymode: Astal.Keymode.NONE,
+        child: dismissArea(true),
+      });
+      backdrops.push(backdrop);
+      backdrop.show();
     }
+  }
+
+  function queueBackdrops() {
+    if (backdropSync) return;
+    // Let GDK process the menu's output before deciding which monitors to cover.
+    backdropSync = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+      backdropSync = 0;
+      syncBackdrops();
+      return GLib.SOURCE_REMOVE;
+    });
   }
 
   const panel = new Widget.Box({
@@ -119,14 +135,20 @@ export default function ShellWindow(props: ShellWindowProps) {
     anchor,
     layer: Astal.Layer.OVERLAY,
     exclusivity: Astal.Exclusivity.IGNORE,
-    keymode: Astal.Keymode.EXCLUSIVE,
+    // Hyprland's exclusive layers also capture pointer input across monitors,
+    // preventing the non-interactive backdrops from receiving dismissal clicks.
+    keymode: Astal.Keymode.ON_DEMAND,
     onMap: () => {
-      syncBackdrops();
+      queueBackdrops();
       props.initialFocus?.grab_focus();
     },
     onUnmap: () => {
       clearBackdrops();
       props.onClose?.();
+    },
+    onFocusOutEvent: (self) => {
+      self.hide();
+      return false;
     },
     onKeyPressEvent: (self, event) => {
       if (event.get_keyval()[1] === Gdk.KEY_Escape) {
@@ -147,8 +169,8 @@ export default function ShellWindow(props: ShellWindowProps) {
     }),
   });
 
-  const added = display?.connect("monitor-added", syncBackdrops);
-  const removed = display?.connect("monitor-removed", syncBackdrops);
+  const added = display?.connect("monitor-added", queueBackdrops);
+  const removed = display?.connect("monitor-removed", queueBackdrops);
   window.connect("destroy", () => {
     clearBackdrops();
     if (added) display?.disconnect(added);

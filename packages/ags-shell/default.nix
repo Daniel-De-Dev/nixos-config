@@ -2,6 +2,7 @@
   lib,
   ags,
   astal,
+  glib,
   makeWrapper,
   symlinkJoin,
   uwsm,
@@ -46,6 +47,7 @@ symlinkJoin {
       --set AGS_SHELL_STYLE ${stylesheet} \
       --prefix PATH : ${
         lib.makeBinPath [
+          (lib.getBin glib)
           uwsm
           xdg-terminal-exec
         ]
