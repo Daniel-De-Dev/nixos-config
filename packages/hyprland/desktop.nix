@@ -5,6 +5,7 @@
   wrapper-manager,
 }:
 let
+  clipboard = pkgs.callPackage ../clipboard { };
   applications = {
     terminal = pkgs.ghostty;
     browser =
@@ -77,6 +78,7 @@ in
 {
   inherit
     applications
+    clipboard
     commands
     cursor
     wallpaper
@@ -94,6 +96,7 @@ in
     pkgs.awww
     pkgs.wtype
     pkgs.wl-clipboard
+    clipboard
   ];
   environment = {
     GTK_THEME = "Adwaita:dark";
@@ -110,7 +113,7 @@ in
       command = "${pkgs.awww}/bin/awww-daemon";
       afterStart = lib.getExe setWallpaper;
     };
-    cliphist.command = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
+    clipboard-history.command = "${lib.getExe clipboard} watch";
     mako.command = lib.getExe pkgs.mako;
   };
   screenshot = pkgs.writeShellApplication {
@@ -120,6 +123,7 @@ in
       pkgs.grimblast
       pkgs.wl-clipboard
       pkgs.libnotify
+      clipboard
     ];
     text = builtins.readFile ../../modules/desktop/hyprland/src/scripts/screenshot.sh;
   };

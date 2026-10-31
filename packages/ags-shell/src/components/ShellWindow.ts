@@ -8,9 +8,13 @@ type ShellWindowProps = {
   title: string;
   subtitle: string;
   content: Gtk.Widget;
+  overlay?: Gtk.Widget;
+  // Return true when an inner prompt handled the dismissal.
+  onDismiss?: () => boolean;
   hint: string;
   initialFocus?: Gtk.Widget;
   onClose?: () => void;
+  onKeyPress?: (event: Gdk.Event) => boolean;
 };
 
 export default function ShellWindow(props: ShellWindowProps) {
@@ -33,7 +37,7 @@ export default function ShellWindow(props: ShellWindowProps) {
       visibleWindow: false,
       events: Gdk.EventMask.BUTTON_PRESS_MASK,
       onButtonPressEvent: () => {
-        window.hide();
+        if (props.onDismiss?.() !== true) window.hide();
         return true;
       },
     });
@@ -126,6 +130,23 @@ export default function ShellWindow(props: ShellWindowProps) {
     ],
   });
 
+  const layout = new Widget.Box({
+    vertical: true,
+    children: [
+      dismissArea(true),
+      new Widget.Box({
+        children: [dismissArea(), panel, dismissArea()],
+      }),
+      dismissArea(true),
+    ],
+  });
+  const overlay = new Gtk.Overlay({ visible: true });
+  overlay.add(layout);
+  if (props.overlay) {
+    overlay.add_overlay(props.overlay);
+    overlay.set_overlay_pass_through(props.overlay, false);
+  }
+
   const window = new Widget.Window({
     name: props.name,
     namespace: "nixos-shell",
@@ -146,27 +167,17 @@ export default function ShellWindow(props: ShellWindowProps) {
       clearBackdrops();
       props.onClose?.();
     },
-    onFocusOutEvent: (self) => {
-      self.hide();
-      return false;
-    },
+    // Tooltips can temporarily move focus away from the layer surface. Dismiss
+    // through the click backdrops, Escape, toggling, or an explicit menu action.
     onKeyPressEvent: (self, event) => {
+      if (props.onKeyPress?.(event)) return true;
       if (event.get_keyval()[1] === Gdk.KEY_Escape) {
         self.hide();
         return true;
       }
       return false;
     },
-    child: new Widget.Box({
-      vertical: true,
-      children: [
-        dismissArea(true),
-        new Widget.Box({
-          children: [dismissArea(), panel, dismissArea()],
-        }),
-        dismissArea(true),
-      ],
-    }),
+    child: overlay,
   });
 
   const added = display?.connect("monitor-added", queueBackdrops);

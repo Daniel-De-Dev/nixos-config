@@ -2,6 +2,7 @@
   lib,
   ags,
   astal,
+  callPackage,
   glib,
   makeWrapper,
   symlinkJoin,
@@ -11,6 +12,7 @@
   theme ? import ../../themes/carbon-dark.nix,
 }:
 let
+  clipboard = callPackage ../clipboard { };
   stylesheet = writeText "ags-shell.css" (
     import ./style.nix { inherit lib theme; }
   );
@@ -32,7 +34,7 @@ let
     '';
 
     meta = {
-      description = "AGS desktop shell with window, shortcut, and application search";
+      description = "AGS desktop shell with window, shortcut, application, and clipboard search";
       mainProgram = "ags-shell";
       platforms = lib.platforms.linux;
     };
@@ -50,9 +52,10 @@ symlinkJoin {
           (lib.getBin glib)
           uwsm
           xdg-terminal-exec
+          clipboard
         ]
       }
   '';
-  passthru = { inherit bundle stylesheet; };
+  passthru = { inherit bundle stylesheet clipboard; };
   inherit (bundle) meta;
 }

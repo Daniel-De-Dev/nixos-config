@@ -1,0 +1,27 @@
+Subject: [PATCH] wl-paste: set CLIPBOARD_TYPE for the watch command
+
+Backport of https://github.com/bugaevc/wl-clipboard/pull/297
+(7495661ad900f50381735f714b9a2c6c8d30bde4), merged upstream after 2.3.0.
+Only used by the clipboard history helper; no system-wide override.
+
+diff --git a/src/wl-paste.c b/src/wl-paste.c
+index e359ad9..39b49fe 100644
+--- a/src/wl-paste.c
++++ b/src/wl-paste.c
+@@ -186 +186,5 @@ static const char *mime_type_to_request(struct types types) {
+-static int run_paste_command(int stdin_fd, const char *clipboard_state) {
++static int run_paste_command(
++    int stdin_fd,
++    const char *clipboard_state,
++    const char *mime_type
++) {
+@@ -203,0 +208,3 @@ static int run_paste_command(int stdin_fd, const char *clipboard_state) {
++            if (mime_type != NULL) {
++                setenv("CLIPBOARD_TYPE", mime_type, 1);
++            }
+@@ -274 +281 @@ static void selection_callback(struct offer *offer, int primary) {
+-        run_paste_command(devnull, "nil");
++        run_paste_command(devnull, "nil", NULL);
+@@ -335 +342 @@ static void selection_callback(struct offer *offer, int primary) {
+-    rc = run_paste_command(pipefd[0], clipboard_state);
++    rc = run_paste_command(pipefd[0], clipboard_state, mime_type);

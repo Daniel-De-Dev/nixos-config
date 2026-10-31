@@ -91,9 +91,6 @@ bind(
   'Applications: Open calculator'
 )
 
--- Planned AGS navigation bindings
--- TODO: SUPER + V: open the clipboard manager.
-
 -- Window State Management
 bind(
   mainMod .. ' + Q',

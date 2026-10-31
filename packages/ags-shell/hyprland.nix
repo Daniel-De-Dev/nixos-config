@@ -17,6 +17,11 @@ let
       request = "application-launcher";
       description = "Applications: Open application launcher";
     };
+    clipboardManager = {
+      keys = "SUPER + V";
+      request = "clipboard-manager";
+      description = "Clipboard: Search clipboard history";
+    };
   };
 in
 {

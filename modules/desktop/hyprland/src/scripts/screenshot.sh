@@ -7,11 +7,11 @@ mkdir -p "${DIR}"
 # $1 will be "screen", "area", or "active"
 MODE="${1:-screen}"
 
-OUT_FILE=$(grimblast --freeze save "${MODE}" "${DIR}/${FILE}")
+OUT_FILE="${DIR}/${FILE}"
+grimblast --freeze save "${MODE}" "${OUT_FILE}"
 
 if [[ -f ${OUT_FILE} ]]; then
-  # Copy file to clipboard directly
-  wl-copy <"${OUT_FILE}"
+  ags-clipboard copy-file "${OUT_FILE}"
 
   # Send notification with action button.
   ACTION=$(notify-send \

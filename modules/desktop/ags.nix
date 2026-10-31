@@ -31,6 +31,26 @@
     {
       packages.ags-shell = pkgs.callPackage ../../packages/ags-shell { };
       packages.ags-tooling = tooling;
+      packages.clipboard-history = pkgs.callPackage ../../packages/clipboard { };
+      checks.ags-clipboard =
+        pkgs.runCommand "ags-clipboard-tests"
+          {
+            nativeBuildInputs = [
+              (pkgs.python3.withPackages (ps: [ ps.pillow ]))
+              pkgs.ffmpeg-headless
+            ];
+          }
+          ''
+            mkdir -p packages
+            cp -R ${../../packages/clipboard} packages/clipboard
+            cp ${../../tests/clipboard.py} test_clipboard.py
+            mkdir -p packages/ags-shell/tests
+            cp ${../../packages/ags-shell/tests/search-cases.json} packages/ags-shell/tests/search-cases.json
+            mkdir -p modules/desktop/hyprland/src/scripts
+            cp ${./hyprland/src/scripts/screenshot.sh} modules/desktop/hyprland/src/scripts/screenshot.sh
+            PYTHONDONTWRITEBYTECODE=1 python -m unittest -v test_clipboard
+            touch "$out"
+          '';
       checks.ags-types = check "ags-types-check" "tsc --noEmit";
       checks.ags-lint = check "ags-lint-check" "eslint src --max-warnings=0";
       checks.ags-shell = config.packages.ags-shell;

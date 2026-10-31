@@ -1,8 +1,18 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { fuzzyRank } from "../src/lib/search.ts";
 
 const rank = (items, query) => fuzzyRank(items, query, (item) => item);
+
+const cases = JSON.parse(
+  readFileSync(new URL("./search-cases.json", import.meta.url), "utf8"),
+);
+for (const example of cases) {
+  test(`shared fuzzy contract: ${example.name}`, () => {
+    assert.deepEqual(rank(example.items, example.query), example.expected);
+  });
+}
 
 test("empty queries retain source order without changing the input", () => {
   const items = ["Brave", "Ghostty", "Neovim"];

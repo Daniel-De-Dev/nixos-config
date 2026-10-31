@@ -23,7 +23,8 @@ function tokenScore(text: string, token: string): number | null {
   return 2 + (gaps + first / (text.length + 1)) / (text.length + 1);
 }
 
-// Every query word must match. Lower scores prefer contiguous, earlier matches.
+// Default matcher for AGS search fields. Every query word must match. Lower
+// scores prefer contiguous, earlier matches.
 export function fuzzyRank<T>(
   items: readonly T[],
   query: string,

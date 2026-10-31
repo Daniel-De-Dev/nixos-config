@@ -75,11 +75,16 @@
   outline-style: none;
 }
 
+.shell-action-row:nth-child(even) {
+  background-color: @theme_surfaceAlternate;
+}
+
 .shell-action-row:hover {
   background-color: @theme_surfaceHover;
 }
 
-.shell-action-row:focus {
+.shell-action-row:focus,
+.shell-action-row.selected {
   background-color: @theme_surfaceSelected;
   border-left-color: @theme_accent;
   box-shadow: inset 0 0 0 1px @theme_focus;
@@ -90,7 +95,103 @@
 }
 
 .shell-action-row:disabled {
-  background-color: @theme_background;
+  color: @theme_textMuted;
+}
+
+.shell-toolbar {
+  margin: var(--spacing-sm) 0;
+}
+
+.shell-tool-button {
+  min-height: 28px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-right: var(--spacing-xs);
+  color: @theme_text;
+  background-color: @theme_surface;
+  background-image: none;
+  border: 1px solid @theme_borderStrong;
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+  font-size: var(--fontSize-small);
+}
+
+.shell-tool-button:hover {
+  background-color: @theme_surfaceHover;
+}
+
+.shell-tool-button:focus {
+  border-color: @theme_focus;
+}
+
+.shell-tool-button:active {
+  background-color: @theme_surfaceActive;
+}
+
+.shell-tool-button:disabled {
+  color: @theme_textMuted;
+}
+
+.shell-modal-scrim {
+  background-color: alpha(@theme_overlay, 0.65);
+}
+
+.shell-dialog {
+  color: @theme_text;
+  background-color: @theme_surface;
+  border: 1px solid @theme_borderStrong;
+  border-radius: 0;
+  font-family: var(--fontSans), sans-serif;
+  font-size: var(--fontSize-body);
+}
+
+.shell-dialog-content {
+  padding: var(--spacing-xl);
+}
+
+.shell-dialog-description {
+  margin-top: var(--spacing-lg);
+  color: @theme_text;
+  font-size: var(--fontSize-body);
+}
+
+.shell-dialog-button {
+  min-height: 48px;
+  padding: 0 var(--spacing-lg);
+  color: @theme_text;
+  background-color: @theme_surfaceSelected;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+  outline-style: none;
+  font-size: var(--fontSize-body);
+}
+
+.shell-dialog-button:hover {
+  background-color: @theme_surfaceHover;
+}
+
+.shell-dialog-button:active {
+  background-color: @theme_surfaceActive;
+}
+
+.shell-dialog-button:focus {
+  box-shadow: inset 0 0 0 2px @theme_focus;
+}
+
+.shell-danger-button {
+  color: @theme_textOnColor;
+  background-color: @theme_danger;
+}
+
+.shell-danger-button:hover {
+  background-color: @theme_dangerHover;
+}
+
+.shell-danger-button:active {
+  background-color: @theme_dangerActive;
 }
 
 .shell-item-icon {
@@ -98,6 +199,12 @@
   margin-right: var(--spacing-md);
   color: @theme_text;
   font-size: 24px;
+}
+
+.shell-thumbnail {
+  min-width: 64px;
+  min-height: 48px;
+  margin-right: var(--spacing-md);
 }
 
 .shell-item-title {

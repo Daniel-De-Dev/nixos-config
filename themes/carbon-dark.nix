@@ -3,6 +3,7 @@
   colors = {
     background = "#161616";
     surface = "#262626";
+    surfaceAlternate = "#393939";
     surfaceHover = "#333333";
     surfaceSelected = "#393939";
     surfaceActive = "#525252";
@@ -12,6 +13,11 @@
     borderStrong = "#6f6f6f";
     accent = "#4589ff";
     focus = "#ffffff";
+    textOnColor = "#ffffff";
+    danger = "#da1e28";
+    dangerHover = "#b81921";
+    dangerActive = "#750e13";
+    overlay = "#000000";
   };
 
   fonts = {

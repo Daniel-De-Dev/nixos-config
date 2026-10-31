@@ -1,0 +1,86 @@
+[
+  {
+    "name": "empty query preserves source order",
+    "items": ["Recent screenshot", "Older note", "Oldest recording"],
+    "query": "",
+    "expected": ["Recent screenshot", "Older note", "Oldest recording"]
+  },
+  {
+    "name": "whitespace query preserves source order",
+    "items": ["Brave", "Ghostty", "Neovim"],
+    "query": " \t\n ",
+    "expected": ["Brave", "Ghostty", "Neovim"]
+  },
+  {
+    "name": "abbreviations match ordered characters",
+    "items": ["Brave", "browser", "Ghostty"],
+    "query": "brv",
+    "expected": ["Brave"]
+  },
+  {
+    "name": "reversed characters do not match",
+    "items": ["Brave"],
+    "query": "vrb",
+    "expected": []
+  },
+  {
+    "name": "repeated query characters must exist",
+    "items": ["Brave"],
+    "query": "brvv",
+    "expected": []
+  },
+  {
+    "name": "exact and contiguous results precede scattered results",
+    "items": ["b r a v e", "Open Brave", "Brave"],
+    "query": "brave",
+    "expected": ["Brave", "Open Brave", "b r a v e"]
+  },
+  {
+    "name": "case and combining accents are ignored",
+    "items": ["Résumé — Éditeur", "Resume notes"],
+    "query": "RESUME edtr",
+    "expected": ["Résumé — Éditeur"]
+  },
+  {
+    "name": "compatibility characters use NFKD normalization",
+    "items": ["file manager", "Ｆｉｌｅ"],
+    "query": "file",
+    "expected": ["Ｆｉｌｅ", "file manager"]
+  },
+  {
+    "name": "query words can span fields in either order",
+    "items": ["NixOS manual Brave", "NixOS terminal Ghostty"],
+    "query": "brv nix",
+    "expected": ["NixOS manual Brave"]
+  },
+  {
+    "name": "every query word must match",
+    "items": ["NixOS manual Brave", "NixOS terminal Ghostty"],
+    "query": "brv missing",
+    "expected": []
+  },
+  {
+    "name": "equal scores retain recency or source order",
+    "items": ["ab first", "ab second"],
+    "query": "ab",
+    "expected": ["ab first", "ab second"]
+  },
+  {
+    "name": "punctuation is literal",
+    "items": ["C++", "C language"],
+    "query": "c++",
+    "expected": ["C++"]
+  },
+  {
+    "name": "brackets are not regular expressions",
+    "items": ["filename [x].txt", "filename x.txt"],
+    "query": "[x]",
+    "expected": ["filename [x].txt"]
+  },
+  {
+    "name": "non-BMP characters match as complete characters",
+    "items": ["Notes 📋", "ordinary text", "📋 Notes"],
+    "query": "📋nts",
+    "expected": ["📋 Notes"]
+  }
+]

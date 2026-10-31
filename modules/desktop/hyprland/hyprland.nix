@@ -85,6 +85,7 @@
       recScript = pkgs.writeShellApplication {
         name = "screenrecording";
         runtimeInputs = with pkgs; [
+          desktop.clipboard
           wf-recorder
           ffmpeg
           slurp

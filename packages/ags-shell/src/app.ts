@@ -3,11 +3,13 @@ import GLib from "gi://GLib?version=2.0";
 import WindowSwitcher from "./widget/WindowSwitcher";
 import KeybindingSearch from "./widget/KeybindingSearch";
 import ApplicationLauncher from "./widget/ApplicationLauncher";
+import ClipboardManager from "./widget/ClipboardManager";
 
 const windows = [
   "window-switcher",
   "keybinding-search",
   "application-launcher",
+  "clipboard-manager",
 ];
 
 App.start({
@@ -30,5 +32,6 @@ App.start({
     WindowSwitcher();
     KeybindingSearch();
     ApplicationLauncher();
+    ClipboardManager();
   },
 });

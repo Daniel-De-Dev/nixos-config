@@ -22,7 +22,7 @@ if [[ -f ${LOCK} ]]; then
       sleep 0.1
     done
 
-    echo "file://${OUT_FILE}" | wl-copy -t text/uri-list
+    ags-clipboard copy-file "${OUT_FILE}"
 
     ACTION=$(notify-send \
       -i "video-x-generic" \

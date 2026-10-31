@@ -18,6 +18,8 @@ let
   changed =
     (evaluate {
       colors.accent = "#ff00ff";
+      colors.surfaceAlternate = "#454545";
+      colors.danger = "#ba0000";
       fonts.sans = "Noto Sans";
       spacing.md = 20;
     }).config.my.theme;
@@ -73,6 +75,8 @@ lib.runTests {
   testOverridesReachStylesheet = {
     expr = lib.all (part: lib.hasInfix part css) [
       "@define-color theme_accent #ff00ff;"
+      "@define-color theme_surfaceAlternate #454545;"
+      "@define-color theme_danger #ba0000;"
       ''font-family: "Noto Sans", sans-serif;''
       "padding: 0 20px;"
     ];
