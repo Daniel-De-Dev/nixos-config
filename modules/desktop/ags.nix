@@ -1,18 +1,70 @@
 # Package and run the desktop shell independently of compositor configuration.
 { self, ... }: {
-  perSystem = { config, pkgs, ... }: {
-    packages.ags-shell = pkgs.callPackage ../../packages/ags-shell { };
-    checks.ags-shell = config.packages.ags-shell;
-    checks.ags-search =
-      pkgs.runCommand "ags-search-tests" { nativeBuildInputs = [ pkgs.nodejs_24 ]; }
-        ''
-          mkdir -p src
-          cp -R ${../../packages/ags-shell/src/lib} src/lib
-          cp -R ${../../packages/ags-shell/tests} tests
-          node --experimental-strip-types --test tests/*.test.mjs
+  perSystem =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    let
+      tooling = pkgs.callPackage ../../packages/ags-shell/tooling.nix { };
+      source = lib.fileset.toSource {
+        root = ../../packages/ags-shell;
+        fileset = lib.fileset.unions [
+          ../../packages/ags-shell/src
+          ../../packages/ags-shell/tests/types.test.ts
+          ../../packages/ags-shell/tsconfig.json
+          ../../packages/ags-shell/eslint.config.mjs
+        ];
+      };
+      check =
+        name: command:
+        pkgs.runCommand name { nativeBuildInputs = [ tooling ]; } ''
+          cp -R ${source}/. .
+          chmod -R u+w .
+          ln -s ${tooling}/node_modules node_modules
+          ${command}
           touch "$out"
         '';
-  };
+    in
+    {
+      packages.ags-shell = pkgs.callPackage ../../packages/ags-shell { };
+      packages.ags-tooling = tooling;
+      checks.ags-types = check "ags-types-check" "tsc --noEmit";
+      checks.ags-lint = check "ags-lint-check" "eslint src --max-warnings=0";
+      checks.ags-shell = config.packages.ags-shell;
+      checks.ags-search =
+        pkgs.runCommand "ags-search-tests" { nativeBuildInputs = [ pkgs.nodejs_24 ]; }
+          ''
+            mkdir -p src
+            cp -R ${../../packages/ags-shell/src/lib} src/lib
+            cp -R ${../../packages/ags-shell/tests} tests
+            node --experimental-strip-types --test tests/*.test.mjs
+            touch "$out"
+          '';
+
+      devShells.ags = pkgs.mkShell {
+        packages = [
+          tooling
+          pkgs.git
+          pkgs.nodejs_24
+          pkgs.vscode-langservers-extracted
+        ];
+        shellHook = ''
+          ags_project="$(git rev-parse --show-toplevel)/packages/ags-shell"
+          if [[ ! -f "$ags_project/tsconfig.json" ]]; then
+            echo "Enter the AGS shell from the nixos-config checkout." >&2
+            return 1
+          fi
+          if [[ -e "$ags_project/node_modules" && ! -L "$ags_project/node_modules" ]]; then
+            echo "Move the existing packages/ags-shell/node_modules directory aside before using the Nix environment." >&2
+            return 1
+          fi
+          ln -sfnT ${tooling}/node_modules "$ags_project/node_modules"
+        '';
+      };
+    };
 
   flake.nixosModules.desktop-ags =
     {

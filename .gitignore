@@ -1,2 +1,3 @@
 todo-*.nix
 docs/.*
+node_modules

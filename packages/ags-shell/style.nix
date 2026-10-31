@@ -10,7 +10,7 @@ let
   // lib.mapAttrs' (
     name: value: lib.nameValuePair "spacing-${name}" "${toString value}px"
   ) theme.spacing;
-  render = lib.replaceStrings (map (name: "@${name}@") (
+  render = lib.replaceStrings (map (name: "var(--${name})") (
     builtins.attrNames values
   )) (builtins.attrValues values);
 in

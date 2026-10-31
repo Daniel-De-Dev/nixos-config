@@ -18,12 +18,16 @@ test("ordered subsequences match and missing or reversed characters do not", () 
 
 test("exact and contiguous matches precede scattered matches", () => {
   assert.deepEqual(rank(["b r a v e", "Open Brave", "Brave"], "brave"), [
-    "Brave", "Open Brave", "b r a v e",
+    "Brave",
+    "Open Brave",
+    "b r a v e",
   ]);
 });
 
 test("case and accents are ignored", () => {
-  assert.deepEqual(rank(["Résumé — Éditeur"], "RESUME edtr"), ["Résumé — Éditeur"]);
+  assert.deepEqual(rank(["Résumé — Éditeur"], "RESUME edtr"), [
+    "Résumé — Éditeur",
+  ]);
 });
 
 test("all words must match, including words from different window fields", () => {
@@ -37,7 +41,10 @@ test("all words must match, including words from different window fields", () =>
 });
 
 test("equal scores keep source order and punctuation is literal", () => {
-  assert.deepEqual(rank(["ab first", "ab second"], "ab"), ["ab first", "ab second"]);
+  assert.deepEqual(rank(["ab first", "ab second"], "ab"), [
+    "ab first",
+    "ab second",
+  ]);
   assert.deepEqual(rank(["C++", "C language"], "c++"), ["C++"]);
   assert.deepEqual(rank([], "anything"), []);
 });

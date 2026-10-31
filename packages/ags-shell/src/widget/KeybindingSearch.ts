@@ -21,7 +21,9 @@ function BindingItem(
     tooltipText: binding.action
       ? "Run once"
       : "Use this shortcut on the keyboard",
-    onClicked: () => activate(binding),
+    onClicked: () => {
+      activate(binding);
+    },
     child: new Widget.Box({
       vertical: true,
       children: [
@@ -74,7 +76,7 @@ export default function KeybindingSearch() {
     } catch (err) {
       bindings.set([]);
       error.set("Cannot read Hyprland bindings. See the AGS service journal.");
-      console.error(`Cannot read Hyprland bindings: ${err}`);
+      console.error("Cannot read Hyprland bindings:", err);
     }
   }
 
@@ -90,7 +92,7 @@ export default function KeybindingSearch() {
         const response = hypr.message(request);
         if (response.trim() !== "ok") throw new Error(response);
       } catch (err) {
-        console.error(`Cannot run shortcut: ${err}`);
+        console.error("Cannot run shortcut:", err);
         window.show();
         error.set(
           "Cannot run this shortcut. Reopen search to refresh, or check the AGS journal.",
@@ -105,8 +107,12 @@ export default function KeybindingSearch() {
   const search = new Widget.Entry({
     className: "shell-search",
     placeholderText: "Search descriptions or shortcuts...",
-    onChanged: (self) => query.set(self.text),
-    onActivate: () => activate(matches.get()[0]),
+    onChanged: (self) => {
+      query.set(self.text);
+    },
+    onActivate: () => {
+      activate(matches.get()[0]);
+    },
   });
   const results = new Widget.Box({
     vertical: true,

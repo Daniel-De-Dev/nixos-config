@@ -223,11 +223,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1789320864,
-        "narHash": "sha256-lX32+EXf2YF0PtVl0Vf/p/Vz5CzOO21gpGfaTeD8Rlk=",
+        "lastModified": 1793447920,
+        "narHash": "sha256-Z7shzsRxYoa+3gkpCfHflH1cFVxefI/VER9fZTRamqE=",
         "owner": "Daniel-De-Dev",
         "repo": "nixos-standards",
-        "rev": "e7a48afb654cc0ebd8ba32e2bd25a9a23f4cb7ca",
+        "rev": "167e16ad31996d41d0bf44eedd01707c79a116c8",
         "type": "github"
       },
       "original": {
@@ -259,11 +259,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785945821,
-        "narHash": "sha256-NLSyTCW4K4ofhNBllt3omPasm6QpralXH1DBZOc91Dw=",
+        "lastModified": 1791885023,
+        "narHash": "sha256-C3alQ2MEt0zVrUSho5NUDo3jmhbff72++bfwoqT9Omo=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "ae7910970dddc408fe6ab1c8e4b277bb21d72dc0",
+        "rev": "0d6d739a833ba9a9c93034862e4a7b061a062a1c",
         "type": "github"
       },
       "original": {

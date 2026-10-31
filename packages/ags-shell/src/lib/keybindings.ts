@@ -20,6 +20,35 @@ type RawBinding = {
   catch_all?: boolean;
 };
 
+const bindingFields: Record<keyof RawBinding, "string" | "number" | "boolean"> =
+  {
+    description: "string",
+    dispatcher: "string",
+    arg: "string",
+    key: "string",
+    keycode: "number",
+    modmask: "number",
+    submap: "string",
+    release: "boolean",
+    repeat: "boolean",
+    mouse: "boolean",
+    longPress: "boolean",
+    catch_all: "boolean",
+  };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isRawBinding(value: unknown): value is RawBinding {
+  return (
+    isRecord(value) &&
+    Object.entries(bindingFields).every(
+      ([key, type]) => !(key in value) || typeof value[key] === type,
+    )
+  );
+}
+
 const modifiers: [number, string][] = [
   [64, "SUPER"],
   [4, "CTRL"],
@@ -35,7 +64,8 @@ function shortcutOf(binding: RawBinding): string {
   const keys = modifiers
     .filter(([mask]) => (Number(binding.modmask) & mask) !== 0)
     .map(([, name]) => name);
-  const key = binding.key || (binding.keycode ? `code:${binding.keycode}` : "");
+  const key =
+    binding.key || (binding.keycode ? `code:${String(binding.keycode)}` : "");
   keys.push(binding.catch_all ? "catchall" : key || "(unreported key)");
   return keys.join(" + ");
 }
@@ -44,7 +74,10 @@ export function parseActionIds(response: string): number[] {
   const ids: unknown = JSON.parse(response);
   if (
     !Array.isArray(ids) ||
-    !ids.every((id) => Number.isSafeInteger(id) && id > 0)
+    !ids.every(
+      (id: unknown): id is number =>
+        typeof id === "number" && Number.isSafeInteger(id) && id > 0,
+    )
   )
     throw new Error("Expected a shortcut action ID array");
   return ids;
@@ -52,17 +85,20 @@ export function parseActionIds(response: string): number[] {
 
 // Lua accepts decimal byte escapes, rather than JSON's Unicode escape syntax.
 function luaString(text: string): string {
-  return `"${text.replace(
-    /[\x00-\x1f\x7f"\\]/g,
-    (c) => `\\${c.charCodeAt(0).toString().padStart(3, "0")}`,
-  )}"`;
+  const escaped = Array.from(text, (character) => {
+    const code = character.charCodeAt(0);
+    return code < 32 || code === 127 || character === '"' || character === "\\"
+      ? `\\${code.toString().padStart(3, "0")}`
+      : character;
+  }).join("");
+  return `"${escaped}"`;
 }
 
 export function activationRequest(binding: Keybinding): string | null {
   if (!binding.action) return null;
   const { id, description } = binding.action;
   if (!Number.isSafeInteger(id) || id <= 0) return null;
-  return `eval nixos_shortcuts.run(${id}, ${luaString(description)})`;
+  return `eval nixos_shortcuts.run(${String(id)}, ${luaString(description)})`;
 }
 
 export function parseKeybindings(
@@ -74,11 +110,11 @@ export function parseKeybindings(
     throw new Error("Expected a Hyprland bindings array");
 
   return bindings
-    .map((value) => {
-      if (!value || typeof value !== "object" || Array.isArray(value)) {
+    .map((value: unknown) => {
+      if (!isRawBinding(value)) {
         throw new Error("Invalid Hyprland binding");
       }
-      const binding = value as RawBinding;
+      const binding = value;
       const nativeDescription =
         typeof binding.description === "string" ? binding.description : "";
       const text = nativeDescription.trim();

@@ -30,7 +30,7 @@ export default function ApplicationLauncher() {
     } catch (err) {
       applications.set([]);
       error.set(`Cannot read installed applications. ${logHint}`);
-      console.error(`Cannot read installed applications: ${err}`);
+      console.error("Cannot read installed applications:", err);
     }
   }
 
@@ -70,7 +70,8 @@ export default function ApplicationLauncher() {
         }
       } catch (err) {
         console.error(
-          `Cannot launch ${application.id || application.name}: ${err}`,
+          `Cannot launch ${application.id || application.name}:`,
+          err,
         );
         window.show();
         error.set(`Cannot start ${application.name}. ${logHint}`);
@@ -87,8 +88,12 @@ export default function ApplicationLauncher() {
   const search = new Widget.Entry({
     className: "shell-search",
     placeholderText: "Search applications...",
-    onChanged: (self) => query.set(self.text),
-    onActivate: () => launch(matches.get()[0]),
+    onChanged: (self) => {
+      query.set(self.text);
+    },
+    onActivate: () => {
+      launch(matches.get()[0]);
+    },
   });
   const list = new Widget.Scrollable({
     className: "shell-scrollable",
@@ -104,7 +109,9 @@ export default function ApplicationLauncher() {
             icon:
               application.info.get_icon() ??
               Gio.ThemedIcon.new("application-x-executable"),
-            onActivate: () => launch(application),
+            onActivate: () => {
+              launch(application);
+            },
           }),
         ),
         new Widget.Label({
@@ -113,7 +120,7 @@ export default function ApplicationLauncher() {
           visible: items.length === 0,
         }),
         new Widget.Label({
-          label: `Showing the first ${MAX_RESULTS} of ${items.length} applications. Type to narrow your search.`,
+          label: `Showing the first ${String(MAX_RESULTS)} of ${String(items.length)} applications. Type to narrow your search.`,
           className: "shell-hint",
           wrap: true,
           visible: items.length > MAX_RESULTS,

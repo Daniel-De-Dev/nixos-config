@@ -17,7 +17,7 @@ export default function ShellWindow(props: ShellWindowProps) {
   props.content.hexpand = true;
   props.content.vexpand = true;
 
-  const anchor =
+  const anchor: Astal.WindowAnchor =
     Astal.WindowAnchor.TOP |
     Astal.WindowAnchor.BOTTOM |
     Astal.WindowAnchor.LEFT |
@@ -56,7 +56,7 @@ export default function ShellWindow(props: ShellWindowProps) {
       const monitor = display.get_monitor(i);
       if (!monitor || monitor === current) continue;
       const backdrop = new Widget.Window({
-        name: `${props.name}-backdrop-${i}`,
+        name: `${props.name}-backdrop-${String(i)}`,
         namespace: "nixos-shell",
         application: App,
         className: "shell-window",

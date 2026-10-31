@@ -79,7 +79,7 @@ lib.runTests {
     expected = true;
   };
   testNoUnresolvedPlaceholders = {
-    expr = builtins.match ".*@(spacing-|fontSize-|fontSans)[^@]*@.*" css == null;
+    expr = !(lib.hasInfix "var(--" css);
     expected = true;
   };
   testThemeKeepsBundle = {

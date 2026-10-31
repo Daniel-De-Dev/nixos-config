@@ -34,7 +34,9 @@ function ClientItem(client: Hyprland.Client) {
     title: client.title || client.class,
     description: client.class,
     icon: getIcon(client.class),
-    onActivate: () => focusClient(client),
+    onActivate: () => {
+      focusClient(client);
+    },
   });
 }
 
@@ -49,7 +51,9 @@ export default function WindowSwitcher() {
   const SearchInput = new Widget.Entry({
     className: "shell-search window-switcher-search",
     placeholderText: "Search open windows...",
-    onChanged: (self) => query.set(self.text),
+    onChanged: (self) => {
+      query.set(self.text);
+    },
     onActivate: () => {
       const first = matches.get()[0];
 
