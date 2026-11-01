@@ -139,12 +139,8 @@ lib.runTests {
       config:
       config.programs.hyprlock.enable
       ->
-        lib.hasInfix "enabled = true"
-          config.environment.etc."xdg/hypr/hyprlock.conf".text
-        &&
-          lib.hasInfix
-            (builtins.unsafeDiscardStringContext "${config.programs.hyprlock.package}/share/hypr/hyprlock.conf")
-            config.environment.etc."xdg/hypr/hyprlock.conf".text
+        lib.hasInfix "fingerprint:enabled = true" config.programs.hyprlock.package.configText
+        && !config.security.pam.services.hyprlock.fprintAuth
     ) fingerprintHosts;
     expected = true;
   };

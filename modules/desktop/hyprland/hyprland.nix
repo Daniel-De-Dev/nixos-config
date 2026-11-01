@@ -47,9 +47,6 @@
         touch "$out"
       '';
     };
-  # TODO: Fix that "suspend-then-hibernate" works when desktop is left on
-  # atm only suspends.
-
   # TODO: Add a top bar that shows various icons and information ect
   # (time, icons, vpn, wifi, battery, date, calendar (sync with personal?)...)
 
@@ -123,8 +120,6 @@
         inherit (cfg) extraBindings extraLayerRules;
       };
 
-      # TODO: Fix hyprlock
-
       # TODO: Add keyboard layout short cut and add keybind shortcut for hyprland
 
       sessionEnv = lib.mapAttrs (_: value: { inherit value; }) (
@@ -184,7 +179,10 @@
       wrappedHyprland = lib.makeOverridable wrapperFnWithArgs { };
     in
     {
-      imports = [ self.nixosModules.core-palette ];
+      imports = [
+        self.nixosModules.core-palette
+        self.nixosModules.hyprland-lock
+      ];
 
       options.my.desktop.hyprland = {
         enable = lib.mkEnableOption "Hyprland Desktop Environment";
@@ -238,8 +236,6 @@
           languages = [ "eng" ];
           symbolsFile = ./src/real-prog-dvorak;
         };
-
-        services.hypridle.enable = true;
 
         systemd.user.services =
           lib.mapAttrs (name: service: {
@@ -304,25 +300,6 @@
           "video/mp4" = desktop.browserDesktop;
         };
 
-        programs.hyprlock.enable = true;
-        # TODO: Set up hyprlock and make it look nice (integrate the finger print
-        # config to be dynamic based on the enabled option)
-        #
-        # Keep the packaged lock screen and use native fingerprint auth in
-        # parallel with password entry, without a second PAM fingerprint client.
-        environment.etc."xdg/hypr/hyprlock.conf" =
-          lib.mkIf config.services.fprintd.enable
-            {
-              text = ''
-                source = ${config.programs.hyprlock.package}/share/hypr/hyprlock.conf
-
-                auth {
-                    fingerprint {
-                        enabled = true
-                    }
-                }
-              '';
-            };
         programs.gpu-screen-recorder.enable = true;
       };
     };

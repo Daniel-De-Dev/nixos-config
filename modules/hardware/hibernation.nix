@@ -63,11 +63,8 @@ _: {
           # Hibernation requires writing the kernel from memory to disk
           security.protectKernelImage = false;
 
-          # Power & Sleep Behavior
           services.logind.settings.Login = {
             HandleLidSwitch = "suspend-then-hibernate";
-            IdleAction = "suspend-then-hibernate";
-            IdleActionSec = "30m";
           };
           systemd.sleep.settings.Sleep = {
             HibernateDelaySec = "30m";
