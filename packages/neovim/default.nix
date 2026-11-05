@@ -90,6 +90,11 @@ let
           pathAdd = nvimDeps;
 
           env = {
+            # -u skips Neovim's native project-local configuration loading.
+            VIMINIT = {
+              value = "source ${nvimConfig}/init.lua";
+              force = true;
+            };
             HYPRLAND_STUBS.value = "${pkgs.hyprland}/share/hypr/stubs";
           }
           // lib.optionalAttrs (appName != null) {
@@ -104,8 +109,6 @@ let
             "set packpath^=${pluginPack}"
             "--cmd"
             "set rtp^=${nvimConfig}"
-            "-u"
-            "${nvimConfig}/init.lua"
           ];
         };
       }

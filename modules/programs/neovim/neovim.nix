@@ -30,9 +30,39 @@
       export VIMINIT='lua error("unexpected VIMINIT")'
 
       # Use a loopback RPC server where the build environment restricts Unix sockets.
-      ${config.packages.nvim}/bin/nvim --headless -n -i NONE \
-        --cmd "lua vim.g.fzf_lua_server = vim.fn.serverstart('127.0.0.1:0')" \
+      run_nvim() {
+        ${config.packages.nvim}/bin/nvim --headless -n -i NONE \
+          --cmd "lua vim.g.fzf_lua_server = vim.fn.serverstart('127.0.0.1:0')" \
+          "$@"
+      }
+
+      run_nvim \
         -c "lua dofile('${../../../tests/neovim.lua}')"
+
+      mkdir -p "$TMPDIR/project"
+      cat > "$TMPDIR/project/.nvim.lua" <<'LUA'
+      assert(package.loaded['core.lsp'], 'project config loaded before repository config')
+      vim.g.nvim_project_config_loaded = true
+      LUA
+
+      # Seed native trust before startup, then exercise the normal `nvim .` path.
+      (
+        cd "$TMPDIR/project"
+        export NVIM_TEST_PROJECT_CONFIG=trusted
+        run_nvim . \
+          --cmd "lua local b = vim.fn.bufadd('.nvim.lua'); vim.fn.bufload(b); \
+            assert(vim.secure.trust({ action = 'allow', bufnr = b }))" \
+          -c "lua dofile('${../../../tests/neovim.lua}')"
+      )
+      (
+        cd "$TMPDIR/project"
+        export NVIM_TEST_PROJECT_CONFIG=denied
+        run_nvim . \
+          --cmd "lua assert(vim.secure.trust({ action = 'deny', \
+            path = vim.fn.getcwd() .. '/.nvim.lua' }))" \
+          -c "lua dofile('${../../../tests/neovim.lua}')"
+      )
+
       touch "$out"
     '';
   };
