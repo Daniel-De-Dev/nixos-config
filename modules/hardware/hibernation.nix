@@ -60,6 +60,12 @@ _: {
             patch = overridePatch;
           };
 
+          # Retain the custom kernel image and build files with the system generation.
+          system.extraDependencies = lib.optionals overrideEnabled [
+            config.boot.kernelPackages.kernel.out
+            config.boot.kernelPackages.kernel.dev
+          ];
+
           # Hibernation requires writing the kernel from memory to disk
           security.protectKernelImage = false;
 
